@@ -1,0 +1,14 @@
+# Normalizza i line endings: evita "tutto il file modificato" quando uno commita da Windows e un altro da Mac/Linux
+* text=auto eol=lf
+
+# File Windows-only
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binari
+*.jar binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
