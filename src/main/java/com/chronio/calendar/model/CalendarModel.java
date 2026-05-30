@@ -88,7 +88,7 @@ public interface CalendarModel {
     /**
      * Restituisce gli eventi di una data specifica, filtrati per tag visibili.
      *
-     * @param dateKey data in formato "yyyy-M-d" (es. "2025-6-10")
+     * @param dateKey data in formato "yyyy-M-d"
      * @return lista di eventi visibili in quella data
      */
     java.util.LinkedList<Event> getEventsForDate(String dateKey);
