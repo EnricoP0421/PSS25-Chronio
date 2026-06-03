@@ -1,23 +1,26 @@
 package com.chronio;
 
+import com.chronio.calendar.controller.CalendarControllerImpl;
+import com.chronio.calendar.model.CalendarData;
+import com.chronio.calendar.model.CalendarModelImpl;
+import com.chronio.calendar.persistence.CalendarPersistence;
+import com.chronio.calendar.view.CalendarView;
 import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 public class App extends Application {
 
     @Override
-    public void start(Stage stage) {
-        Label label = new Label("Chronio - setup OK");
-        Scene scene = new Scene(new StackPane(label), 800, 600);
+    public void start(final Stage stage) {
+        final CalendarPersistence persistence = new CalendarPersistence(CalendarPersistence.getDefaultPath());
+        final CalendarModelImpl model = new CalendarModelImpl(persistence.load());
+        final CalendarControllerImpl controller = new CalendarControllerImpl(model, persistence);
         stage.setTitle("Chronio");
-        stage.setScene(scene);
+        stage.setScene(new CalendarView(controller, stage).build());
         stage.show();
     }
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         launch(args);
     }
 }
