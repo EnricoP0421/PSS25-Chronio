@@ -8,9 +8,12 @@ import com.chronio.calendar.controller.CalendarControllerImpl;
 import com.chronio.calendar.model.CalendarModelImpl;
 import com.chronio.calendar.persistence.CalendarPersistence;
 import com.chronio.calendar.view.MainView;
+<<<<<<< HEAD
 import com.chronio.kanban.controller.BoardControllerImpl;
 import com.chronio.kanban.persistence.BoardPersistence;
 
+=======
+>>>>>>> a167bd8 (rename CalendarView to MainView, CalendarCenterView to CalendarView)
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -38,7 +41,11 @@ public final class App extends Application {
         final BudgetView budgetView = new BudgetView(budgetController);
 
         stage.setTitle("Chronio");
+<<<<<<< HEAD
         stage.setScene(new MainView(calController, boardController, budgetView, stage).build());
+=======
+        stage.setScene(new MainView(controller, stage).build());
+>>>>>>> a167bd8 (rename CalendarView to MainView, CalendarCenterView to CalendarView)
         stage.show();
     }
 

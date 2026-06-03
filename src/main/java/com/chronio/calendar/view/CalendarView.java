@@ -1,8 +1,7 @@
 package com.chronio.calendar.view;
 
 import com.chronio.calendar.controller.CalendarController;
-import javafx.scene.Scene;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public final class CalendarView {
@@ -15,11 +14,8 @@ public final class CalendarView {
         this.stage = stage;
     }
 
-    public Scene build() {
-        final BorderPane root = new BorderPane();
-        root.setLeft(new TagSidebarView().build());
-        root.setCenter(new CalendarCenterView().build());
-        root.setRight(new EventSidebarView().build());
-        return new Scene(root, 1200, 700);
+    public VBox build() {
+        final VBox box = new VBox(8);
+        return box;
     }
 }
