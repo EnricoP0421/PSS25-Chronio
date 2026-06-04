@@ -17,7 +17,13 @@ public final class EventDialog extends Dialog<Void> {
         final TextField titleField = new TextField();
         titleField.setPromptText("Titolo");
 
-        final VBox content = new VBox(8, titleField);
+        final TextField startField = new TextField(date + "T09:00");
+        startField.setPromptText("Inizio (yyyy-MM-ddTHH:mm)");
+
+        final TextField endField = new TextField(date + "T10:00");
+        endField.setPromptText("Fine (yyyy-MM-ddTHH:mm)");
+
+        final VBox content = new VBox(8, titleField, startField, endField);
         content.setPrefWidth(300);
         getDialogPane().setContent(content);
         getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
