@@ -124,6 +124,11 @@ public final class CalendarView {
                 final Label pill = new Label(ev.title());
                 pill.setStyle("-fx-background-color: " + color + "; -fx-text-fill: white; -fx-padding: 1 4; -fx-background-radius: 3; -fx-font-size: 10;");
                 pill.setMaxWidth(Double.MAX_VALUE);
+                pill.setOnMouseClicked(e -> {
+                    e.consume();
+                    new EventDialog(stage, controller, date, ev).showAndWait();
+                    refreshGrid(grid);
+                });
                 cell.getChildren().add(pill);
             });
             cell.setOnMouseClicked(e -> {
