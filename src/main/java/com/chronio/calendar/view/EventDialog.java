@@ -1,5 +1,6 @@
 package com.chronio.calendar.view;
 
+import com.chronio.calendar.controller.CalendarController;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ButtonType;
@@ -14,7 +15,7 @@ import java.time.LocalDate;
 
 public final class EventDialog extends Dialog<Void> {
 
-    public EventDialog(final Stage owner, final LocalDate date) {
+    public EventDialog(final Stage owner, final CalendarController controller, final LocalDate date) {
         initOwner(owner);
         setTitle("Nuovo evento");
 
@@ -41,5 +42,16 @@ public final class EventDialog extends Dialog<Void> {
         content.setPrefWidth(400);
         getDialogPane().setContent(content);
         getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        setResultConverter(btn -> {
+            if (btn == ButtonType.OK && !titleField.getText().isBlank()) {
+                final String start = String.format("%sT%02d:%02d",
+                    startDate.getValue(), startHour.getValue(), startMin.getValue());
+                final String end = String.format("%sT%02d:%02d",
+                    endDate.getValue(), endHour.getValue(), endMin.getValue());
+                controller.createEvent(titleField.getText(), "", start, end, null, false);
+            }
+            return null;
+        });
     }
 }
