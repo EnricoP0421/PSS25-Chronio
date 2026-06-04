@@ -109,13 +109,27 @@ public final class CalendarView {
         for (int day = 1; day <= daysInMonth; day++) {
             final LocalDate date = displayMonth.atDay(day);
             final boolean isToday = date.equals(today);
-            final Label cell = new Label(String.valueOf(day));
+            final VBox cell = new VBox(2);
             cell.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-            cell.setAlignment(Pos.TOP_LEFT);
             cell.setStyle(isToday
                 ? "-fx-border-color: gray; -fx-background-color: lightblue; -fx-padding: 4;"
                 : "-fx-border-color: gray; -fx-padding: 4;");
-            cell.setOnMouseClicked(e -> new EventDialog(stage, controller, date).showAndWait());
+            final Label dayNum = new Label(String.valueOf(day));
+            cell.getChildren().add(dayNum);
+            final String dateKey = date.getYear() + "-" + date.getMonthValue() + "-" + date.getDayOfMonth();
+            controller.getEventsForDate(dateKey).forEach(ev -> {
+                final String color = ev.tagId() != null && controller.getTags().get(ev.tagId()) != null
+                    ? controller.getTags().get(ev.tagId()).color()
+                    : "#888888";
+                final Label pill = new Label(ev.title());
+                pill.setStyle("-fx-background-color: " + color + "; -fx-text-fill: white; -fx-padding: 1 4; -fx-background-radius: 3; -fx-font-size: 10;");
+                pill.setMaxWidth(Double.MAX_VALUE);
+                cell.getChildren().add(pill);
+            });
+            cell.setOnMouseClicked(e -> {
+                new EventDialog(stage, controller, date).showAndWait();
+                refreshGrid(grid);
+            });
             grid.add(cell, col, row);
             col++;
             if (col == 7) { col = 0; row++; }
