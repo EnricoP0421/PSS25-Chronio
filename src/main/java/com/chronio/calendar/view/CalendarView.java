@@ -115,6 +115,7 @@ public final class CalendarView {
             cell.setStyle(isToday
                 ? "-fx-border-color: gray; -fx-background-color: lightblue; -fx-padding: 4;"
                 : "-fx-border-color: gray; -fx-padding: 4;");
+            cell.setOnMouseClicked(e -> new EventDialog(stage, date).showAndWait());
             grid.add(cell, col, row);
             col++;
             if (col == 7) { col = 0; row++; }
