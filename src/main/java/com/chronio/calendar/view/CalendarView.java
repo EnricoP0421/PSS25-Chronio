@@ -1,12 +1,14 @@
 package com.chronio.calendar.view;
 
 import com.chronio.calendar.controller.CalendarController;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.VBox;
-import javafx.scene.control.Label;
 import javafx.geometry.Pos;
 import javafx.stage.Stage;
 
@@ -24,17 +26,49 @@ public final class CalendarView {
         this.stage = stage;
     }
 
+    private static final String[] MONTHS_IT = {
+        "Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno",
+        "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"
+    };
+
+    private String monthLabel() {
+        return MONTHS_IT[displayMonth.getMonthValue() - 1] + " " + displayMonth.getYear();
+    }
+
     public VBox build() {
         final VBox box = new VBox(8);
         VBox.setVgrow(box, Priority.ALWAYS);
-        box.getChildren().add(buildGrid());
+        final GridPane grid = buildGrid();
+        box.getChildren().addAll(buildNav(box, grid), grid);
+        VBox.setVgrow(grid, Priority.ALWAYS);
         return box;
     }
 
-    private GridPane buildGrid() {
-        final GridPane grid = new GridPane();
-        grid.setHgap(4);
-        grid.setVgap(4);
+    private HBox buildNav(final VBox box, final GridPane grid) {
+        final Button prev = new Button("<");
+        final Button next = new Button(">");
+        final Label label = new Label(monthLabel());
+
+        prev.setOnAction(e -> {
+            displayMonth = displayMonth.minusMonths(1);
+            label.setText(monthLabel());
+            refreshGrid(grid);
+        });
+        next.setOnAction(e -> {
+            displayMonth = displayMonth.plusMonths(1);
+            label.setText(monthLabel());
+            refreshGrid(grid);
+        });
+
+        final HBox nav = new HBox(12, prev, label, next);
+        nav.setAlignment(Pos.CENTER_LEFT);
+        return nav;
+    }
+
+    private void refreshGrid(final GridPane grid) {
+        grid.getChildren().clear();
+        grid.getColumnConstraints().clear();
+        grid.getRowConstraints().clear();
 
         for (int i = 0; i < 7; i++) {
             final ColumnConstraints cc = new ColumnConstraints();
@@ -71,7 +105,13 @@ public final class CalendarView {
             col++;
             if (col == 7) { col = 0; row++; }
         }
+    }
 
+    private GridPane buildGrid() {
+        final GridPane grid = new GridPane();
+        grid.setHgap(4);
+        grid.setVgap(4);
+        refreshGrid(grid);
         return grid;
     }
 }
