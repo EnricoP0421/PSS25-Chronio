@@ -26,6 +26,8 @@ public final class CalendarView {
         this.stage = stage;
     }
 
+    private static final String[] DAYS_IT = {"Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"};
+
     private static final String[] MONTHS_IT = {
         "Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno",
         "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"
@@ -39,8 +41,20 @@ public final class CalendarView {
         final VBox box = new VBox(8);
         VBox.setVgrow(box, Priority.ALWAYS);
         final GridPane grid = buildGrid();
-        box.getChildren().addAll(buildNav(box, grid), grid);
+        box.getChildren().addAll(buildNav(box, grid), buildDayHeaders(), grid);
         VBox.setVgrow(grid, Priority.ALWAYS);
+        return box;
+    }
+
+    private HBox buildDayHeaders() {
+        final HBox box = new HBox(4);
+        for (final String day : DAYS_IT) {
+            final Label lbl = new Label(day);
+            lbl.setMaxWidth(Double.MAX_VALUE);
+            lbl.setAlignment(Pos.CENTER);
+            HBox.setHgrow(lbl, Priority.ALWAYS);
+            box.getChildren().add(lbl);
+        }
         return box;
     }
 
