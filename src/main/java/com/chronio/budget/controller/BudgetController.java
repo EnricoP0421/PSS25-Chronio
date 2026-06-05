@@ -4,6 +4,7 @@ import com.chronio.budget.model.BudgetService;
 import com.chronio.budget.model.BudgetSummary;
 import com.chronio.budget.model.Transaction;
 import com.chronio.budget.model.TransactionType;
+import com.chronio.budget.model.Tag;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -20,7 +21,7 @@ public final class BudgetController {
     private final BudgetService service;
     private View view;
 
-    // Periodo correntemente selezionato (default: dal 1° del mese corrente a oggi).
+    // Intervallo di tempo correntemente selezionato (default: dal 1° del mese corrente a oggi).
     private LocalDate periodStart;
     private LocalDate periodEnd;
 
@@ -35,7 +36,7 @@ public final class BudgetController {
         this.view = view;
     }
 
-    // --- Periodo ---
+    //Intervallo di tempo
 
     public LocalDate getPeriodStart() {
         return periodStart;
@@ -59,7 +60,7 @@ public final class BudgetController {
         refreshCharts();
     }
 
-    // --- Operazioni sulle transazioni ---
+    //Operazioni sulle transazioni
 
     /**
      * Salva una transazione: crea se id è null, altrimenti aggiorna.
@@ -94,7 +95,22 @@ public final class BudgetController {
         refreshCharts();
     }
 
-    // --- Query per la view ---
+    //Operazioni sui tag
+
+    public Tag onAddTag(final String name, final String color) {
+        final Tag tag = service.addTag(name, color);
+        refreshTransactionLists();
+        refreshCharts();
+        return tag;
+    }
+
+    public void onRemoveTag(final String id) {
+        service.removeTag(id);
+        refreshTransactionLists();
+        refreshCharts();
+    }
+
+    //Query per la view
 
     public List<Transaction> getIncomes() {
         return service.getAllTransactionsSorted().stream()
@@ -119,7 +135,16 @@ public final class BudgetController {
     public Map<String, Double> getNetByMonth() {
         return service.aggregateByMonth(periodStart.toString(), periodEnd.toString());
     }
-    // --- Refresh ---
+
+    public Tag getTag(final String tagId) {
+        return tagId == null ? null : service.getTags().get(tagId);
+    }
+
+    public List<Tag> getAllTags() {
+        return List.copyOf(service.getTags().values());
+    }
+
+    //Refresh
 
     public void refreshTransactionLists() {
         if (view != null) {
