@@ -1,4 +1,4 @@
-package com.chronio.budget;
+package com.chronio.budget.persistence;
 
 import com.chronio.budget.model.BudgetData;
 

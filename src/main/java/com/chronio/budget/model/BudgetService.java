@@ -1,10 +1,6 @@
-package com.chronio.budget;
+package com.chronio.budget.model;
 
-import com.chronio.budget.model.BudgetData;
-import com.chronio.budget.model.BudgetSummary;
-import com.chronio.budget.model.Tag;
-import com.chronio.budget.model.Transaction;
-import com.chronio.budget.model.TransactionType;
+import com.chronio.budget.persistence.BudgetRepository;
 
 import java.util.ArrayList;
 import java.util.Comparator;
