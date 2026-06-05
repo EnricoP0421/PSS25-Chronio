@@ -268,7 +268,7 @@ public final class BudgetService {
             result.merge(month, signed, Double::sum);
         }
         return result;
-    }-
+    }
 
     private List<Transaction> filterByPeriod(final String startDate, final String endDate) {
         final List<Transaction> result = new ArrayList<>();

@@ -2,13 +2,10 @@ package com.chronio.budget.model;
 
 import java.util.LinkedHashMap;
 
-import javax.swing.text.html.HTML.Tag;
-
-
 public record BudgetData (
     LinkedHashMap<String, Transaction> transactions,
     LinkedHashMap<String, Tag> tags,
-    int nextTransactionIs,
+    int nextTransactionId,
     int nextTagId
     
 ){
