@@ -19,11 +19,16 @@ public final class CalendarView {
 
     private final CalendarController controller;
     private final Stage stage;
+    private final EventSidebarView sidebarView;
+    private final VBox sidebar;
     private YearMonth displayMonth = YearMonth.now();
 
-    public CalendarView(final CalendarController controller, final Stage stage) {
+    public CalendarView(final CalendarController controller, final Stage stage,
+                        final EventSidebarView sidebarView, final VBox sidebar) {
         this.controller = controller;
         this.stage = stage;
+        this.sidebarView = sidebarView;
+        this.sidebar = sidebar;
     }
 
     private static final String[] DAYS_IT = {"Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"};
@@ -134,6 +139,7 @@ public final class CalendarView {
             cell.setOnMouseClicked(e -> {
                 new EventDialog(stage, controller, date).showAndWait();
                 refreshGrid(grid);
+                sidebarView.refresh(sidebar);
             });
             grid.add(cell, col, row);
             col++;
