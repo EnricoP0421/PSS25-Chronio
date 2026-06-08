@@ -20,6 +20,11 @@ public final class EventSidebarView {
         return box;
     }
 
+    public void refresh(final VBox box) {
+        box.getChildren().clear();
+        box.getChildren().add(buildTodayCard());
+    }
+
     private VBox buildTodayCard() {
         final VBox card = new VBox(6);
         card.setStyle("-fx-border-color: gray; -fx-padding: 8;");
