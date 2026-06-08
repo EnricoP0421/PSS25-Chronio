@@ -19,7 +19,7 @@ public final class MainView {
         final BorderPane root = new BorderPane();
         root.setLeft(new TagSidebarView().build());
         root.setCenter(new CalendarView(controller, stage).build());
-        root.setRight(new EventSidebarView().build());
+        root.setRight(new EventSidebarView(controller).build());
         return new Scene(root, 1200, 700);
     }
 }
