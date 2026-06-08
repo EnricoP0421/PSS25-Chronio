@@ -43,14 +43,22 @@ public final class EventDialog extends Dialog<Void> {
         final DatePicker startDate = new DatePicker(startDate0);
         final Spinner<Integer> startHour = new Spinner<>(0, 23, startH);
         final Spinner<Integer> startMin = new Spinner<>(0, 59, startM, 15);
+        startHour.setEditable(true);
+        startMin.setEditable(true);
         startHour.setPrefWidth(70);
         startMin.setPrefWidth(70);
 
         final DatePicker endDate = new DatePicker(endDate0);
         final Spinner<Integer> endHour = new Spinner<>(0, 23, endH);
         final Spinner<Integer> endMin = new Spinner<>(0, 59, endM, 15);
+        endHour.setEditable(true);
+        endMin.setEditable(true);
         endHour.setPrefWidth(70);
         endMin.setPrefWidth(70);
+
+        startHour.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) endHour.getValueFactory().setValue(Math.min(newVal + 1, 23));
+        });
 
         final VBox content = new VBox(8,
             titleField,
