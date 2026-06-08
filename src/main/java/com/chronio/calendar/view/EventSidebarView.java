@@ -47,7 +47,9 @@ public final class EventSidebarView {
             card.getChildren().add(new Label("Nessun evento nei prossimi giorni"));
         } else {
             weekEvents.forEach((dateKey, evs) -> {
-                card.getChildren().add(new Label(dateKey));
+                final String[] parts = dateKey.split("-");
+                final String formatted = parts[2] + "/" + parts[1] + "/" + parts[0];
+                card.getChildren().add(new Label(formatted));
                 evs.forEach(ev -> card.getChildren().add(new Label("  " + ev.title())));
             });
         }
