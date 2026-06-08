@@ -16,13 +16,13 @@ public final class EventSidebarView {
     public VBox build() {
         final VBox box = new VBox(8);
         box.setPrefWidth(250);
-        box.getChildren().add(buildTodayCard());
+        box.getChildren().addAll(buildTodayCard(), buildWeekCard());
         return box;
     }
 
     public void refresh(final VBox box) {
         box.getChildren().clear();
-        box.getChildren().add(buildTodayCard());
+        box.getChildren().addAll(buildTodayCard(), buildWeekCard());
     }
 
     private VBox buildTodayCard() {
@@ -34,6 +34,22 @@ public final class EventSidebarView {
             card.getChildren().add(new Label("Nessun evento oggi"));
         } else {
             events.forEach(ev -> card.getChildren().add(new Label(ev.title())));
+        }
+        return card;
+    }
+
+    private VBox buildWeekCard() {
+        final VBox card = new VBox(6);
+        card.setStyle("-fx-border-color: gray; -fx-padding: 8;");
+        card.getChildren().add(new Label("Questa settimana"));
+        final java.util.LinkedHashMap<String, java.util.LinkedList<Event>> weekEvents = controller.getWeekEvents();
+        if (weekEvents.isEmpty()) {
+            card.getChildren().add(new Label("Nessun evento nei prossimi giorni"));
+        } else {
+            weekEvents.forEach((dateKey, evs) -> {
+                card.getChildren().add(new Label(dateKey));
+                evs.forEach(ev -> card.getChildren().add(new Label("  " + ev.title())));
+            });
         }
         return card;
     }
