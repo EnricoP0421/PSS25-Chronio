@@ -18,7 +18,7 @@ public final class MainView {
 
     public Scene build() {
         final BorderPane root = new BorderPane();
-        root.setLeft(new TagSidebarView().build());
+        root.setLeft(new TagSidebarView(controller, stage).build());
         final EventSidebarView sidebarView = new EventSidebarView(controller);
         final VBox sidebar = sidebarView.build();
         root.setCenter(new CalendarView(controller, stage, sidebarView, sidebar).build());
