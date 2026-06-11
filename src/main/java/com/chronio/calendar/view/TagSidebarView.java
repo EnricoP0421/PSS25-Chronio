@@ -31,7 +31,7 @@ public final class TagSidebarView {
         title.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
         final Button addBtn = new Button("+");
-        addBtn.setOnAction(e -> openTagDialog());
+        addBtn.setOnAction(e -> openTagDialog(box));
 
         final HBox header = new HBox(8, title, addBtn);
         header.setAlignment(Pos.CENTER_LEFT);
@@ -40,7 +40,7 @@ public final class TagSidebarView {
         return box;
     }
 
-    private void openTagDialog() {
+    private void openTagDialog(final VBox box) {
         final Dialog<Void> dialog = new Dialog<>();
         dialog.initOwner(stage);
         dialog.setTitle("Nuovo tag");
@@ -56,9 +56,18 @@ public final class TagSidebarView {
         dialog.setResultConverter(btn -> {
             if (btn == ButtonType.OK && !nameField.getText().isBlank()) {
                 controller.createTag(nameField.getText(), "#888888");
+                refreshList(box);
             }
             return null;
         });
         dialog.showAndWait();
+    }
+
+    private void refreshList(final VBox box) {
+        box.getChildren().subList(1, box.getChildren().size()).clear();
+        controller.getTags().forEach((id, tag) -> {
+            final Label lbl = new Label(tag.name());
+            box.getChildren().add(lbl);
+        });
     }
 }
