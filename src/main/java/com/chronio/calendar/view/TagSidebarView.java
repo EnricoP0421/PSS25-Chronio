@@ -10,6 +10,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 
 public final class TagSidebarView {
@@ -66,8 +68,11 @@ public final class TagSidebarView {
     private void refreshList(final VBox box) {
         box.getChildren().subList(1, box.getChildren().size()).clear();
         controller.getTags().forEach((id, tag) -> {
+            final Circle dot = new Circle(6, Color.web(tag.color()));
             final Label lbl = new Label(tag.name());
-            box.getChildren().add(lbl);
+            final HBox row = new HBox(6, dot, lbl);
+            row.setAlignment(Pos.CENTER_LEFT);
+            box.getChildren().add(row);
         });
     }
 }
