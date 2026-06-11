@@ -2,9 +2,9 @@ package com.chronio.calendar.view;
 
 import com.chronio.calendar.controller.CalendarController;
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -39,6 +39,7 @@ public final class TagSidebarView {
         header.setAlignment(Pos.CENTER_LEFT);
 
         box.getChildren().add(header);
+        refreshList(box);
         return box;
     }
 
@@ -50,14 +51,19 @@ public final class TagSidebarView {
         final TextField nameField = new TextField();
         nameField.setPromptText("Nome tag");
 
-        final VBox content = new VBox(8, new Label("Nome:"), nameField);
+        final ColorPicker colorPicker = new ColorPicker(Color.web("#888888"));
+
+        final VBox content = new VBox(8, new Label("Nome:"), nameField, new Label("Colore:"), colorPicker);
         content.setPrefWidth(250);
         dialog.getDialogPane().setContent(content);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
         dialog.setResultConverter(btn -> {
             if (btn == ButtonType.OK && !nameField.getText().isBlank()) {
-                controller.createTag(nameField.getText(), "#888888");
+                final Color c = colorPicker.getValue();
+                final String hex = String.format("#%02x%02x%02x",
+                    (int)(c.getRed()*255), (int)(c.getGreen()*255), (int)(c.getBlue()*255));
+                controller.createTag(nameField.getText(), hex);
                 refreshList(box);
             }
             return null;
