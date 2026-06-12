@@ -18,10 +18,12 @@ public final class MainView {
 
     public Scene build() {
         final BorderPane root = new BorderPane();
-        root.setLeft(new TagSidebarView(controller, stage).build());
         final EventSidebarView sidebarView = new EventSidebarView(controller);
         final VBox sidebar = sidebarView.build();
-        root.setCenter(new CalendarView(controller, stage, sidebarView, sidebar).build());
+        final CalendarView calendarView = new CalendarView(controller, stage, sidebarView, sidebar);
+        final VBox center = calendarView.build();
+        root.setLeft(new TagSidebarView(controller, stage, calendarView::refresh).build());
+        root.setCenter(center);
         root.setRight(sidebar);
         return new Scene(root, 1200, 700);
     }

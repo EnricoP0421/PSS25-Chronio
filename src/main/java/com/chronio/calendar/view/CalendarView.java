@@ -42,13 +42,19 @@ public final class CalendarView {
         return MONTHS_IT[displayMonth.getMonthValue() - 1] + " " + displayMonth.getYear();
     }
 
+    private GridPane grid;
+
     public VBox build() {
         final VBox box = new VBox(8);
         VBox.setVgrow(box, Priority.ALWAYS);
-        final GridPane grid = buildGrid();
-        box.getChildren().addAll(buildNav(box, grid), buildDayHeaders(), grid);
+        grid = buildGrid();
+        box.getChildren().addAll(buildNav(box), buildDayHeaders(), grid);
         VBox.setVgrow(grid, Priority.ALWAYS);
         return box;
+    }
+
+    public void refresh() {
+        refreshGrid(grid);
     }
 
     private HBox buildDayHeaders() {
@@ -63,7 +69,7 @@ public final class CalendarView {
         return box;
     }
 
-    private HBox buildNav(final VBox box, final GridPane grid) {
+    private HBox buildNav(final VBox box) {
         final Button prev = new Button("<");
         final Button next = new Button(">");
         final Label label = new Label(monthLabel());
@@ -148,10 +154,10 @@ public final class CalendarView {
     }
 
     private GridPane buildGrid() {
-        final GridPane grid = new GridPane();
-        grid.setHgap(4);
-        grid.setVgap(4);
-        refreshGrid(grid);
-        return grid;
+        final GridPane g = new GridPane();
+        g.setHgap(4);
+        g.setVgap(4);
+        refreshGrid(g);
+        return g;
     }
 }

@@ -18,10 +18,12 @@ public final class TagSidebarView {
 
     private final CalendarController controller;
     private final Stage stage;
+    private final Runnable onTagChanged;
 
-    public TagSidebarView(final CalendarController controller, final Stage stage) {
+    public TagSidebarView(final CalendarController controller, final Stage stage, final Runnable onTagChanged) {
         this.controller = controller;
         this.stage = stage;
+        this.onTagChanged = onTagChanged;
     }
 
     public VBox build() {
@@ -80,7 +82,7 @@ public final class TagSidebarView {
             final Button delBtn = new Button("✕");
             delBtn.setStyle("-fx-text-fill: red;");
             editBtn.setOnAction(e -> openEditDialog(box, tag.id(), tag.name(), tag.color()));
-            delBtn.setOnAction(e -> { controller.deleteTag(tag.id()); refreshList(box); });
+            delBtn.setOnAction(e -> { controller.deleteTag(tag.id()); refreshList(box); onTagChanged.run(); });
             final HBox row = new HBox(6, dot, lbl, editBtn, delBtn);
             row.setAlignment(Pos.CENTER_LEFT);
             box.getChildren().add(row);
