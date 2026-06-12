@@ -60,7 +60,7 @@ public final class CalendarModelImpl implements CalendarModel {
         tags.remove(id);
         final LinkedHashMap<String, Event> events = new LinkedHashMap<>();
         data.events().forEach((eid, ev) -> {
-            if (!id.equals(ev.tagId())) events.put(eid, ev);
+            events.put(eid, id.equals(ev.tagId()) ? ev.withTagId(null) : ev);
         });
         data = new CalendarData(tags, events, data.nextTagId(), data.nextEventId());
     }
