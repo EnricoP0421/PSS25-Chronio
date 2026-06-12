@@ -6,6 +6,7 @@ import com.chronio.calendar.model.Tag;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Dialog;
@@ -77,10 +78,29 @@ public final class EventDialog extends Dialog<Void> {
                 .ifPresent(tagCombo.getSelectionModel()::select);
         }
 
+        final CheckBox allDayBox = new CheckBox("Tutto il giorno");
+        allDayBox.setSelected(existing != null && existing.allDay());
+
+        final HBox startRow = new HBox(4, startDate, startHour, startMin);
+        final HBox endRow = new HBox(4, endDate, endHour, endMin);
+        allDayBox.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            startHour.setVisible(!newVal);
+            startMin.setVisible(!newVal);
+            endHour.setVisible(!newVal);
+            endMin.setVisible(!newVal);
+        });
+        if (existing != null && existing.allDay()) {
+            startHour.setVisible(false);
+            startMin.setVisible(false);
+            endHour.setVisible(false);
+            endMin.setVisible(false);
+        }
+
         final VBox content = new VBox(8,
             titleField,
-            new Label("Inizio:"), new HBox(4, startDate, startHour, startMin),
-            new Label("Fine:"),   new HBox(4, endDate, endHour, endMin),
+            allDayBox,
+            new Label("Inizio:"), startRow,
+            new Label("Fine:"),   endRow,
             new Label("Tag:"), tagCombo
         );
         content.setPrefWidth(400);
@@ -96,16 +116,19 @@ public final class EventDialog extends Dialog<Void> {
 
         setResultConverter(btn -> {
             if (btn == ButtonType.OK && !titleField.getText().isBlank()) {
-                final String start = String.format("%sT%02d:%02d",
-                    startDate.getValue(), startHour.getValue(), startMin.getValue());
-                final String end = String.format("%sT%02d:%02d",
-                    endDate.getValue(), endHour.getValue(), endMin.getValue());
+                final boolean allDay = allDayBox.isSelected();
+                final String start = allDay
+                    ? startDate.getValue().toString()
+                    : String.format("%sT%02d:%02d", startDate.getValue(), startHour.getValue(), startMin.getValue());
+                final String end = allDay
+                    ? endDate.getValue().toString()
+                    : String.format("%sT%02d:%02d", endDate.getValue(), endHour.getValue(), endMin.getValue());
                 final Tag selectedTag = tagCombo.getValue();
                 final String tagId = selectedTag != null ? selectedTag.id() : null;
                 if (existing == null) {
-                    controller.createEvent(titleField.getText(), "", start, end, tagId, false);
+                    controller.createEvent(titleField.getText(), "", start, end, tagId, allDay);
                 } else {
-                    controller.updateEvent(existing.id(), titleField.getText(), "", start, end, tagId, existing.allDay());
+                    controller.updateEvent(existing.id(), titleField.getText(), "", start, end, tagId, allDay);
                 }
             } else if (btn != null && btn.getButtonData() == ButtonBar.ButtonData.LEFT) {
                 controller.deleteEvent(existing.id());
