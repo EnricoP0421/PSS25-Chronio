@@ -76,9 +76,40 @@ public final class TagSidebarView {
         controller.getTags().forEach((id, tag) -> {
             final Circle dot = new Circle(6, Color.web(tag.color()));
             final Label lbl = new Label(tag.name());
-            final HBox row = new HBox(6, dot, lbl);
+            final Button editBtn = new Button("✎");
+            final Button delBtn = new Button("✕");
+            delBtn.setStyle("-fx-text-fill: red;");
+            editBtn.setOnAction(e -> openEditDialog(box, tag.id(), tag.name(), tag.color()));
+            delBtn.setOnAction(e -> { controller.deleteTag(tag.id()); refreshList(box); });
+            final HBox row = new HBox(6, dot, lbl, editBtn, delBtn);
             row.setAlignment(Pos.CENTER_LEFT);
             box.getChildren().add(row);
         });
+    }
+
+    private void openEditDialog(final VBox box, final String id, final String currentName, final String currentColor) {
+        final Dialog<Void> dialog = new Dialog<>();
+        dialog.initOwner(stage);
+        dialog.setTitle("Modifica tag");
+
+        final TextField nameField = new TextField(currentName);
+        final ColorPicker colorPicker = new ColorPicker(Color.web(currentColor));
+
+        final VBox content = new VBox(8, new Label("Nome:"), nameField, new Label("Colore:"), colorPicker);
+        content.setPrefWidth(250);
+        dialog.getDialogPane().setContent(content);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.setResultConverter(btn -> {
+            if (btn == ButtonType.OK && !nameField.getText().isBlank()) {
+                final Color c = colorPicker.getValue();
+                final String hex = String.format("#%02x%02x%02x",
+                    (int)(c.getRed()*255), (int)(c.getGreen()*255), (int)(c.getBlue()*255));
+                controller.updateTag(id, nameField.getText(), hex);
+                refreshList(box);
+            }
+            return null;
+        });
+        dialog.showAndWait();
     }
 }
