@@ -3,6 +3,7 @@ package com.chronio.calendar.view;
 import com.chronio.calendar.controller.CalendarController;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -135,6 +136,11 @@ public final class CalendarView {
                 final Label pill = new Label(ev.title());
                 pill.setStyle("-fx-background-color: " + color + "; -fx-text-fill: white; -fx-padding: 1 4; -fx-background-radius: 3; -fx-font-size: 10;");
                 pill.setMaxWidth(Double.MAX_VALUE);
+                if (ev.description() != null && !ev.description().isBlank()) {
+                    final Tooltip tip = new Tooltip(ev.description());
+                    tip.setShowDelay(javafx.util.Duration.ZERO);
+                    pill.setTooltip(tip);
+                }
                 pill.setOnMouseClicked(e -> {
                     e.consume();
                     new EventDialog(stage, controller, date, ev).showAndWait();
