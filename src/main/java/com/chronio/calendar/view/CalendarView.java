@@ -134,7 +134,8 @@ public final class CalendarView {
                     ? controller.getTags().get(ev.tagId()).color()
                     : "#888888";
                 final Label pill = new Label(ev.title());
-                pill.setStyle("-fx-background-color: " + color + "; -fx-text-fill: white; -fx-padding: 1 4; -fx-background-radius: 3; -fx-font-size: 10;");
+                final String textColor = isLight(color) ? "black" : "white";
+                pill.setStyle("-fx-background-color: " + color + "; -fx-text-fill: " + textColor + "; -fx-padding: 1 4; -fx-background-radius: 3; -fx-font-size: 10;");
                 pill.setMaxWidth(Double.MAX_VALUE);
                 if (ev.description() != null && !ev.description().isBlank()) {
                     final Tooltip tip = new Tooltip(ev.description());
@@ -157,6 +158,13 @@ public final class CalendarView {
             col++;
             if (col == 7) { col = 0; row++; }
         }
+    }
+
+    private boolean isLight(final String hex) {
+        final int r = Integer.parseInt(hex.substring(1, 3), 16);
+        final int g = Integer.parseInt(hex.substring(3, 5), 16);
+        final int b = Integer.parseInt(hex.substring(5, 7), 16);
+        return (r * 299 + g * 587 + b * 114) / 1000 > 128;
     }
 
     private GridPane buildGrid() {
