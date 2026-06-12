@@ -8,6 +8,7 @@ import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
@@ -96,11 +97,16 @@ public final class EventDialog extends Dialog<Void> {
             endMin.setVisible(false);
         }
 
+        final TextArea descField = new TextArea(existing != null ? existing.description() : "");
+        descField.setPromptText("Descrizione");
+        descField.setPrefRowCount(3);
+
         final VBox content = new VBox(8,
             titleField,
             allDayBox,
             new Label("Inizio:"), startRow,
             new Label("Fine:"),   endRow,
+            new Label("Descrizione:"), descField,
             new Label("Tag:"), tagCombo
         );
         content.setPrefWidth(400);
@@ -126,9 +132,9 @@ public final class EventDialog extends Dialog<Void> {
                 final Tag selectedTag = tagCombo.getValue();
                 final String tagId = selectedTag != null ? selectedTag.id() : null;
                 if (existing == null) {
-                    controller.createEvent(titleField.getText(), "", start, end, tagId, allDay);
+                    controller.createEvent(titleField.getText(), descField.getText(), start, end, tagId, allDay);
                 } else {
-                    controller.updateEvent(existing.id(), titleField.getText(), "", start, end, tagId, allDay);
+                    controller.updateEvent(existing.id(), titleField.getText(), descField.getText(), start, end, tagId, allDay);
                 }
             } else if (btn != null && btn.getButtonData() == ButtonBar.ButtonData.LEFT) {
                 controller.deleteEvent(existing.id());
