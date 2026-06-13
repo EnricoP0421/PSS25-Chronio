@@ -21,7 +21,7 @@ public final class MainView {
         final EventSidebarView sidebarView = new EventSidebarView(controller);
         final VBox sidebar = sidebarView.build();
         final CalendarView calendarView = new CalendarView(controller, stage, sidebarView, sidebar);
-        root.setLeft(new TagSidebarView(controller, stage, calendarView::refresh).build());
+        root.setLeft(new TagSidebarView(controller, stage, () -> { calendarView.refresh(); sidebarView.refresh(sidebar); }).build());
         root.setCenter(calendarView.build());
         root.setRight(sidebar);
         return new Scene(root, 1200, 700);
