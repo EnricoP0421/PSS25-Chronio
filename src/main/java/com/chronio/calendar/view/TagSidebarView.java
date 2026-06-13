@@ -4,6 +4,7 @@ import com.chronio.calendar.controller.CalendarController;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
@@ -76,6 +77,9 @@ public final class TagSidebarView {
     private void refreshList(final VBox box) {
         box.getChildren().subList(1, box.getChildren().size()).clear();
         controller.getTags().forEach((id, tag) -> {
+            final CheckBox cb = new CheckBox();
+            cb.setSelected(tag.visible());
+            cb.setOnAction(e -> { controller.toggleTagVisibility(tag.id()); onTagChanged.run(); });
             final Circle dot = new Circle(6, Color.web(tag.color()));
             final Label lbl = new Label(tag.name());
             final Button editBtn = new Button("✎");
@@ -83,7 +87,7 @@ public final class TagSidebarView {
             delBtn.setStyle("-fx-text-fill: red;");
             editBtn.setOnAction(e -> openEditDialog(box, tag.id(), tag.name(), tag.color()));
             delBtn.setOnAction(e -> { controller.deleteTag(tag.id()); refreshList(box); onTagChanged.run(); });
-            final HBox row = new HBox(6, dot, lbl, editBtn, delBtn);
+            final HBox row = new HBox(6, cb, dot, lbl, editBtn, delBtn);
             row.setAlignment(Pos.CENTER_LEFT);
             box.getChildren().add(row);
         });
