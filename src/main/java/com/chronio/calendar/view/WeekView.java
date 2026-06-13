@@ -39,19 +39,25 @@ public final class WeekView {
         this.sidebar = sidebar;
     }
 
+    private VBox mainBox;
+
     public VBox build() {
         navLabel = new Label(weekLabel());
-        final VBox box = new VBox(4);
-        VBox.setVgrow(box, Priority.ALWAYS);
-        box.getChildren().addAll(buildNav(), buildScrollContent());
-        return box;
+        mainBox = new VBox(4);
+        VBox.setVgrow(mainBox, Priority.ALWAYS);
+        mainBox.getChildren().addAll(buildNav(), buildScrollContent());
+        return mainBox;
+    }
+
+    private void rebuildContent() {
+        mainBox.getChildren().set(1, buildScrollContent());
     }
 
     private HBox buildNav() {
         final Button prev = new Button("<");
         final Button next = new Button(">");
-        prev.setOnAction(e -> { weekStart = weekStart.minusWeeks(1); navLabel.setText(weekLabel()); });
-        next.setOnAction(e -> { weekStart = weekStart.plusWeeks(1); navLabel.setText(weekLabel()); });
+        prev.setOnAction(e -> { weekStart = weekStart.minusWeeks(1); navLabel.setText(weekLabel()); rebuildContent(); });
+        next.setOnAction(e -> { weekStart = weekStart.plusWeeks(1); navLabel.setText(weekLabel()); rebuildContent(); });
         final HBox nav = new HBox(12, prev, navLabel, next);
         nav.setAlignment(Pos.CENTER_LEFT);
         return nav;
@@ -99,7 +105,7 @@ public final class WeekView {
             controller.getEventsForDate(toKey(date)).stream()
                 .filter(Event::allDay)
                 .forEach(ev -> cell.getChildren().add(makePill(ev, date)));
-            cell.setOnMouseClicked(e -> { new EventDialog(stage, controller, date).showAndWait(); sidebarView.refresh(sidebar); });
+            cell.setOnMouseClicked(e -> { new EventDialog(stage, controller, date).showAndWait(); rebuildContent(); sidebarView.refresh(sidebar); });
             grid.add(cell, i + 1, 1);
         }
 
@@ -118,7 +124,7 @@ public final class WeekView {
                 controller.getEventsForDate(toKey(date)).stream()
                     .filter(ev -> !ev.allDay() && startsAtHour(ev, hour))
                     .forEach(ev -> cell.getChildren().add(makePill(ev, date)));
-                cell.setOnMouseClicked(e -> { new EventDialog(stage, controller, date).showAndWait(); sidebarView.refresh(sidebar); });
+                cell.setOnMouseClicked(e -> { new EventDialog(stage, controller, date, hour, null).showAndWait(); rebuildContent(); sidebarView.refresh(sidebar); });
                 grid.add(cell, i + 1, h + 2);
             }
         }
@@ -146,6 +152,7 @@ public final class WeekView {
         pill.setOnMouseClicked(e -> {
             e.consume();
             new EventDialog(stage, controller, date, ev).showAndWait();
+            rebuildContent();
             sidebarView.refresh(sidebar);
         });
         return pill;
@@ -164,7 +171,7 @@ public final class WeekView {
 
     private String weekLabel() {
         final LocalDate end = weekStart.plusDays(6);
-        return weekStart.getDayOfMonth() + "/" + weekStart.getMonthValue()
+        return weekStart.getDayOfMonth() + "/" + weekStart.getMonthValue() + "/" + weekStart.getYear()
             + " - " + end.getDayOfMonth() + "/" + end.getMonthValue() + "/" + end.getYear();
     }
 
