@@ -27,10 +27,14 @@ public final class EventDialog extends Dialog<Void> {
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
 
     public EventDialog(final Stage owner, final CalendarController controller, final LocalDate date) {
-        this(owner, controller, date, null);
+        this(owner, controller, date, -1, null);
     }
 
     public EventDialog(final Stage owner, final CalendarController controller, final LocalDate date, final Event existing) {
+        this(owner, controller, date, -1, existing);
+    }
+
+    public EventDialog(final Stage owner, final CalendarController controller, final LocalDate date, final int presetHour, final Event existing) {
         initOwner(owner);
         setTitle(existing == null ? "Nuovo evento" : "Modifica evento");
 
@@ -39,9 +43,9 @@ public final class EventDialog extends Dialog<Void> {
 
         final LocalDate startDate0 = existing != null ? parseDate(existing.start(), date) : date;
         final LocalDate endDate0 = existing != null && existing.end() != null ? parseDate(existing.end(), date) : date;
-        final int startH = existing != null ? parseHour(existing.start(), 9) : 9;
+        final int startH = existing != null ? parseHour(existing.start(), 9) : (presetHour >= 0 ? presetHour : 9);
         final int startM = existing != null ? parseMin(existing.start(), 0) : 0;
-        final int endH = existing != null && existing.end() != null ? parseHour(existing.end(), 10) : 10;
+        final int endH = existing != null && existing.end() != null ? parseHour(existing.end(), 10) : (presetHour >= 0 ? Math.min(presetHour + 1, 23) : 10);
         final int endM = existing != null && existing.end() != null ? parseMin(existing.end(), 0) : 0;
 
         final DatePicker startDate = new DatePicker(startDate0);
