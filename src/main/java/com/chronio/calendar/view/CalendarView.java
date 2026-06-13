@@ -44,18 +44,20 @@ public final class CalendarView {
     }
 
     private GridPane grid;
+    private VBox mainBox;
+    private String currentView = "month";
 
     public VBox build() {
-        final VBox box = new VBox(8);
-        VBox.setVgrow(box, Priority.ALWAYS);
+        mainBox = new VBox(8);
+        VBox.setVgrow(mainBox, Priority.ALWAYS);
         grid = buildGrid();
-        box.getChildren().addAll(buildNav(box), buildDayHeaders(), grid);
+        mainBox.getChildren().addAll(buildNav(), buildDayHeaders(), grid);
         VBox.setVgrow(grid, Priority.ALWAYS);
-        return box;
+        return mainBox;
     }
 
     public void refresh() {
-        refreshGrid(grid);
+        if ("month".equals(currentView)) refreshGrid(grid);
     }
 
     private HBox buildDayHeaders() {
@@ -70,10 +72,11 @@ public final class CalendarView {
         return box;
     }
 
-    private HBox buildNav(final VBox box) {
+    private HBox buildNav() {
         final Button prev = new Button("<");
         final Button next = new Button(">");
         final Label label = new Label(monthLabel());
+        final Button toggleBtn = new Button("Settimana");
 
         prev.setOnAction(e -> {
             displayMonth = displayMonth.minusMonths(1);
@@ -85,8 +88,24 @@ public final class CalendarView {
             label.setText(monthLabel());
             refreshGrid(grid);
         });
+        toggleBtn.setOnAction(e -> {
+            if ("month".equals(currentView)) {
+                currentView = "week";
+                toggleBtn.setText("Mese");
+                final WeekView weekView = new WeekView(controller, stage, sidebarView, sidebar);
+                final VBox weekBox = weekView.build();
+                mainBox.getChildren().setAll(buildNav(), weekBox);
+                VBox.setVgrow(weekBox, Priority.ALWAYS);
+            } else {
+                currentView = "month";
+                toggleBtn.setText("Settimana");
+                mainBox.getChildren().setAll(buildNav(), buildDayHeaders(), grid);
+                VBox.setVgrow(grid, Priority.ALWAYS);
+                refreshGrid(grid);
+            }
+        });
 
-        final HBox nav = new HBox(12, prev, label, next);
+        final HBox nav = new HBox(12, prev, label, next, toggleBtn);
         nav.setAlignment(Pos.CENTER_LEFT);
         return nav;
     }
