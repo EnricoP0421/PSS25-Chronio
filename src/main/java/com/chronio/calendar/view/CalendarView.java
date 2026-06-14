@@ -51,6 +51,8 @@ public final class CalendarView {
 
     public VBox build() {
         mainBox = new VBox(8);
+        mainBox.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        mainBox.setPadding(new javafx.geometry.Insets(8));
         VBox.setVgrow(mainBox, Priority.ALWAYS);
         grid = buildGrid();
         nav = buildNav();
@@ -201,6 +203,7 @@ public final class CalendarView {
         final GridPane g = new GridPane();
         g.setHgap(4);
         g.setVgap(4);
+        g.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         refreshGrid(g);
         return g;
     }
