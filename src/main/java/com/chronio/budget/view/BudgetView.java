@@ -16,6 +16,12 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.DatePicker;
+import com.chronio.budget.model.Tag;
+import com.chronio.budget.model.Transaction;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import java.util.List;
+import java.time.format.DateTimeFormatter;
 
 public final class BudgetView extends HBox implements BudgetController.View {
 
@@ -50,7 +56,9 @@ public final class BudgetView extends HBox implements BudgetController.View {
                 buildPanel("Entrate", incomeList),
                 buildPanel("Uscite", expenseList),
                 buildTotalPanel());
-
+        
+        refreshTransactionLists();
+        
     }
 
     private Node buildPanel(final String titleText, final VBox list) {
@@ -102,12 +110,61 @@ public final class BudgetView extends HBox implements BudgetController.View {
 
     @Override
     public void refreshTransactionLists() {
-        // TODO: popolare incomeList ed expenseList dai dati del controller
+        incomeList.getChildren().setAll(rowsFor(controller.getIncomes()));
+        expenseList.getChildren().setAll(rowsFor(controller.getExpenses()));
     }
 
     @Override
     public void refreshCharts() {
         // TODO: aggiornare totali e grafici
+    }
+
+    private List<Node> rowsFor(final List<Transaction> transactions) {
+        return transactions.stream().map(this::row).toList();
+    }
+
+    private Node row(final Transaction tx) {
+        final Label desc = new Label(tx.description() == null ? "" : tx.description());
+        desc.setStyle("-fx-font-weight: bold;");
+        final Label amount = new Label(String.format("€%.2f", tx.amount()));
+        final Label date = new Label(
+            tx.date().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        date.setStyle("-fx-text-fill: gray;");
+
+        final HBox top = new HBox(8, desc, spacer(), amount);
+        top.setAlignment(Pos.CENTER_LEFT);
+
+        final HBox bottom = new HBox(8, date);
+        bottom.setAlignment(Pos.CENTER_LEFT);
+        final Tag tag = controller.getTag(tx.tagId());
+        if (tag != null) {
+            bottom.getChildren().add(tagBadge(tag));
+        }
+
+        final VBox card = new VBox(2, top, bottom);
+        card.setPadding(new Insets(8));
+        card.setStyle("-fx-background-color: #f4f4f5; -fx-background-radius: 6;");
+        //Da completare handler dei dialog
+        return card;
+    }
+
+    private Node tagBadge(final Tag tag) {
+        final Circle dot = new Circle(5);
+        dot.setFill(parseColor(tag.color()));
+        final Label name = new Label(tag.name());
+        final HBox badge = new HBox(4, dot, name);
+        badge.setAlignment(Pos.CENTER_LEFT);
+        badge.setPadding(new Insets(2, 6, 2, 6));
+        badge.setStyle("-fx-background-color: #e4e4e7; -fx-background-radius: 10;");
+        return badge;
+    }
+
+    static Color parseColor(final String hex) {
+        try {
+            return hex == null || hex.isBlank() ? Color.GRAY : Color.web(hex);
+        } catch (final IllegalArgumentException e) {
+            return Color.GRAY;
+        }
     }
 
     //Util
