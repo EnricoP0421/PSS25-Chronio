@@ -10,31 +10,29 @@ public interface CalendarModel {
 
     /**
      * Restituisce tutti i tag salvati.
-     * @return mappa id -> Tag
+     * @return mappa id -> ritorna il tag corrispondente all'id salvato
      */
     LinkedHashMap<String, Tag> getTags();
 
     /**
      * Crea un nuovo tag con nome e colore.
-     *
-     * @param name  nome del tag
+     * @param name nome del tag
      * @param color colore in formato hex
-     * @return il tag creato (con eventuale colore)
+     * @return il tag creato
      */
     Tag createTag(String name, String color);
 
     /**
      * Aggiorna nome e colore di un tag esistente.
-     *
-     * @param id    id del tag da aggiornare
-     * @param name  nuovo nome
-     * @param color nuovo colore
-     * @return il tag aggiornato, o empty se l'id non esiste
+     * @param id id del tag da aggiornare
+     * @param name nome
+     * @param color colore
+     * @return il tag aggiornato.
      */
     Optional<Tag> updateTag(String id, String name, String color);
 
     /**
-     * Inverte la visibilità di un tag (visibile -> nascosto e viceversa).
+     * Inverte la visibilità di un tag (visibile - nascosto e viceversa).
      * @param id id del tag
      */
     void toggleTagVisibility(String id);
@@ -47,35 +45,32 @@ public interface CalendarModel {
 
     /**
      * Restituisce tutti gli eventi salvati.
-     * @return mappa id -> Event
+     * @return mappa id -> ritorna l'event corrispondente all'id salvato
      */
     LinkedHashMap<String, Event> getEvents();
 
     /**
      * Crea un nuovo evento. Lancia IllegalArgumentException se start è null
-     * o se end è presente ma precedente a start.
-     *
-     * @param title       titolo dell'evento
+     * @param title titolo dell'evento
      * @param description descrizione
-     * @param start       data/ora inizio in formato ISO-8601
-     * @param end         data/ora fine, può essere null
-     * @param tagId       id del tag associato, può essere null
-     * @param allDay      true se l'evento dura tutto il giorno
+     * @param start data/ora inizio
+     * @param end data/ora fine, può essere null
+     * @param tagId id del tag associato, può essere null
+     * @param allDay true se l'evento dura tutto il giorno
      * @return l'evento creato
      */
     Event createEvent(String title, String description, String start, String end, String tagId, boolean allDay);
 
     /**
      * Aggiorna un evento esistente.
-     *
      * @param id id dell'evento da aggiornare
-     * @param title nuovo titolo
-     * @param description nuova descrizione
-     * @param start nuovo inizio
-     * @param end  nuova fine, può essere null
-     * @param tagId  nuovo tag, può essere null
-     * @param allDay nuovo valore allDay
-     * @return l'evento aggiornato, o empty se l'id non esiste
+     * @param title titolo
+     * @param description descrizione
+     * @param start inizio
+     * @param end fine, può essere null
+     * @param tagId tag, può essere null
+     * @param allDay valore allDay
+     * @return l'evento aggiornato
      */
     Optional<Event> updateEvent(String id, String title, String description, String start, String end, String tagId, boolean allDay);
 
@@ -87,7 +82,6 @@ public interface CalendarModel {
 
     /**
      * Restituisce gli eventi di una data specifica, filtrati per tag visibili.
-     *
      * @param dateKey data in formato "yyyy-M-d"
      * @return lista di eventi visibili in quella data
      */
@@ -101,8 +95,8 @@ public interface CalendarModel {
 
     /**
      * Restituisce gli eventi dei prossimi 6 giorni (escluso oggi),
-     * filtrati per tag visibili, raggruppati per data.
-     * @return mappa dateKey -> lista eventi
+     * filtrati per tag visibili, raggruppati per data
+     * @return mappa dateKey -> lista eventi che accadono in quella data
      */
     LinkedHashMap<String, java.util.LinkedList<Event>> getWeekEvents();
 }

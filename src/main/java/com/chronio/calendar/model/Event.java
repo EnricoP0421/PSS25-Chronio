@@ -1,10 +1,11 @@
 package com.chronio.calendar.model;
 
-// Funzioni di un evento: titolo, descrizione, data inizio e fine
-// start e end sono stringhe in formato ISO-8601
-// tagId è l'id del tag associato, può essere null se l'evento non ha tag
-// allDay è true se l'evento dura tutto il giorno / no orario
-
+/**
+ * L'evento nel calendario
+ * I campi start e end sono stringhe in formato ISO-8601
+ * tagId può essere null se l'evento non ha tag associato
+ * allDay è true se l'evento dura tutto il giorno, senza orario specifico
+ */
 public record Event(
         String id,
         String title,

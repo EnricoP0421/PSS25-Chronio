@@ -1,9 +1,5 @@
 package com.chronio.calendar.persistence;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.chronio.calendar.model.CalendarData;
-
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -14,6 +10,13 @@ import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.chronio.calendar.model.CalendarData;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+/**
+ * Gestisce il salvataggio e il caricamento dei dati del calendario su disco in formato JSON
+ */
 public final class CalendarPersistence {
 
     private static final Logger LOGGER = Logger.getLogger(CalendarPersistence.class.getName());
@@ -28,10 +31,21 @@ public final class CalendarPersistence {
         this.gson = new GsonBuilder().setPrettyPrinting().create();
     }
 
+    /**
+     * @return il percorso di default del file di salvataggio
+     */
     public static Path getDefaultPath() {
         return Paths.get(System.getProperty("user.home"), SAVE_DIR, SAVE_FILE);
     }
 
+    /**
+     * Salva i dati del calendario su disco
+     * Controlla se la cartella dove deve salvare esiste, se no la crea 
+     * Apre il file in scrittura
+     * Usa Gson per convertire l'oggetto CalendarData in JSON e scriverlo nel file
+     * Se qualcosa va storto logga l'errore senza far crashare l'app
+     * @param data i dati da salvare
+     */
     public void save(final CalendarData data) {
         try {
             final Path parent = filePath.getParent();
@@ -44,6 +58,11 @@ public final class CalendarPersistence {
         }
     }
 
+    /**
+     * Carica i dati del calendario da disco
+     * Se il file non esiste o è corrotto, restituisce uno stato vuoto
+     * @return i dati caricati, o CalendarData#empty() in caso di errore
+     */
     public CalendarData load() {
         if (!Files.exists(filePath)) return CalendarData.empty();
         try (Reader reader = Files.newBufferedReader(filePath, StandardCharsets.UTF_8)) {

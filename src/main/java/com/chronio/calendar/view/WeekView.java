@@ -18,6 +18,11 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+/**
+ * Vista settimanale del calendario.
+ * Mostra i 7 giorni della settimana corrente su colonne, con righe orarie e navigazione avanti/indietro
+ * Pulsante per tornare a Mese/Giorno
+ */
 public final class WeekView {
 
     private static final String[] DAYS_IT = {"Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"};
@@ -41,6 +46,10 @@ public final class WeekView {
 
     private VBox mainBox;
 
+    /**
+     * Costruisce e restituisce il nodo radice della vista settimanale
+     * @return VBox che contiene la navigazione e la griglia degli eventi
+     */
     public VBox build() {
         navLabel = new Label(weekLabel());
         mainBox = new VBox(4);

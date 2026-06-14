@@ -25,6 +25,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Dialog per la creazione e modifica di un evento
+ * Supporta tre modalità di apertura: nuovo evento su una data, nuovo evento con ora preimpostata,
+ * e modifica di un evento esistente
+ */
 public final class EventDialog extends Dialog<Void> {
 
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
