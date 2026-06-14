@@ -72,7 +72,7 @@ public final class BudgetController {
                                          final TransactionType type,
                                          final String description,
                                          final double amount,
-                                         final String date,
+                                         final LocalDate date,
                                          final String tagId) {
         final Transaction saved;
         if (id == null) {
@@ -125,15 +125,15 @@ public final class BudgetController {
     }
 
     public BudgetSummary getCurrentSummary() {
-        return service.calculateSummary(periodStart.toString(), periodEnd.toString());
+        return service.calculateSummary(periodStart, periodEnd);
     }
 
     public Map<String, Double> getExpensesByTag() {
-        return service.aggregateByTag(periodStart.toString(), periodEnd.toString());
+        return service.aggregateByTag(periodStart, periodEnd);
     }
 
     public Map<String, Double> getNetByMonth() {
-        return service.aggregateByMonth(periodStart.toString(), periodEnd.toString());
+        return service.aggregateByMonth(periodStart, periodEnd);
     }
 
     public Tag getTag(final String tagId) {

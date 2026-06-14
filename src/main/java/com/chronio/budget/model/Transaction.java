@@ -1,11 +1,13 @@
 package com.chronio.budget.model;
 
+import java.time.LocalDate;
+
 public record Transaction(
     String id,
     TransactionType type,
     String description,
     double amount,
-    String date,
+    LocalDate date,
     String tagId
 ) {
 
@@ -17,7 +19,7 @@ public record Transaction(
         return new Transaction(id, type, description, amount, date, tagId);
     }
 
-    public Transaction withDate(final String date) {
+    public Transaction withDate(final LocalDate date) {
         return new Transaction(id, type, description, amount, date, tagId);
     }
 

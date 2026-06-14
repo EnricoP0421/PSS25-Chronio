@@ -10,6 +10,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializer;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public final class JsonBudgetRepository implements BudgetRepository {
 
@@ -17,8 +22,14 @@ public final class JsonBudgetRepository implements BudgetRepository {
 
     private final Path file;
     private final Gson gson = new GsonBuilder()
-            .setPrettyPrinting()
-            .create();
+        .setPrettyPrinting()
+        .registerTypeAdapter(LocalDate.class,
+                (JsonSerializer<LocalDate>) (date, type, ctx) ->
+                        new JsonPrimitive(date.format(DateTimeFormatter.ISO_LOCAL_DATE)))
+        .registerTypeAdapter(LocalDate.class,
+                (JsonDeserializer<LocalDate>) (json, type, ctx) ->
+                        LocalDate.parse(json.getAsString(), DateTimeFormatter.ISO_LOCAL_DATE))
+        .create();
 
     // Costruttore di default: usa la cartella dati standard dell'app
     // (la stessa in cui vivono gli altri file dati come data.json del calendario).
@@ -29,6 +40,7 @@ public final class JsonBudgetRepository implements BudgetRepository {
     // Costruttore esplicito: utile per indicare una cartella/percorso specifico.
     public JsonBudgetRepository(final Path file) {
         this.file = file;
+        System.out.println("Percorso budget.json: " + file.toAbsolutePath());  
     }
 
     // Cartella dati dell'applicazione: ~/.chronio

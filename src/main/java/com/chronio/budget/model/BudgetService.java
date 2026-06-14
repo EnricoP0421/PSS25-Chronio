@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.time.LocalDate;
 
 public final class BudgetService {
 
@@ -39,7 +40,7 @@ public final class BudgetService {
     public Transaction addTransaction(final TransactionType type,
                                       final String description,
                                       final double amount,
-                                      final String date,
+                                      final LocalDate date,
                                       final String tagId) {
         if (type == null) {
             throw new IllegalArgumentException("Il tipo della transazione non può essere null");
@@ -47,7 +48,7 @@ public final class BudgetService {
         if (amount <= 0) {
             throw new IllegalArgumentException("L'importo deve essere positivo");
         }
-        if (date == null || date.isBlank()) {
+        if (date == null) {
             throw new IllegalArgumentException("La data è obbligatoria");
         }
 
@@ -97,7 +98,7 @@ public final class BudgetService {
     public Transaction updateTransaction(final String id,
                                          final String description,
                                          final double amount,
-                                         final String date,
+                                         final LocalDate date,
                                          final String tagId) {
         final Transaction existing = data.transactions().get(id);
         if (existing == null) {
@@ -106,7 +107,7 @@ public final class BudgetService {
         if (amount <= 0) {
             throw new IllegalArgumentException("L'importo deve essere positivo");
         }
-        if (date == null || date.isBlank()) {
+        if (date == null) {
             throw new IllegalArgumentException("La data è obbligatoria");
         }
 
@@ -185,7 +186,7 @@ public final class BudgetService {
      * @param endDate   data finale inclusa ("YYYY-MM-DD")
      * @return il riepilogo del periodo
      */
-    public BudgetSummary calculateSummary(final String startDate, final String endDate) {
+    public BudgetSummary calculateSummary(final LocalDate startDate, final LocalDate endDate) {
         final List<Transaction> filtered = filterByPeriod(startDate, endDate);
 
         double totalIncome = 0;
@@ -237,7 +238,7 @@ public final class BudgetService {
      * @param endDate   data finale inclusa
      * @return mappa tagId -> totale speso nel periodo
      */
-    public Map<String, Double> aggregateByTag(final String startDate, final String endDate) {
+    public Map<String, Double> aggregateByTag(final LocalDate startDate, final LocalDate endDate) {
         final Map<String, Double> result = new LinkedHashMap<>();
         for (final Transaction tx : filterByPeriod(startDate, endDate)) {
             if (tx.type() != TransactionType.EXPENSE) {
@@ -257,7 +258,7 @@ public final class BudgetService {
      * @param endDate   data finale inclusa
      * @return mappa "YYYY-MM" -> saldo netto del mese, ordinata cronologicamente
      */
-    public Map<String, Double> aggregateByMonth(final String startDate, final String endDate) {
+    public Map<String, Double> aggregateByMonth(final LocalDate startDate, final LocalDate endDate) {
         final Map<String, Double> result = new LinkedHashMap<>();
         final List<Transaction> filtered = filterByPeriod(startDate, endDate);
         // Ordina cronologicamente crescente così le chiavi "YYYY-MM" entrano in ordine.
@@ -270,19 +271,19 @@ public final class BudgetService {
         return result;
     }
 
-    private List<Transaction> filterByPeriod(final String startDate, final String endDate) {
+    private List<Transaction> filterByPeriod(final LocalDate startDate, final LocalDate endDate) {
         final List<Transaction> result = new ArrayList<>();
         for (final Transaction tx : data.transactions().values()) {
-            final String d = tx.date();
-            if (d != null && d.compareTo(startDate) >= 0 && d.compareTo(endDate) <= 0) {
+            final LocalDate d = tx.date();
+            if (d != null && !d.isBefore(startDate) && !d.isAfter(endDate)) {
                 result.add(tx);
             }
         }
         return result;
     }
 
-    private static String monthKey(final String isoDate) {
-        return isoDate != null && isoDate.length() >= 7 ? isoDate.substring(0, 7) : isoDate;
+    private static String monthKey(final LocalDate isoDate) {
+        return isoDate != null ? isoDate.toString().substring(0, 7) : null;
     }
 
     private void persist() {
