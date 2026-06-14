@@ -45,13 +45,16 @@ public final class CalendarView {
 
     private GridPane grid;
     private VBox mainBox;
+    private HBox nav;
     private String currentView = "month";
+    private Button toggleBtn;
 
     public VBox build() {
         mainBox = new VBox(8);
         VBox.setVgrow(mainBox, Priority.ALWAYS);
         grid = buildGrid();
-        mainBox.getChildren().addAll(buildNav(), buildDayHeaders(), grid);
+        nav = buildNav();
+        mainBox.getChildren().addAll(nav, buildDayHeaders(), grid);
         VBox.setVgrow(grid, Priority.ALWAYS);
         return mainBox;
     }
@@ -76,7 +79,9 @@ public final class CalendarView {
         final Button prev = new Button("<");
         final Button next = new Button(">");
         final Label label = new Label(monthLabel());
-        final Button toggleBtn = new Button("Settimana");
+        if (toggleBtn == null) {
+            toggleBtn = new Button("Settimana");
+        }
 
         prev.setOnAction(e -> {
             displayMonth = displayMonth.minusMonths(1);
@@ -91,15 +96,20 @@ public final class CalendarView {
         toggleBtn.setOnAction(e -> {
             if ("month".equals(currentView)) {
                 currentView = "week";
-                toggleBtn.setText("Mese");
-                final WeekView weekView = new WeekView(controller, stage, sidebarView, sidebar);
-                final VBox weekBox = weekView.build();
-                mainBox.getChildren().setAll(buildNav(), weekBox);
+                toggleBtn.setText("Giorno");
+                final VBox weekBox = new WeekView(controller, stage, sidebarView, sidebar).build();
+                mainBox.getChildren().setAll(nav, weekBox);
                 VBox.setVgrow(weekBox, Priority.ALWAYS);
+            } else if ("week".equals(currentView)) {
+                currentView = "day";
+                toggleBtn.setText("Mese");
+                final VBox dayBox = new DayView(controller, stage, sidebarView, sidebar).build();
+                mainBox.getChildren().setAll(nav, dayBox);
+                VBox.setVgrow(dayBox, Priority.ALWAYS);
             } else {
                 currentView = "month";
                 toggleBtn.setText("Settimana");
-                mainBox.getChildren().setAll(buildNav(), buildDayHeaders(), grid);
+                mainBox.getChildren().setAll(nav, buildDayHeaders(), grid);
                 VBox.setVgrow(grid, Priority.ALWAYS);
                 refreshGrid(grid);
             }
