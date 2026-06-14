@@ -3,7 +3,7 @@ package com.chronio.calendar.model;
 import java.util.LinkedHashMap;
 
 // Questo è il contenitore di tutti i dati del calendario che vengono salvati su disco
-// Gson lo trasforma in JSON e lo rilegge al riavvio dell'app
+// Gson lo trasforma in JSON e lo rilegge al riavvio dell'app. Il file si trova in utenti/(nomeutente)/.chronio come "calendar"
 // I contatori nextTagId e nextEventId servono a generare id univoci senza usare UUID
 public record CalendarData(
         LinkedHashMap<String, Tag> tags,    
