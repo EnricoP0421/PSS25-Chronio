@@ -1,10 +1,10 @@
 package com.chronio;
 
 import com.chronio.calendar.controller.CalendarControllerImpl;
-import com.chronio.calendar.model.CalendarData;
 import com.chronio.calendar.model.CalendarModelImpl;
 import com.chronio.calendar.persistence.CalendarPersistence;
 import com.chronio.calendar.view.MainView;
+
 import javafx.application.Application;
 import javafx.stage.Stage;
 
