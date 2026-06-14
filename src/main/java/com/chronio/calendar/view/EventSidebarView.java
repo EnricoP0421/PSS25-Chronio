@@ -15,8 +15,8 @@ public final class EventSidebarView {
 
     public VBox build() {
         final VBox box = new VBox(8);
-        box.setPrefWidth(250);
-        box.setStyle("-fx-background-color: #f0f0f0; -fx-padding: 12;");
+        box.setPrefWidth(220);
+        box.setMaxWidth(220);
         box.getChildren().addAll(buildTodayCard(), buildWeekCard());
         return box;
     }
