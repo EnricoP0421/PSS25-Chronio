@@ -34,11 +34,17 @@ public final class EventSidebarView {
         if (events.isEmpty()) {
             card.getChildren().add(new Label("Nessun evento oggi"));
         } else {
-            events.forEach(ev -> {
-                final String prefix = (!ev.allDay() && ev.start() != null && ev.start().contains("T"))
-                    ? ev.start().substring(11, 16) + " " : "";
-                card.getChildren().add(new Label(prefix + ev.title()));
-            });
+            events.stream()
+                .sorted((a, b) -> {
+                    final String ta = a.allDay() || !a.start().contains("T") ? "00:00" : a.start().substring(11, 16);
+                    final String tb = b.allDay() || !b.start().contains("T") ? "00:00" : b.start().substring(11, 16);
+                    return ta.compareTo(tb);
+                })
+                .forEach(ev -> {
+                    final String prefix = (!ev.allDay() && ev.start() != null && ev.start().contains("T"))
+                        ? ev.start().substring(11, 16) + " " : "";
+                    card.getChildren().add(new Label(prefix + ev.title()));
+                });
         }
         return card;
     }
