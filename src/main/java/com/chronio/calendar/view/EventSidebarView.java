@@ -34,9 +34,19 @@ public final class EventSidebarView {
         if (events.isEmpty()) {
             card.getChildren().add(new Label("Nessun evento oggi"));
         } else {
-            events.forEach(ev -> card.getChildren().add(new Label(ev.title())));
+            events.forEach(ev -> {
+                final String prefix = (!ev.allDay() && ev.start() != null && ev.start().contains("T"))
+                    ? ev.start().substring(11, 16) + " " : "";
+                card.getChildren().add(new Label(prefix + ev.title()));
+            });
         }
         return card;
+    }
+
+    private String formatDateRange(final String start, final String end) {
+        final String[] s = start.split("-");
+        final String[] e = end.split("-");
+        return "  " + s[2] + "/" + s[1] + " - " + e[2] + "/" + e[1];
     }
 
     private VBox buildWeekCard() {
@@ -51,7 +61,13 @@ public final class EventSidebarView {
                 final String[] parts = dateKey.split("-");
                 final String formatted = parts[2] + "/" + parts[1] + "/" + parts[0];
                 card.getChildren().add(new Label(formatted));
-                evs.forEach(ev -> card.getChildren().add(new Label("  " + ev.title())));
+                evs.forEach(ev -> {
+                    final String label = ev.allDay() && ev.end() != null && !ev.end().isBlank()
+                        && !ev.end().equals(ev.start())
+                        ? formatDateRange(ev.start(), ev.end()) + " " + ev.title()
+                        : "  " + ev.title();
+                    card.getChildren().add(new Label(label));
+                });
             });
         }
         return card;
