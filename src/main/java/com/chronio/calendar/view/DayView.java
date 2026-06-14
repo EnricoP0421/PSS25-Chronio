@@ -18,6 +18,11 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+/**
+ * Vista giornaliera del calendario
+ * Mostra gli eventi del giorno corrente suddivisi per ora, con navigazione avanti/indietro
+ * Pulsante per tornare su Mese/Settimana
+ */
 public final class DayView {
 
     private static final String[] MONTHS_IT = {
@@ -43,6 +48,10 @@ public final class DayView {
         this.sidebar = sidebar;
     }
 
+    /**
+     * Costruisce e restituisce il nodo radice della vista giornaliera.
+     * @return VBox contenente la navigazione e la griglia degli eventi
+     */
     public VBox build() {
         navLabel = new Label(dayLabel());
         mainBox = new VBox(4);

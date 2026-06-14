@@ -1,12 +1,13 @@
 package com.chronio.calendar;
 
-import com.chronio.calendar.model.CalendarData;
-import com.chronio.calendar.model.CalendarModelImpl;
-import com.chronio.calendar.model.Tag;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import com.chronio.calendar.model.CalendarData;
+import com.chronio.calendar.model.CalendarModelImpl;
+import com.chronio.calendar.model.Tag;
 
 class TagFilterTest {
 
@@ -26,7 +27,7 @@ class TagFilterTest {
 
     @Test
     void eventWithHiddenTagShouldNotAppear() {
-        final Tag tag = model.createTag("Lavoro", "#0d4853");
+        final Tag tag = model.createTag("Lavoro", "#8b9395");
         model.toggleTagVisibility(tag.id());
         model.createEvent("Riunione", "", "2025-06-10T09:00", "2025-06-10T10:00", tag.id(), false);
         assertTrue(model.getEventsForDate("2025-6-10").isEmpty());

@@ -1,6 +1,7 @@
 package com.chronio.calendar.view;
 
 import com.chronio.calendar.controller.CalendarController;
+
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -15,6 +16,10 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 
+/**
+ * Barra lateral per la gestione dei tag.
+ * Permette di creare, modificare, eliminare e mostrare/nascondere i tag
+ */
 public final class TagSidebarView {
 
     private final CalendarController controller;
@@ -27,6 +32,10 @@ public final class TagSidebarView {
         this.onTagChanged = onTagChanged;
     }
 
+    /**
+     * Costruisce e restituisce il nodo radice della sidebar dei tag.
+     * @return VBox con l'elenco dei tag e i controlli di gestione
+     */
     public VBox build() {
         final VBox box = new VBox(8);
         box.setPrefWidth(200);

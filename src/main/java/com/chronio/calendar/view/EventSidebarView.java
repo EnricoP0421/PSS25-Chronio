@@ -2,9 +2,13 @@ package com.chronio.calendar.view;
 
 import com.chronio.calendar.controller.CalendarController;
 import com.chronio.calendar.model.Event;
+
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
+/**
+ * Barra laterale destra che mostra gli eventi di oggi e quelli dei prossimi 6 giorni.
+ */
 public final class EventSidebarView {
 
     private final CalendarController controller;
@@ -13,6 +17,10 @@ public final class EventSidebarView {
         this.controller = controller;
     }
 
+    /**
+     * Costruisce e restituisce il nodo radice della sidebar degli eventi.
+     * @return VBox con i card "Oggi" e "Questa settimana"
+     */
     public VBox build() {
         final VBox box = new VBox(8);
         box.setPrefWidth(220);
@@ -21,6 +29,10 @@ public final class EventSidebarView {
         return box;
     }
 
+    /**
+     * Aggiorna il contenuto della sidebar ricalcolando gli eventi correnti.
+     * @param box il nodo VBox da aggiornare
+     */
     public void refresh(final VBox box) {
         box.getChildren().clear();
         box.getChildren().addAll(buildTodayCard(), buildWeekCard());

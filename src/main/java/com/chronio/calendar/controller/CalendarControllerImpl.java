@@ -1,15 +1,20 @@
 package com.chronio.calendar.controller;
 
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.Optional;
+
 import com.chronio.calendar.model.CalendarModel;
 import com.chronio.calendar.model.CalendarModelImpl;
 import com.chronio.calendar.model.Event;
 import com.chronio.calendar.model.Tag;
 import com.chronio.calendar.persistence.CalendarPersistence;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.Optional;
-
+/**
+ * Implementazione di CalendarController.
+ * Delega la logica a CalendarModel e persiste lo stato dopo ogni operazione di scrittura,
+ * chiamando save() per salvare su disco.
+ */
 public final class CalendarControllerImpl implements CalendarController {
 
     private final CalendarModel model;

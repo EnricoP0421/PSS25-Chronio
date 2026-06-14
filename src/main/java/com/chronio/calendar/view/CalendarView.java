@@ -1,21 +1,25 @@
 package com.chronio.calendar.view;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
+
 import com.chronio.calendar.controller.CalendarController;
+
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
-import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.VBox;
-import javafx.geometry.Pos;
 import javafx.stage.Stage;
 
-import java.time.LocalDate;
-import java.time.YearMonth;
-
+/**
+ * Vista mensile del calendario con pulsante per navigazione tra mesi, settimana e giorno
+ */
 public final class CalendarView {
 
     private final CalendarController controller;
@@ -49,6 +53,10 @@ public final class CalendarView {
     private String currentView = "month";
     private Button toggleBtn;
 
+    /**
+     * Costruisce e restituisce il nodo radice della vista mensile
+     * @return VBox che contiene la navigazione e la griglia del mese
+     */
     public VBox build() {
         mainBox = new VBox(8);
         mainBox.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
@@ -61,6 +69,9 @@ public final class CalendarView {
         return mainBox;
     }
 
+    /**
+     * Aggiorna la griglia del mese corrente, se la vista attiva è quella mensile
+     */
     public void refresh() {
         if ("month".equals(currentView)) refreshGrid(grid);
     }

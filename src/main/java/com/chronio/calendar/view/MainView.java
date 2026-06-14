@@ -1,11 +1,16 @@
 package com.chronio.calendar.view;
 
 import com.chronio.calendar.controller.CalendarController;
+
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+/**
+ * Vista principale dell'applicazione. Assembla le tre aree principali (tag, calendario, oggi/questa settimana)
+ * in un BorderPane e restituisce la Scene pronta per lo stage.
+ */
 public final class MainView {
 
     private final CalendarController controller;
@@ -16,6 +21,10 @@ public final class MainView {
         this.stage = stage;
     }
 
+    /**
+     * Costruisce e restituisce la scena principale dell'applicazione
+     * @return Scene (1200 x 700)
+     */
     public Scene build() {
         final BorderPane root = new BorderPane();
         final EventSidebarView sidebarView = new EventSidebarView(controller);
