@@ -175,6 +175,7 @@ public final class CalendarView {
                     e.consume();
                     new EventDialog(stage, controller, date, ev).showAndWait();
                     refreshGrid(grid);
+                    sidebarView.refresh(sidebar);
                 });
                 cell.getChildren().add(pill);
             });
