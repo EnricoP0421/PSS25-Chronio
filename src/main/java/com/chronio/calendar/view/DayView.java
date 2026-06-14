@@ -140,7 +140,7 @@ public final class DayView {
     private boolean startsAtHour(final Event ev, final int hour) {
         if (ev.start() == null || !ev.start().contains("T")) return false;
         try { return Integer.parseInt(ev.start().substring(11, 13)) == hour; }
-        catch (final Exception e) { return false; }
+        catch (final NumberFormatException | StringIndexOutOfBoundsException e) { return false; }
     }
 
     private String formatTime(final Event ev) {
@@ -160,6 +160,6 @@ public final class DayView {
         final int r = Integer.parseInt(hex.substring(1, 3), 16);
         final int g = Integer.parseInt(hex.substring(3, 5), 16);
         final int b = Integer.parseInt(hex.substring(5, 7), 16);
-        return (r * 299 + g * 587 + b * 114) / 1000 > 128;
+        return (r + g + b) > 380;
     }
 }

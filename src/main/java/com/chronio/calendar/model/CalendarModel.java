@@ -68,13 +68,13 @@ public interface CalendarModel {
     /**
      * Aggiorna un evento esistente.
      *
-     * @param id          id dell'evento da aggiornare
-     * @param title       nuovo titolo
+     * @param id id dell'evento da aggiornare
+     * @param title nuovo titolo
      * @param description nuova descrizione
-     * @param start       nuovo inizio
-     * @param end         nuova fine, può essere null
-     * @param tagId       nuovo tag, può essere null
-     * @param allDay      nuovo valore allDay
+     * @param start nuovo inizio
+     * @param end  nuova fine, può essere null
+     * @param tagId  nuovo tag, può essere null
+     * @param allDay nuovo valore allDay
      * @return l'evento aggiornato, o empty se l'id non esiste
      */
     Optional<Event> updateEvent(String id, String title, String description, String start, String end, String tagId, boolean allDay);
