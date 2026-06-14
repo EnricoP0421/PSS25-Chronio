@@ -8,6 +8,7 @@ import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Dialog;
@@ -16,6 +17,8 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 
 import java.time.LocalDate;
@@ -75,7 +78,20 @@ public final class EventDialog extends Dialog<Void> {
             @Override public String toString(final Tag t) { return t == null ? "(nessun tag)" : t.name(); }
             @Override public Tag fromString(final String s) { return null; }
         });
-        tagCombo.getSelectionModel().selectFirst();
+        tagCombo.setCellFactory(lv -> new ListCell<Tag>() {
+            @Override protected void updateItem(final Tag t, final boolean empty) {
+                super.updateItem(t, empty);
+                if (empty || t == null) { setText("(nessun tag)"); setGraphic(null); }
+                else { setText(t.name()); setGraphic(new Circle(6, Color.web(t.color()))); }
+            }
+        });
+        tagCombo.setButtonCell(new ListCell<Tag>() {
+            @Override protected void updateItem(final Tag t, final boolean empty) {
+                super.updateItem(t, empty);
+                if (empty || t == null) { setText("(nessun tag)"); setGraphic(null); }
+                else { setText(t.name()); setGraphic(new Circle(6, Color.web(t.color()))); }
+            }
+        });
         if (existing != null && existing.tagId() != null) {
             controller.getTags().values().stream()
                 .filter(t -> t.id().equals(existing.tagId()))
