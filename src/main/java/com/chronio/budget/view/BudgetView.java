@@ -1,6 +1,11 @@
 package com.chronio.budget.view;
 
 import com.chronio.budget.controller.BudgetController;
+import com.chronio.budget.model.Tag;
+import com.chronio.budget.model.Transaction;
+import com.chronio.budget.model.TransactionType;
+import com.chronio.budget.model.BudgetSummary;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -16,14 +21,13 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.DatePicker;
-import com.chronio.budget.model.Tag;
-import com.chronio.budget.model.Transaction;
-import com.chronio.budget.model.TransactionType;
-
+import javafx.scene.chart.XYChart;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+
 import java.util.List;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 public final class BudgetView extends HBox implements BudgetController.View {
 
@@ -60,7 +64,7 @@ public final class BudgetView extends HBox implements BudgetController.View {
                 buildTotalPanel());
         
         refreshTransactionLists();
-        
+        refreshCharts();  
     }
 
     private Node buildPanel(final String titleText, final VBox list, final TransactionType type) {
@@ -118,7 +122,32 @@ public final class BudgetView extends HBox implements BudgetController.View {
 
     @Override
     public void refreshCharts() {
-        // TODO: aggiornare totali e grafici
+        final BudgetSummary summary = controller.getCurrentSummary();
+        incomeTotalLabel.setText(String.format("Entrate totali: €%.2f", summary.totalIncome()));
+        expenseTotalLabel.setText(String.format("Uscite totali: €%.2f", summary.totalExpenses()));
+        balanceLabel.setText(String.format("Saldo: €%.2f", summary.balance()));
+        balanceLabel.setTextFill(balanceColor(summary.balance()));
+
+        // PieChart: distribuzione uscite per tag con percentuali.
+        final Map<String, Double> byTag = controller.getExpensesByTag();
+        final double totalExpenses = byTag.values().stream().mapToDouble(Double::doubleValue).sum();
+        pieChart.getData().clear();
+        for (final Map.Entry<String, Double> entry : byTag.entrySet()) {
+            final Tag tag = controller.getTag(entry.getKey());
+            final String name = tag != null ? tag.name() : "Senza categoria";
+            final double pct = totalExpenses > 0 ? (entry.getValue() / totalExpenses) * 100 : 0;
+            pieChart.getData().add(new PieChart.Data(
+                    String.format("%s (%.1f%%)", name, pct), entry.getValue()));
+        }
+
+        // LineChart: saldo netto mese per mese.
+        final Map<String, Double> byMonth = controller.getNetByMonth();
+        final XYChart.Series<String, Number> series = new XYChart.Series<>();
+        for (final Map.Entry<String, Double> entry : byMonth.entrySet()) {
+            series.getData().add(new XYChart.Data<>(entry.getKey(), entry.getValue()));
+        }
+        lineChart.getData().clear();
+        lineChart.getData().add(series);
     }
 
     private List<Node> rowsFor(final List<Transaction> transactions) {
@@ -185,5 +214,15 @@ public final class BudgetView extends HBox implements BudgetController.View {
         final Region region = new Region();
         HBox.setHgrow(region, Priority.ALWAYS);
         return region;
+    }
+
+    private static Color balanceColor(final double balance) {
+        if (balance > 0) {
+            return Color.web("#16a34a");
+        }
+        if (balance < 0) {
+            return Color.web("#dc2626");
+        }
+        return Color.web("#52525b");
     }
 }
