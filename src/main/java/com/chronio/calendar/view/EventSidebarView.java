@@ -1,5 +1,8 @@
 package com.chronio.calendar.view;
 
+import java.util.List;
+import java.util.Map;
+
 import com.chronio.calendar.controller.CalendarController;
 import com.chronio.calendar.model.Event;
 
@@ -42,7 +45,7 @@ public final class EventSidebarView {
         final VBox card = new VBox(6);
         card.setStyle("-fx-border-color: gray; -fx-padding: 8;");
         card.getChildren().add(new Label("Oggi"));
-        final java.util.LinkedList<Event> events = controller.getTodayEvents();
+        final List<Event> events = controller.getTodayEvents();
         if (events.isEmpty()) {
             card.getChildren().add(new Label("Nessun evento oggi"));
         } else {
@@ -71,7 +74,7 @@ public final class EventSidebarView {
         final VBox card = new VBox(6);
         card.setStyle("-fx-border-color: gray; -fx-padding: 8;");
         card.getChildren().add(new Label("Questa settimana"));
-        final java.util.LinkedHashMap<String, java.util.LinkedList<Event>> weekEvents = controller.getWeekEvents();
+        final Map<String, List<Event>> weekEvents = controller.getWeekEvents();
         if (weekEvents.isEmpty()) {
             card.getChildren().add(new Label("Nessun evento nei prossimi giorni"));
         } else {

@@ -1,6 +1,7 @@
 package com.chronio.calendar.model;
 
-import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 // Definisce le operazioni sul calendario: gestione tag ed eventi.
@@ -12,7 +13,7 @@ public interface CalendarModel {
      * Restituisce tutti i tag salvati.
      * @return mappa id -> ritorna il tag corrispondente all'id salvato
      */
-    LinkedHashMap<String, Tag> getTags();
+    Map<String, Tag> getTags();
 
     /**
      * Crea un nuovo tag con nome e colore.
@@ -47,7 +48,7 @@ public interface CalendarModel {
      * Restituisce tutti gli eventi salvati.
      * @return mappa id -> ritorna l'event corrispondente all'id salvato
      */
-    LinkedHashMap<String, Event> getEvents();
+    Map<String, Event> getEvents();
 
     /**
      * Crea un nuovo evento. Lancia IllegalArgumentException se start è null
@@ -85,18 +86,18 @@ public interface CalendarModel {
      * @param dateKey data in formato "yyyy-M-d"
      * @return lista di eventi visibili in quella data
      */
-    java.util.LinkedList<Event> getEventsForDate(String dateKey);
+    List<Event> getEventsForDate(String dateKey);
 
     /**
      * Restituisce gli eventi di oggi, filtrati per tag visibili.
      * @return lista di eventi di oggi
      */
-    java.util.LinkedList<Event> getTodayEvents();
+    List<Event> getTodayEvents();
 
     /**
      * Restituisce gli eventi dei prossimi 6 giorni (escluso oggi),
      * filtrati per tag visibili, raggruppati per data
      * @return mappa dateKey -> lista eventi che accadono in quella data
      */
-    LinkedHashMap<String, java.util.LinkedList<Event>> getWeekEvents();
+    Map<String, List<Event>> getWeekEvents();
 }

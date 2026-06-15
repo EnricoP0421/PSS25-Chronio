@@ -1,7 +1,7 @@
 package com.chronio.calendar.controller;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.chronio.calendar.model.Event;
@@ -10,10 +10,9 @@ import com.chronio.calendar.model.Tag;
 public interface CalendarController {
 
     /**
-     * @return mappa id -> LinkedHashMap restituita ha come chiave l'id del tag 
-     *  e come valore l'oggetto Tag corrispondente (nel caso, t)
+     * @return mappa id -> tag
      */
-    LinkedHashMap<String, Tag> getTags();
+    Map<String, Tag> getTags();
 
     /**
      * Crea un nuovo tag con nome e colore.
@@ -47,10 +46,9 @@ public interface CalendarController {
     void deleteTag(String id);
 
     /**
-     * @return mappa id ->LinkedHashMap restituita ha come chiave l'id del tag 
-     *  e come valore l'oggetto Tag corrispondente (nel caso, e)
+     * @return mappa id -> evento
      */
-    LinkedHashMap<String, Event> getEvents();
+    Map<String, Event> getEvents();
 
     /**
      * Crea un nuovo evento.
@@ -88,16 +86,16 @@ public interface CalendarController {
      * @param dateKey data in formato "yyyy-M-d"
      * @return lista di eventi visibili in quella data
      */
-    LinkedList<Event> getEventsForDate(String dateKey);
+    List<Event> getEventsForDate(String dateKey);
 
     /**
      * @return lista degli eventi di oggi, filtrati per tag visibili
      */
-    LinkedList<Event> getTodayEvents();
+    List<Event> getTodayEvents();
 
     /**
      * Restituisce gli eventi dei prossimi 6 giorni (escluso oggi), raggruppati per data.
      * @return mappa dateKey -> lista eventi
      */
-    LinkedHashMap<String, LinkedList<Event>> getWeekEvents();
+    Map<String, List<Event>> getWeekEvents();
 }
