@@ -1,39 +1,39 @@
 package com.chronio.calendar;
 
-import com.chronio.calendar.model.CalendarData;
-import com.chronio.calendar.model.CalendarModelImpl;
-import org.junit.jupiter.api.BeforeEach;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import com.chronio.calendar.model.CalendarData;
+import com.chronio.calendar.model.CalendarModelImpl;
 
 class DateValidationTest {
 
-    private CalendarModelImpl model;
-
-    @BeforeEach
-    void setUp() {
-        model = new CalendarModelImpl(CalendarData.empty());
+    private CalendarModelImpl newModel() {
+        return new CalendarModelImpl(CalendarData.empty());
     }
 
     @Test
     void startNullShouldThrow() {
-        assertThrows(IllegalArgumentException.class, () ->
-            model.createEvent("Test", "", null, null, null, false)
+        final Exception ex = assertThrows(IllegalArgumentException.class, () ->
+            newModel().createEvent("Test", "", null, null, null, false)
         );
+        assertNotNull(ex);
     }
 
     @Test
     void endBeforeStartShouldThrow() {
-        assertThrows(IllegalArgumentException.class, () ->
-            model.createEvent("Test", "", "2025-06-10T10:00", "2025-06-10T09:00", null, false)
+        final Exception ex = assertThrows(IllegalArgumentException.class, () ->
+            newModel().createEvent("Test", "", "2026-06-10T10:00", "2026-06-10T09:00", null, false)
         );
+        assertNotNull(ex);
     }
 
     @Test
     void validDatesShouldWork() {
         assertDoesNotThrow(() ->
-            model.createEvent("Test", "", "2025-06-10T09:00", "2025-06-10T10:00", null, false)
+            newModel().createEvent("Test", "", "2026-06-10T09:00", "2026-06-10T10:00", null, false)
         );
     }
 }
