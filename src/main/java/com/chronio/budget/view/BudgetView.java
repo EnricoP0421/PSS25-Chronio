@@ -63,6 +63,8 @@ public final class BudgetView extends HBox implements BudgetController.View {
                 buildPanel("Uscite", expenseList, TransactionType.EXPENSE),
                 buildTotalPanel());
         
+        fromPicker.setValue(controller.getPeriodStart());
+        toPicker.setValue(controller.getPeriodEnd());
         refreshTransactionLists();
         refreshCharts();  
     }
@@ -98,6 +100,9 @@ public final class BudgetView extends HBox implements BudgetController.View {
 
         final HBox periodBox = new HBox(8, fromLabel, fromPicker, toLabel, toPicker);
         periodBox.setAlignment(Pos.CENTER_LEFT);
+
+        fromPicker.setOnAction(e -> openPeriodChanged());
+        toPicker.setOnAction(e -> openPeriodChanged());
 
         final VBox summaryBox = new VBox(4, incomeTotalLabel, expenseTotalLabel, balanceLabel);
         summaryBox.setPadding(new Insets(8, 0, 8, 0));
@@ -200,6 +205,10 @@ public final class BudgetView extends HBox implements BudgetController.View {
 
     private void openTransactionForm(final TransactionType defaultType, final Transaction existing) {
         new TransactionFormDialog(controller, defaultType, existing).showAndWait();
+    }
+
+    private void openPeriodChanged() {
+        controller.onPeriodChanged(fromPicker.getValue(), toPicker.getValue());
     }
 
     //Util
