@@ -40,7 +40,7 @@ public final class CalendarModelImpl implements CalendarModel {
     public Optional<Tag> updateTag(final String id, final String name, final String color) {
         final Tag existing = data.tags().get(id);
         if (existing == null) return Optional.empty();
-        final Tag updated = existing.withName(name).withColor(color);
+        final Tag updated = new Tag(id, name, color, existing.visible());
         final LinkedHashMap<String, Tag> tags = new LinkedHashMap<>(data.tags());
         tags.put(id, updated);
         data = new CalendarData(tags, data.events(), data.nextTagId(), data.nextEventId());
@@ -52,7 +52,7 @@ public final class CalendarModelImpl implements CalendarModel {
         final Tag existing = data.tags().get(id);
         if (existing == null) return;
         final LinkedHashMap<String, Tag> tags = new LinkedHashMap<>(data.tags());
-        tags.put(id, existing.withVisible(!existing.visible()));
+        tags.put(id, new Tag(id, existing.name(), existing.color(), !existing.visible()));
         data = new CalendarData(tags, data.events(), data.nextTagId(), data.nextEventId());
     }
 
@@ -62,7 +62,7 @@ public final class CalendarModelImpl implements CalendarModel {
         tags.remove(id);
         final LinkedHashMap<String, Event> events = new LinkedHashMap<>();
         data.events().forEach((eid, ev) -> {
-            events.put(eid, id.equals(ev.tagId()) ? ev.withTagId(null) : ev);
+            events.put(eid, id.equals(ev.tagId()) ? new Event(ev.id(), ev.title(), ev.description(), ev.start(), ev.end(), null, ev.allDay()) : ev);
         });
         data = new CalendarData(tags, events, data.nextTagId(), data.nextEventId());
     }

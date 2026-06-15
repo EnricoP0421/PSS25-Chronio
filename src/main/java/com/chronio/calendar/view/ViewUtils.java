@@ -16,7 +16,6 @@ final class ViewUtils {
 
     private static final int TIME_START = 11;
     private static final int TIME_END_HOUR = 13;
-    private static final int TIME_END_MIN = 16;
     private static final int LUMINANCE_THRESHOLD = 380;
     private static final String DEFAULT_COLOR = "#888888";
 
@@ -46,20 +45,6 @@ final class ViewUtils {
         final int g = Integer.parseInt(hex.substring(3, 5), 16);
         final int b = Integer.parseInt(hex.substring(5, 7), 16);
         return (r + g + b) > LUMINANCE_THRESHOLD;
-    }
-
-    /**
-     * Restituisce l'orario di inizio dell'evento in formato "HH:mm", o stringa vuota se assente.
-     *
-     * @param ev l'evento
-     *
-     * @return orario formattato o stringa vuota
-     */
-    static String formatTime(final Event ev) {
-        if (ev.start() == null || !ev.start().contains("T")) {
-            return "";
-        }
-        return ev.start().substring(TIME_START, TIME_END_MIN);
     }
 
     /**
@@ -97,8 +82,7 @@ final class ViewUtils {
         final String color = ev.tagId() != null && controller.getTags().get(ev.tagId()) != null
             ? controller.getTags().get(ev.tagId()).color() : DEFAULT_COLOR;
         final String textColor = isLight(color) ? "black" : "white";
-        final String prefix = ev.allDay() ? "" : formatTime(ev) + " ";
-        final Label pill = new Label(prefix + ev.title());
+        final Label pill = new Label(ev.title());
         pill.setStyle("-fx-background-color: " + color + "; -fx-text-fill: " + textColor
             + "; -fx-padding: 1 4; -fx-background-radius: 3; -fx-font-size: 10;");
         pill.setMaxWidth(Double.MAX_VALUE);
