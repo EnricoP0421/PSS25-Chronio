@@ -5,6 +5,7 @@ import java.time.YearMonth;
 
 import com.chronio.calendar.controller.CalendarController;
 
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -21,11 +22,28 @@ import javafx.stage.Stage;
  */
 public final class CalendarView {
 
+    private static final int DAYS_IN_WEEK = 7;
+    private static final int NAV_SPACING = 12;
+    private static final int CELL_SPACING = 2;
+    private static final int PADDING = 8;
+    private static final int HEADER_SPACING = 4;
+    private static final int GRID_GAP = 4;
+    private static final String[] DAYS_IT = {"Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"};
+    private static final String[] MONTHS_IT = {
+        "Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno",
+        "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"
+    };
+
     private final CalendarController controller;
     private final Stage stage;
     private final EventSidebarView sidebarView;
     private final VBox sidebar;
     private YearMonth displayMonth = YearMonth.now();
+    private GridPane grid;
+    private VBox mainBox;
+    private HBox nav;
+    private String currentView = "month";
+    private Button toggleBtn;
 
     public CalendarView(final CalendarController controller, final Stage stage,
                         final EventSidebarView sidebarView, final VBox sidebar) {
@@ -35,31 +53,18 @@ public final class CalendarView {
         this.sidebar = sidebar;
     }
 
-    private static final String[] DAYS_IT = {"Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"};
-
-    private static final String[] MONTHS_IT = {
-        "Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno",
-        "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"
-    };
-
     private String monthLabel() {
         return MONTHS_IT[displayMonth.getMonthValue() - 1] + " " + displayMonth.getYear();
     }
-
-    private GridPane grid;
-    private VBox mainBox;
-    private HBox nav;
-    private String currentView = "month";
-    private Button toggleBtn;
 
     /**
      * Costruisce e restituisce il nodo radice della vista mensile
      * @return VBox che contiene la navigazione e la griglia del mese
      */
     public VBox build() {
-        mainBox = new VBox(8);
+        mainBox = new VBox(PADDING);
         mainBox.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        mainBox.setPadding(new javafx.geometry.Insets(8));
+        mainBox.setPadding(new Insets(PADDING));
         VBox.setVgrow(mainBox, Priority.ALWAYS);
         grid = buildGrid();
         nav = buildNav();
@@ -72,11 +77,13 @@ public final class CalendarView {
      * Aggiorna la griglia del mese corrente, se la vista attiva è quella mensile
      */
     public void refresh() {
-        if ("month".equals(currentView)) refreshGrid(grid);
+        if ("month".equals(currentView)) {
+            refreshGrid(grid);
+        }
     }
 
     private HBox buildDayHeaders() {
-        final HBox box = new HBox(4);
+        final HBox box = new HBox(HEADER_SPACING);
         for (final String day : DAYS_IT) {
             final Label lbl = new Label(day);
             lbl.setMaxWidth(Double.MAX_VALUE);
@@ -94,7 +101,6 @@ public final class CalendarView {
         if (toggleBtn == null) {
             toggleBtn = new Button("Settimana");
         }
-
         prev.setOnAction(e -> {
             displayMonth = displayMonth.minusMonths(1);
             label.setText(monthLabel());
@@ -130,8 +136,7 @@ public final class CalendarView {
                 }
             }
         });
-
-        final HBox navBar = new HBox(12, prev, label, next, toggleBtn);
+        final HBox navBar = new HBox(NAV_SPACING, prev, label, next, toggleBtn);
         navBar.setAlignment(Pos.CENTER_LEFT);
         return navBar;
     }
@@ -141,9 +146,9 @@ public final class CalendarView {
         grid.getColumnConstraints().clear();
         grid.getRowConstraints().clear();
 
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < DAYS_IN_WEEK; i++) {
             final ColumnConstraints cc = new ColumnConstraints();
-            cc.setPercentWidth(100.0 / 7);
+            cc.setPercentWidth(100.0 / DAYS_IN_WEEK);
             cc.setFillWidth(true);
             grid.getColumnConstraints().add(cc);
         }
@@ -152,7 +157,7 @@ public final class CalendarView {
         final LocalDate first = displayMonth.atDay(1);
         final int startCol = first.getDayOfWeek().getValue() - 1;
         final int daysInMonth = displayMonth.lengthOfMonth();
-        final int totalRows = (int) Math.ceil((startCol + daysInMonth) / 7.0);
+        final int totalRows = (int) Math.ceil((startCol + daysInMonth) / (double) DAYS_IN_WEEK);
 
         for (int i = 0; i < totalRows; i++) {
             final RowConstraints rc = new RowConstraints();
@@ -166,13 +171,12 @@ public final class CalendarView {
         for (int day = 1; day <= daysInMonth; day++) {
             final LocalDate date = displayMonth.atDay(day);
             final boolean isToday = date.equals(today);
-            final VBox cell = new VBox(2);
+            final VBox cell = new VBox(CELL_SPACING);
             cell.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
             cell.setStyle(isToday
                 ? "-fx-border-color: gray; -fx-background-color: lightblue; -fx-padding: 4;"
                 : "-fx-border-color: gray; -fx-padding: 4;");
-            final Label dayNum = new Label(String.valueOf(day));
-            cell.getChildren().add(dayNum);
+            cell.getChildren().add(new Label(String.valueOf(day)));
             final String dateKey = date.getYear() + "-" + date.getMonthValue() + "-" + date.getDayOfMonth();
             controller.getEventsForDate(dateKey).forEach(ev ->
                 cell.getChildren().add(ViewUtils.makePill(ev, date, controller, stage, () -> {
@@ -187,14 +191,17 @@ public final class CalendarView {
             });
             grid.add(cell, col, row);
             col++;
-            if (col == 7) { col = 0; row++; }
+            if (col == DAYS_IN_WEEK) {
+                col = 0;
+                row++;
+            }
         }
     }
 
     private GridPane buildGrid() {
         final GridPane g = new GridPane();
-        g.setHgap(4);
-        g.setVgap(4);
+        g.setHgap(GRID_GAP);
+        g.setVgap(GRID_GAP);
         g.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         refreshGrid(g);
         return g;
