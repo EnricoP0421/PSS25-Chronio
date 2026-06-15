@@ -24,6 +24,7 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.chart.XYChart;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.application.Platform;
 
 import java.util.List;
 import java.time.format.DateTimeFormatter;
@@ -139,13 +140,26 @@ public final class BudgetView extends HBox implements BudgetController.View {
         final Map<String, Double> byTag = controller.getExpensesByTag();
         final double totalExpenses = byTag.values().stream().mapToDouble(Double::doubleValue).sum();
         pieChart.getData().clear();
+        
+        final List<String> sliceColors = new java.util.ArrayList<>();
         for (final Map.Entry<String, Double> entry : byTag.entrySet()) {
             final Tag tag = controller.getTag(entry.getKey());
             final String name = tag != null ? tag.name() : "Senza categoria";
             final double pct = totalExpenses > 0 ? (entry.getValue() / totalExpenses) * 100 : 0;
             pieChart.getData().add(new PieChart.Data(
                     String.format("%s (%.1f%%)", name, pct), entry.getValue()));
+            sliceColors.add(tag != null ? tag.color() : "#9ca3af"); // grigio per "senza categoria"
         }
+        
+        Platform.runLater(() -> {
+            final var data = pieChart.getData();
+            for (int i = 0; i < data.size(); i++) {
+                final Node node = data.get(i).getNode();
+                if (node != null) {
+                    node.setStyle("-fx-pie-color: " + sliceColors.get(i) + ";");
+                }
+            }
+        });
 
         // LineChart: saldo netto mese per mese.
         final Map<String, Double> byMonth = controller.getNetByMonth();
