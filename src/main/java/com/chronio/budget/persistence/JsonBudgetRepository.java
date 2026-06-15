@@ -40,7 +40,6 @@ public final class JsonBudgetRepository implements BudgetRepository {
     // Costruttore esplicito: utile per indicare una cartella/percorso specifico.
     public JsonBudgetRepository(final Path file) {
         this.file = file;
-        System.out.println("Percorso budget.json: " + file.toAbsolutePath());  
     }
 
     // Cartella dati dell'applicazione: ~/.chronio
