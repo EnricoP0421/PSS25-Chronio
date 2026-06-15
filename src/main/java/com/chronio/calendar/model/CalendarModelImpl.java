@@ -4,8 +4,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public final class CalendarModelImpl implements CalendarModel {
@@ -20,7 +22,7 @@ public final class CalendarModelImpl implements CalendarModel {
     }
 
     @Override
-    public LinkedHashMap<String, Tag> getTags() {
+    public Map<String, Tag> getTags() {
         return data.tags();
     }
 
@@ -66,7 +68,7 @@ public final class CalendarModelImpl implements CalendarModel {
     }
 
     @Override
-    public LinkedHashMap<String, Event> getEvents() {
+    public Map<String, Event> getEvents() {
         return data.events();
     }
 
@@ -104,8 +106,8 @@ public final class CalendarModelImpl implements CalendarModel {
     }
 
     @Override
-    public LinkedList<Event> getEventsForDate(final String dateKey) {
-        final LinkedList<Event> result = new LinkedList<>();
+    public List<Event> getEventsForDate(final String dateKey) {
+        final List<Event> result = new ArrayList<>();
         data.events().forEach((id, ev) -> {
             if (isVisible(ev) && fallsOn(ev, dateKey)) result.add(ev);
         });
@@ -113,19 +115,19 @@ public final class CalendarModelImpl implements CalendarModel {
     }
 
     @Override
-    public LinkedList<Event> getTodayEvents() {
+    public List<Event> getTodayEvents() {
         final LocalDate today = LocalDate.now();
         return getEventsForDate(today.getYear() + "-" + today.getMonthValue() + "-" + today.getDayOfMonth());
     }
 
     @Override
-    public LinkedHashMap<String, LinkedList<Event>> getWeekEvents() {
-        final LinkedHashMap<String, LinkedList<Event>> result = new LinkedHashMap<>();
+    public Map<String, List<Event>> getWeekEvents() {
+        final Map<String, List<Event>> result = new LinkedHashMap<>();
         final LocalDate today = LocalDate.now();
         for (int i = 1; i <= 6; i++) {
             final LocalDate d = today.plusDays(i);
             final String key = d.getYear() + "-" + d.getMonthValue() + "-" + d.getDayOfMonth();
-            final LinkedList<Event> evs = getEventsForDate(key);
+            final List<Event> evs = getEventsForDate(key);
             if (!evs.isEmpty()) result.put(key, evs);
         }
         return result;

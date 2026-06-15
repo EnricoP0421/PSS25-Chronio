@@ -1,7 +1,7 @@
 package com.chronio.calendar.controller;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.chronio.calendar.model.CalendarModel;
@@ -30,7 +30,7 @@ public final class CalendarControllerImpl implements CalendarController {
     }
 
     @Override
-    public LinkedHashMap<String, Tag> getTags() {
+    public Map<String, Tag> getTags() {
         return model.getTags();
     }
 
@@ -61,7 +61,7 @@ public final class CalendarControllerImpl implements CalendarController {
     }
 
     @Override
-    public LinkedHashMap<String, Event> getEvents() {
+    public Map<String, Event> getEvents() {
         return model.getEvents();
     }
 
@@ -90,17 +90,17 @@ public final class CalendarControllerImpl implements CalendarController {
     }
 
     @Override
-    public LinkedList<Event> getEventsForDate(final String dateKey) {
+    public List<Event> getEventsForDate(final String dateKey) {
         return model.getEventsForDate(dateKey);
     }
 
     @Override
-    public LinkedList<Event> getTodayEvents() {
+    public List<Event> getTodayEvents() {
         return model.getTodayEvents();
     }
 
     @Override
-    public LinkedHashMap<String, LinkedList<Event>> getWeekEvents() {
+    public Map<String, List<Event>> getWeekEvents() {
         return model.getWeekEvents();
     }
 }
