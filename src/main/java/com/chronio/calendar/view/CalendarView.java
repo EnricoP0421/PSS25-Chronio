@@ -107,30 +107,34 @@ public final class CalendarView {
             refreshGrid(grid);
         });
         toggleBtn.setOnAction(e -> {
-            if ("month".equals(currentView)) {
-                currentView = "week";
-                toggleBtn.setText("Giorno");
-                final VBox weekBox = new WeekView(controller, stage, sidebarView, sidebar).build();
-                mainBox.getChildren().setAll(nav, weekBox);
-                VBox.setVgrow(weekBox, Priority.ALWAYS);
-            } else if ("week".equals(currentView)) {
-                currentView = "day";
-                toggleBtn.setText("Mese");
-                final VBox dayBox = new DayView(controller, stage, sidebarView, sidebar).build();
-                mainBox.getChildren().setAll(nav, dayBox);
-                VBox.setVgrow(dayBox, Priority.ALWAYS);
-            } else {
-                currentView = "month";
-                toggleBtn.setText("Settimana");
-                mainBox.getChildren().setAll(nav, buildDayHeaders(), grid);
-                VBox.setVgrow(grid, Priority.ALWAYS);
-                refreshGrid(grid);
+            switch (currentView) {
+                case "month" -> {
+                    currentView = "week";
+                    toggleBtn.setText("Giorno");
+                    final VBox weekBox = new WeekView(controller, stage, sidebarView, sidebar).build();
+                    mainBox.getChildren().setAll(nav, weekBox);
+                    VBox.setVgrow(weekBox, Priority.ALWAYS);
+                }
+                case "week" -> {
+                    currentView = "day";
+                    toggleBtn.setText("Mese");
+                    final VBox dayBox = new DayView(controller, stage, sidebarView, sidebar).build();
+                    mainBox.getChildren().setAll(nav, dayBox);
+                    VBox.setVgrow(dayBox, Priority.ALWAYS);
+                }
+                default -> {
+                    currentView = "month";
+                    toggleBtn.setText("Settimana");
+                    mainBox.getChildren().setAll(nav, buildDayHeaders(), grid);
+                    VBox.setVgrow(grid, Priority.ALWAYS);
+                    refreshGrid(grid);
+                }
             }
         });
 
-        final HBox nav = new HBox(12, prev, label, next, toggleBtn);
-        nav.setAlignment(Pos.CENTER_LEFT);
-        return nav;
+        final HBox navBar = new HBox(12, prev, label, next, toggleBtn);
+        navBar.setAlignment(Pos.CENTER_LEFT);
+        return navBar;
     }
 
     private void refreshGrid(final GridPane grid) {
@@ -207,7 +211,7 @@ public final class CalendarView {
         final int r = Integer.parseInt(hex.substring(1, 3), 16);
         final int g = Integer.parseInt(hex.substring(3, 5), 16);
         final int b = Integer.parseInt(hex.substring(5, 7), 16);
-        return (r * 299 + g * 587 + b * 114) / 1000 > 128;
+        return (r + g + b) > 380;
     }
 
     private GridPane buildGrid() {
