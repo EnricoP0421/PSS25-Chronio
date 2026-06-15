@@ -3,6 +3,8 @@ package com.chronio.budget.view;
 import com.chronio.budget.controller.BudgetController;
 import com.chronio.budget.model.Transaction;
 import com.chronio.budget.model.TransactionType;
+import com.chronio.budget.model.Tag;
+
 import javafx.geometry.Insets;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
@@ -11,6 +13,8 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import javafx.scene.control.ComboBox;
+import javafx.util.StringConverter;
 
 import java.time.LocalDate;
 
@@ -26,6 +30,7 @@ public final class TransactionFormDialog extends Dialog<Void> {
     private final TextField amountField = new TextField();
     private final DatePicker datePicker = new DatePicker();
     private final Label errorLabel = new Label();
+    private final ComboBox<Tag> tagCombo = new ComboBox<>();
 
     public TransactionFormDialog(final BudgetController controller,
                                  final TransactionType type,
@@ -37,6 +42,21 @@ public final class TransactionFormDialog extends Dialog<Void> {
         final boolean editing = existing != null;
         final String kind = type == TransactionType.INCOME ? "entrata" : "uscita";
         setTitle((editing ? "Modifica " : "Nuova ") + kind);
+        
+        // Scelta tag (opzionale)
+        tagCombo.getItems().add(null);
+        tagCombo.getItems().addAll(controller.getAllTags());
+        tagCombo.setConverter(new StringConverter<Tag>() {
+            @Override
+            public String toString(final Tag tag) {
+                return tag == null ? "(nessuna categoria)" : tag.name();
+            }
+            @Override
+            public Tag fromString(final String s) {
+                return null;
+            }
+        });
+        tagCombo.getSelectionModel().selectFirst(); 
 
         // Pulsanti: Salva e Annulla sempre; Elimina solo in modifica.
         final ButtonType saveButton = new ButtonType("Salva", ButtonBar.ButtonData.OK_DONE);
@@ -54,6 +74,7 @@ public final class TransactionFormDialog extends Dialog<Void> {
             descriptionField.setText(existing.description() == null ? "" : existing.description());
             amountField.setText(String.valueOf(existing.amount()));
             datePicker.setValue(existing.date());
+            tagCombo.getSelectionModel().select(controller.getTag(existing.tagId()));
         } else {
             datePicker.setValue(LocalDate.now());
         }
@@ -62,7 +83,7 @@ public final class TransactionFormDialog extends Dialog<Void> {
         getDialogPane().lookupButton(saveButton).addEventFilter(
                 javafx.event.ActionEvent.ACTION, e -> {
                     if (!handleSave()) {
-                        e.consume(); // input non valido: non chiudere il dialog
+                        e.consume();
                     }
                 });
 
@@ -85,9 +106,11 @@ public final class TransactionFormDialog extends Dialog<Void> {
         grid.add(amountField, 1, 1);
         grid.add(new Label("Data:"), 0, 2);
         grid.add(datePicker, 1, 2);
+        grid.add(new Label("Categoria:"), 0, 3);
+        grid.add(tagCombo, 1, 3); 
 
         errorLabel.setStyle("-fx-text-fill: #dc2626;");
-        grid.add(errorLabel, 0, 3, 2, 1); // occupa due colonne
+        grid.add(errorLabel, 0, 4, 2, 1);
 
         return grid;
     }
@@ -114,8 +137,10 @@ public final class TransactionFormDialog extends Dialog<Void> {
             return false;
         }
 
-        final String id = existing == null ? null : existing.id();
-        controller.onSaveTransaction(id, type, description, amount, date, null);
+        final Tag selectedTag = tagCombo.getSelectionModel().getSelectedItem();
+        final String tagId = selectedTag == null ? null : selectedTag.id();
+        final String id = existing == null ?  null : existing.id();
+        controller.onSaveTransaction(id, type, description, amount, date, tagId);
         return true;
     }
 
