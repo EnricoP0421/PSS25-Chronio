@@ -21,8 +21,8 @@ class TagFilterTest {
     @Test
     void eventWithVisibleTagShouldAppear() {
         final Tag tag = model.createTag("Lavoro", "#0d4853");
-        model.createEvent("Riunione", "", "2025-06-10T09:00", "2025-06-10T10:00", tag.id(), false);
-        assertFalse(model.getEventsForDate("2025-6-10").isEmpty());
+        model.createEvent("Riunione", "", "2026-06-10T09:00", "2026-06-10T10:00", tag.id(), false);
+        assertFalse(model.getEventsForDate("2026-6-10").isEmpty());
     }
 
     @Test
@@ -35,7 +35,7 @@ class TagFilterTest {
 
     @Test
     void eventWithNoTagShouldAlwaysAppear() {
-        model.createEvent("Promemoria", "", "2025-06-10T09:00", null, null, false);
-        assertFalse(model.getEventsForDate("2025-6-10").isEmpty());
+        model.createEvent("Promemoria", "", "2027-06-10T09:00", null, null, false);
+        assertFalse(model.getEventsForDate("2027-6-10").isEmpty());
     }
 }

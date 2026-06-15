@@ -1,14 +1,15 @@
 package com.chronio.calendar;
 
-import com.chronio.calendar.model.CalendarData;
-import com.chronio.calendar.model.CalendarModelImpl;
-import com.chronio.calendar.persistence.CalendarPersistence;
+import java.nio.file.Path;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import java.nio.file.Path;
-
-import static org.junit.jupiter.api.Assertions.*;
+import com.chronio.calendar.model.CalendarData;
+import com.chronio.calendar.model.CalendarModelImpl;
+import com.chronio.calendar.persistence.CalendarPersistence;
 
 class PersistenceTest {
 
@@ -21,7 +22,7 @@ class PersistenceTest {
         final CalendarPersistence persistence = new CalendarPersistence(file);
 
         final CalendarModelImpl model = new CalendarModelImpl(CalendarData.empty());
-        model.createEvent("Riunione", "desc", "2025-06-10T09:00", "2025-06-10T10:00", null, false);
+        model.createEvent("Riunione", "desc", "2026-06-10T09:00", "2026-06-10T10:00", null, false);
         persistence.save(model.getData());
 
         final CalendarData loaded = persistence.load();
