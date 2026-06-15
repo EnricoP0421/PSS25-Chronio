@@ -90,7 +90,9 @@ public final class BudgetView extends HBox implements BudgetController.View {
 
     private Node buildTotalPanel() {
         final Label title = sectionTitle("Totale");
-        final HBox header = new HBox(8, title, spacer());
+        final Button manageTags = new Button("Gestione tag");
+        manageTags.setOnAction(e -> openTagManager());
+        final HBox header = new HBox(8, title, spacer(), manageTags);
         header.setAlignment(Pos.CENTER_LEFT);
 
         final Label fromLabel = new Label("Da:");
@@ -101,8 +103,8 @@ public final class BudgetView extends HBox implements BudgetController.View {
         final HBox periodBox = new HBox(8, fromLabel, fromPicker, toLabel, toPicker);
         periodBox.setAlignment(Pos.CENTER_LEFT);
 
-        fromPicker.setOnAction(e -> openPeriodChanged());
-        toPicker.setOnAction(e -> openPeriodChanged());
+        fromPicker.setOnAction(e -> onPeriodChanged());
+        toPicker.setOnAction(e -> onPeriodChanged());
 
         final VBox summaryBox = new VBox(4, incomeTotalLabel, expenseTotalLabel, balanceLabel);
         summaryBox.setPadding(new Insets(8, 0, 8, 0));
@@ -207,8 +209,12 @@ public final class BudgetView extends HBox implements BudgetController.View {
         new TransactionFormDialog(controller, defaultType, existing).showAndWait();
     }
 
-    private void openPeriodChanged() {
+    private void onPeriodChanged() {
         controller.onPeriodChanged(fromPicker.getValue(), toPicker.getValue());
+    }
+
+    private void openTagManager() {
+        new TagManagerDialog(controller).showAndWait();
     }
 
     //Util
