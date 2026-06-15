@@ -29,6 +29,13 @@ public final class DayView {
     };
     private static final int HOURS = 24;
     private static final double TIME_COL_W = 50;
+    private static final int ALL_DAY_ROW_H = 40;
+    private static final int HOUR_ROW_H = 60;
+    private static final int NAV_SPACING = 12;
+    private static final int CELL_SPACING = 2;
+    private static final String CELL_STYLE = "-fx-border-color: lightgray; -fx-padding: 2;";
+    private static final String TIME_FONT = "-fx-font-size: 10; -fx-padding: 2;";
+    private static final String ALL_DAY_FONT = "-fx-font-size: 9;";
 
     private final CalendarController controller;
     private final Stage stage;
@@ -65,9 +72,17 @@ public final class DayView {
     private HBox buildNav() {
         final Button prev = new Button("<");
         final Button next = new Button(">");
-        prev.setOnAction(e -> { date = date.minusDays(1); navLabel.setText(dayLabel()); rebuildContent(); });
-        next.setOnAction(e -> { date = date.plusDays(1); navLabel.setText(dayLabel()); rebuildContent(); });
-        final HBox nav = new HBox(12, prev, navLabel, next);
+        prev.setOnAction(e -> {
+            date = date.minusDays(1);
+            navLabel.setText(dayLabel());
+            rebuildContent();
+        });
+        next.setOnAction(e -> {
+            date = date.plusDays(1);
+            navLabel.setText(dayLabel());
+            rebuildContent();
+        });
+        final HBox nav = new HBox(NAV_SPACING, prev, navLabel, next);
         nav.setAlignment(Pos.CENTER_LEFT);
         return nav;
     }
@@ -84,34 +99,42 @@ public final class DayView {
         eventCol.setFillWidth(true);
         grid.getColumnConstraints().addAll(timeCol, eventCol);
 
-        grid.getRowConstraints().add(new RowConstraints(40));
+        grid.getRowConstraints().add(new RowConstraints(ALL_DAY_ROW_H));
         final Label adLbl = new Label("Tutto\nil giorno");
-        adLbl.setStyle("-fx-font-size: 9;");
+        adLbl.setStyle(ALL_DAY_FONT);
         adLbl.setAlignment(Pos.CENTER);
         grid.add(adLbl, 0, 0);
-        final VBox allDayCell = new VBox(2);
+        final VBox allDayCell = new VBox(CELL_SPACING);
         allDayCell.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        allDayCell.setStyle("-fx-border-color: lightgray; -fx-padding: 2;");
+        allDayCell.setStyle(CELL_STYLE);
         controller.getEventsForDate(ViewUtils.toKey(date)).stream()
             .filter(ev -> ev.allDay())
             .forEach(ev -> allDayCell.getChildren().add(makePill(ev)));
-        allDayCell.setOnMouseClicked(e -> { new EventDialog(stage, controller, date).showAndWait(); rebuildContent(); sidebarView.refresh(sidebar); });
+        allDayCell.setOnMouseClicked(e -> {
+            new EventDialog(stage, controller, date).showAndWait();
+            rebuildContent();
+            sidebarView.refresh(sidebar);
+        });
         grid.add(allDayCell, 1, 0);
 
         for (int h = 0; h < HOURS; h++) {
-            grid.getRowConstraints().add(new RowConstraints(60));
+            grid.getRowConstraints().add(new RowConstraints(HOUR_ROW_H));
             final Label timeLbl = new Label(String.format("%02d:00", h));
-            timeLbl.setStyle("-fx-font-size: 10; -fx-padding: 2;");
+            timeLbl.setStyle(TIME_FONT);
             timeLbl.setAlignment(Pos.TOP_RIGHT);
             grid.add(timeLbl, 0, h + 1);
             final int hour = h;
-            final VBox cell = new VBox(2);
+            final VBox cell = new VBox(CELL_SPACING);
             cell.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-            cell.setStyle("-fx-border-color: lightgray; -fx-padding: 2;");
+            cell.setStyle(CELL_STYLE);
             controller.getEventsForDate(ViewUtils.toKey(date)).stream()
                 .filter(ev -> !ev.allDay() && ViewUtils.startsAtHour(ev, hour))
                 .forEach(ev -> cell.getChildren().add(makePill(ev)));
-            cell.setOnMouseClicked(e -> { new EventDialog(stage, controller, date, hour, null).showAndWait(); rebuildContent(); sidebarView.refresh(sidebar); });
+            cell.setOnMouseClicked(e -> {
+                new EventDialog(stage, controller, date, hour, null).showAndWait();
+                rebuildContent();
+                sidebarView.refresh(sidebar);
+            });
             grid.add(cell, 1, h + 1);
         }
 

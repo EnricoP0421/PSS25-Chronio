@@ -25,6 +25,15 @@ public final class WeekView {
     private static final String[] DAYS_IT = {"Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"};
     private static final int HOURS = 24;
     private static final double TIME_COL_W = 50;
+    private static final int HEADER_ROW_H = 36;
+    private static final int ALL_DAY_ROW_H = 40;
+    private static final int HOUR_ROW_H = 60;
+    private static final int NAV_SPACING = 12;
+    private static final int CELL_SPACING = 2;
+    private static final int DAYS_IN_WEEK = 7;
+    private static final String CELL_STYLE = "-fx-border-color: lightgray; -fx-padding: 2;";
+    private static final String TIME_FONT = "-fx-font-size: 10; -fx-padding: 2;";
+    private static final String ALL_DAY_FONT = "-fx-font-size: 9;";
 
     private final CalendarController controller;
     private final Stage stage;
@@ -32,6 +41,7 @@ public final class WeekView {
     private final VBox sidebar;
     private LocalDate weekStart = startOfWeek(LocalDate.now());
     private Label navLabel;
+    private VBox mainBox;
 
     public WeekView(final CalendarController controller, final Stage stage,
                     final EventSidebarView sidebarView, final VBox sidebar) {
@@ -40,8 +50,6 @@ public final class WeekView {
         this.sidebarView = sidebarView;
         this.sidebar = sidebar;
     }
-
-    private VBox mainBox;
 
     /**
      * Costruisce e restituisce il nodo radice della vista settimanale
@@ -62,9 +70,17 @@ public final class WeekView {
     private HBox buildNav() {
         final Button prev = new Button("<");
         final Button next = new Button(">");
-        prev.setOnAction(e -> { weekStart = weekStart.minusWeeks(1); navLabel.setText(weekLabel()); rebuildContent(); });
-        next.setOnAction(e -> { weekStart = weekStart.plusWeeks(1); navLabel.setText(weekLabel()); rebuildContent(); });
-        final HBox nav = new HBox(12, prev, navLabel, next);
+        prev.setOnAction(e -> {
+            weekStart = weekStart.minusWeeks(1);
+            navLabel.setText(weekLabel());
+            rebuildContent();
+        });
+        next.setOnAction(e -> {
+            weekStart = weekStart.plusWeeks(1);
+            navLabel.setText(weekLabel());
+            rebuildContent();
+        });
+        final HBox nav = new HBox(NAV_SPACING, prev, navLabel, next);
         nav.setAlignment(Pos.CENTER_LEFT);
         return nav;
     }
@@ -77,7 +93,7 @@ public final class WeekView {
         final ColumnConstraints timeCol = new ColumnConstraints(TIME_COL_W, TIME_COL_W, TIME_COL_W);
         timeCol.setHgrow(Priority.NEVER);
         grid.getColumnConstraints().add(timeCol);
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < DAYS_IN_WEEK; i++) {
             final ColumnConstraints cc = new ColumnConstraints();
             cc.setHgrow(Priority.ALWAYS);
             cc.setFillWidth(true);
@@ -86,9 +102,9 @@ public final class WeekView {
 
         final LocalDate today = LocalDate.now();
 
-        grid.getRowConstraints().add(new RowConstraints(36));
+        grid.getRowConstraints().add(new RowConstraints(HEADER_ROW_H));
         grid.add(new Label(""), 0, 0);
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < DAYS_IN_WEEK; i++) {
             final LocalDate date = weekStart.plusDays(i);
             final Label lbl = new Label(DAYS_IT[i] + " " + date.getDayOfMonth() + "/" + date.getMonthValue());
             lbl.setMaxWidth(Double.MAX_VALUE);
@@ -98,45 +114,53 @@ public final class WeekView {
             grid.add(lbl, i + 1, 0);
         }
 
-        grid.getRowConstraints().add(new RowConstraints(40));
+        grid.getRowConstraints().add(new RowConstraints(ALL_DAY_ROW_H));
         final Label adLbl = new Label("Tutto\nil giorno");
-        adLbl.setStyle("-fx-font-size: 9;");
+        adLbl.setStyle(ALL_DAY_FONT);
         adLbl.setAlignment(Pos.CENTER);
         grid.add(adLbl, 0, 1);
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < DAYS_IN_WEEK; i++) {
             final LocalDate date = weekStart.plusDays(i);
-            final VBox cell = new VBox(2);
+            final VBox cell = new VBox(CELL_SPACING);
             cell.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-            cell.setStyle("-fx-border-color: lightgray; -fx-padding: 2;");
+            cell.setStyle(CELL_STYLE);
             controller.getEventsForDate(ViewUtils.toKey(date)).stream()
                 .filter(ev -> ev.allDay())
                 .forEach(ev -> cell.getChildren().add(ViewUtils.makePill(ev, date, controller, stage, () -> {
                     rebuildContent();
                     sidebarView.refresh(sidebar);
                 })));
-            cell.setOnMouseClicked(e -> { new EventDialog(stage, controller, date).showAndWait(); rebuildContent(); sidebarView.refresh(sidebar); });
+            cell.setOnMouseClicked(e -> {
+                new EventDialog(stage, controller, date).showAndWait();
+                rebuildContent();
+                sidebarView.refresh(sidebar);
+            });
             grid.add(cell, i + 1, 1);
         }
 
         for (int h = 0; h < HOURS; h++) {
-            grid.getRowConstraints().add(new RowConstraints(60));
+            grid.getRowConstraints().add(new RowConstraints(HOUR_ROW_H));
             final Label timeLbl = new Label(String.format("%02d:00", h));
-            timeLbl.setStyle("-fx-font-size: 10; -fx-padding: 2;");
+            timeLbl.setStyle(TIME_FONT);
             timeLbl.setAlignment(Pos.TOP_RIGHT);
             grid.add(timeLbl, 0, h + 2);
-            for (int i = 0; i < 7; i++) {
+            for (int i = 0; i < DAYS_IN_WEEK; i++) {
                 final LocalDate date = weekStart.plusDays(i);
                 final int hour = h;
-                final VBox cell = new VBox(2);
+                final VBox cell = new VBox(CELL_SPACING);
                 cell.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-                cell.setStyle("-fx-border-color: lightgray; -fx-padding: 2;");
+                cell.setStyle(CELL_STYLE);
                 controller.getEventsForDate(ViewUtils.toKey(date)).stream()
                     .filter(ev -> !ev.allDay() && ViewUtils.startsAtHour(ev, hour))
                     .forEach(ev -> cell.getChildren().add(ViewUtils.makePill(ev, date, controller, stage, () -> {
                         rebuildContent();
                         sidebarView.refresh(sidebar);
                     })));
-                cell.setOnMouseClicked(e -> { new EventDialog(stage, controller, date, hour, null).showAndWait(); rebuildContent(); sidebarView.refresh(sidebar); });
+                cell.setOnMouseClicked(e -> {
+                    new EventDialog(stage, controller, date, hour, null).showAndWait();
+                    rebuildContent();
+                    sidebarView.refresh(sidebar);
+                });
                 grid.add(cell, i + 1, h + 2);
             }
         }
