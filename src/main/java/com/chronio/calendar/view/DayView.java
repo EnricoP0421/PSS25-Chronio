@@ -108,7 +108,7 @@ public final class DayView {
         allDayCell.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         allDayCell.setStyle(CELL_STYLE);
         controller.getEventsForDate(ViewUtils.toKey(date)).stream()
-            .filter(ev -> ev.allDay())
+            .filter(Event::allDay)
             .forEach(ev -> allDayCell.getChildren().add(makePill(ev)));
         allDayCell.setOnMouseClicked(e -> {
             new EventDialog(stage, controller, date).showAndWait();

@@ -14,6 +14,10 @@ import javafx.scene.layout.VBox;
  */
 public final class EventSidebarView {
 
+    private static final int SIDEBAR_WIDTH = 220;
+    private static final int CARD_SPACING = 6;
+    private static final int BOX_SPACING = 8;
+
     private final CalendarController controller;
 
     public EventSidebarView(final CalendarController controller) {
@@ -25,9 +29,9 @@ public final class EventSidebarView {
      * @return VBox con i card "Oggi" e "Questa settimana"
      */
     public VBox build() {
-        final VBox box = new VBox(8);
-        box.setPrefWidth(220);
-        box.setMaxWidth(220);
+        final VBox box = new VBox(BOX_SPACING);
+        box.setPrefWidth(SIDEBAR_WIDTH);
+        box.setMaxWidth(SIDEBAR_WIDTH);
         box.getChildren().addAll(buildTodayCard(), buildWeekCard());
         return box;
     }
@@ -42,7 +46,7 @@ public final class EventSidebarView {
     }
 
     private VBox buildTodayCard() {
-        final VBox card = new VBox(6);
+        final VBox card = new VBox(CARD_SPACING);
         card.setStyle("-fx-border-color: gray; -fx-padding: 8;");
         card.getChildren().add(new Label("Oggi"));
         final List<Event> events = controller.getTodayEvents();
@@ -71,7 +75,7 @@ public final class EventSidebarView {
     }
 
     private VBox buildWeekCard() {
-        final VBox card = new VBox(6);
+        final VBox card = new VBox(CARD_SPACING);
         card.setStyle("-fx-border-color: gray; -fx-padding: 8;");
         card.getChildren().add(new Label("Questa settimana"));
         final Map<String, List<Event>> weekEvents = controller.getWeekEvents();

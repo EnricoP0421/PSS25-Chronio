@@ -14,6 +14,9 @@ import javafx.stage.Stage;
  */
 public final class MainView {
 
+    private static final int SCENE_WIDTH = 1200;
+    private static final int SCENE_HEIGHT = 700;
+
     private final CalendarController controller;
     private final Stage stage;
 
@@ -34,9 +37,12 @@ public final class MainView {
 
         final NavBar navBar = new NavBar(() -> {}, () -> {});
         root.setTop(navBar.build());
-        root.setLeft(new TagSidebarView(controller, stage, () -> { calendarView.refresh(); sidebarView.refresh(sidebar); }).build());
+        root.setLeft(new TagSidebarView(controller, stage, () -> {
+            calendarView.refresh();
+            sidebarView.refresh(sidebar);
+        }).build());
         root.setCenter(calendarView.build());
         root.setRight(sidebar);
-        return new Scene(root, 1200, 700);
+        return new Scene(root, SCENE_WIDTH, SCENE_HEIGHT);
     }
 }
