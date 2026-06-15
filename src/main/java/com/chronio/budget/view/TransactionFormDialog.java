@@ -1,0 +1,125 @@
+package com.chronio.budget.view;
+
+import com.chronio.budget.controller.BudgetController;
+import com.chronio.budget.model.Transaction;
+import com.chronio.budget.model.TransactionType;
+import javafx.geometry.Insets;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
+
+import java.time.LocalDate;
+
+// Finestra di dialogo per creare o modificare una transazione.
+// Se 'existing' è null siamo in creazione; altrimenti in modifica.
+public final class TransactionFormDialog extends Dialog<Void> {
+
+    private final BudgetController controller;
+    private final TransactionType type;
+    private final Transaction existing;
+
+    private final TextField descriptionField = new TextField();
+    private final TextField amountField = new TextField();
+    private final DatePicker datePicker = new DatePicker();
+    private final Label errorLabel = new Label();
+
+    public TransactionFormDialog(final BudgetController controller,
+                                 final TransactionType type,
+                                 final Transaction existing) {
+        this.controller = controller;
+        this.type = type;
+        this.existing = existing;
+
+        final boolean editing = existing != null;
+        final String kind = type == TransactionType.INCOME ? "entrata" : "uscita";
+        setTitle((editing ? "Modifica " : "Nuova ") + kind);
+
+        // Pulsanti: Salva e Annulla sempre; Elimina solo in modifica.
+        final ButtonType saveButton = new ButtonType("Salva", ButtonBar.ButtonData.OK_DONE);
+        final ButtonType deleteButton = new ButtonType("Elimina", ButtonBar.ButtonData.LEFT);
+        getDialogPane().getButtonTypes().add(saveButton);
+        if (editing) {
+            getDialogPane().getButtonTypes().add(deleteButton);
+        }
+        getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
+
+        getDialogPane().setContent(buildForm());
+
+        // Precompila i campi se stiamo modificando.
+        if (editing) {
+            descriptionField.setText(existing.description() == null ? "" : existing.description());
+            amountField.setText(String.valueOf(existing.amount()));
+            datePicker.setValue(existing.date());
+        } else {
+            datePicker.setValue(LocalDate.now());
+        }
+
+        // Intercetta il click su Salva per validare prima di chiudere.
+        getDialogPane().lookupButton(saveButton).addEventFilter(
+                javafx.event.ActionEvent.ACTION, e -> {
+                    if (!handleSave()) {
+                        e.consume(); // input non valido: non chiudere il dialog
+                    }
+                });
+
+        // Elimina: chiede al controller e chiude.
+        if (editing) {
+            getDialogPane().lookupButton(deleteButton).addEventFilter(
+                    javafx.event.ActionEvent.ACTION, e -> handleDelete());
+        }
+    }
+
+    private GridPane buildForm() {
+        final GridPane grid = new GridPane();
+        grid.setHgap(8);
+        grid.setVgap(8);
+        grid.setPadding(new Insets(12));
+
+        grid.add(new Label("Descrizione:"), 0, 0);
+        grid.add(descriptionField, 1, 0);
+        grid.add(new Label("Importo (€):"), 0, 1);
+        grid.add(amountField, 1, 1);
+        grid.add(new Label("Data:"), 0, 2);
+        grid.add(datePicker, 1, 2);
+
+        errorLabel.setStyle("-fx-text-fill: #dc2626;");
+        grid.add(errorLabel, 0, 3, 2, 1); // occupa due colonne
+
+        return grid;
+    }
+
+    // Valida e salva. Ritorna true se ok (il dialog può chiudersi).
+    private boolean handleSave() {
+        final String description = descriptionField.getText();
+        final LocalDate date = datePicker.getValue();
+
+        if (date == null) {
+            errorLabel.setText("Seleziona una data.");
+            return false;
+        }
+
+        final double amount;
+        try {
+            amount = Double.parseDouble(amountField.getText().trim().replace(",", "."));
+        } catch (final NumberFormatException ex) {
+            errorLabel.setText("L'importo non è un numero valido.");
+            return false;
+        }
+        if (amount <= 0) {
+            errorLabel.setText("L'importo deve essere positivo.");
+            return false;
+        }
+
+        final String id = existing == null ? null : existing.id();
+        controller.onSaveTransaction(id, type, description, amount, date, null);
+        return true;
+    }
+
+    private void handleDelete() {
+        controller.onDeleteTransaction(existing.id());
+    }
+}

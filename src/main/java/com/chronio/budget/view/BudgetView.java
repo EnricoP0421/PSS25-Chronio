@@ -18,6 +18,8 @@ import javafx.scene.chart.PieChart;
 import javafx.scene.control.DatePicker;
 import com.chronio.budget.model.Tag;
 import com.chronio.budget.model.Transaction;
+import com.chronio.budget.model.TransactionType;
+
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import java.util.List;
@@ -53,18 +55,18 @@ public final class BudgetView extends HBox implements BudgetController.View {
         this.lineChart.setLegendVisible(false);
 
         getChildren().addAll(
-                buildPanel("Entrate", incomeList),
-                buildPanel("Uscite", expenseList),
+                buildPanel("Entrate", incomeList, TransactionType.INCOME),
+                buildPanel("Uscite", expenseList, TransactionType.EXPENSE),
                 buildTotalPanel());
         
         refreshTransactionLists();
         
     }
 
-    private Node buildPanel(final String titleText, final VBox list) {
+    private Node buildPanel(final String titleText, final VBox list, final TransactionType type) {
         final Label title = sectionTitle(titleText);
         final Button add = new Button("+");
-        add.setOnAction(e -> System.out.println("Aggiungi in " + titleText));
+        add.setOnAction(e -> openTransactionForm(type, null));
 
         final HBox header = new HBox(8, title, spacer(), add);
         header.setAlignment(Pos.CENTER_LEFT);
@@ -144,7 +146,7 @@ public final class BudgetView extends HBox implements BudgetController.View {
         final VBox card = new VBox(2, top, bottom);
         card.setPadding(new Insets(8));
         card.setStyle("-fx-background-color: #f4f4f5; -fx-background-radius: 6;");
-        //Da completare handler dei dialog
+        card.setOnMouseClicked(e -> openTransactionForm(tx.type(), tx));
         return card;
     }
 
@@ -165,6 +167,10 @@ public final class BudgetView extends HBox implements BudgetController.View {
         } catch (final IllegalArgumentException e) {
             return Color.GRAY;
         }
+    }
+
+    private void openTransactionForm(final TransactionType defaultType, final Transaction existing) {
+        new TransactionFormDialog(controller, defaultType, existing).showAndWait();
     }
 
     //Util
