@@ -22,6 +22,9 @@ import javafx.stage.Stage;
  */
 public final class CalendarView {
 
+    private static final String VIEW_MONTH = "month";
+    private static final String VIEW_WEEK = "week";
+    private static final String VIEW_DAY = "day";
     private static final int DAYS_IN_WEEK = 7;
     private static final int NAV_SPACING = 12;
     private static final int CELL_SPACING = 2;
@@ -42,7 +45,7 @@ public final class CalendarView {
     private GridPane grid;
     private VBox mainBox;
     private HBox nav;
-    private String currentView = "month";
+    private String currentView = VIEW_MONTH;
     private Button toggleBtn;
 
     public CalendarView(final CalendarController controller, final Stage stage,
@@ -77,7 +80,7 @@ public final class CalendarView {
      * Aggiorna la griglia del mese corrente, se la vista attiva è quella mensile
      */
     public void refresh() {
-        if ("month".equals(currentView)) {
+        if (VIEW_MONTH.equals(currentView)) {
             refreshGrid(grid);
         }
     }
@@ -113,22 +116,22 @@ public final class CalendarView {
         });
         toggleBtn.setOnAction(e -> {
             switch (currentView) {
-                case "month" -> {
-                    currentView = "week";
+                case VIEW_MONTH -> {
+                    currentView = VIEW_WEEK;
                     toggleBtn.setText("Giorno");
                     final VBox weekBox = new WeekView(controller, stage, sidebarView, sidebar).build();
                     mainBox.getChildren().setAll(nav, weekBox);
                     VBox.setVgrow(weekBox, Priority.ALWAYS);
                 }
-                case "week" -> {
-                    currentView = "day";
+                case VIEW_WEEK -> {
+                    currentView = VIEW_DAY;
                     toggleBtn.setText("Mese");
                     final VBox dayBox = new DayView(controller, stage, sidebarView, sidebar).build();
                     mainBox.getChildren().setAll(nav, dayBox);
                     VBox.setVgrow(dayBox, Priority.ALWAYS);
                 }
                 default -> {
-                    currentView = "month";
+                    currentView = VIEW_MONTH;
                     toggleBtn.setText("Settimana");
                     mainBox.getChildren().setAll(nav, buildDayHeaders(), grid);
                     VBox.setVgrow(grid, Priority.ALWAYS);

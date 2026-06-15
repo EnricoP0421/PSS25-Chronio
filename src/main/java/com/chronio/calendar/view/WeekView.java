@@ -3,6 +3,7 @@ package com.chronio.calendar.view;
 import java.time.LocalDate;
 
 import com.chronio.calendar.controller.CalendarController;
+import com.chronio.calendar.model.Event;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -125,7 +126,7 @@ public final class WeekView {
             cell.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
             cell.setStyle(CELL_STYLE);
             controller.getEventsForDate(ViewUtils.toKey(date)).stream()
-                .filter(ev -> ev.allDay())
+                .filter(Event::allDay)
                 .forEach(ev -> cell.getChildren().add(ViewUtils.makePill(ev, date, controller, stage, () -> {
                     rebuildContent();
                     sidebarView.refresh(sidebar);
