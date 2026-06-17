@@ -67,11 +67,11 @@ public final class EventDialog extends Dialog<Void> {
             ? parseDate(existing.end(), date) : date;
         final int startH = existing != null
             ? parseHour(existing.start(), DEFAULT_START_HOUR)
-            : (presetHour >= 0 ? presetHour : DEFAULT_START_HOUR);
+            : presetHour >= 0 ? presetHour : DEFAULT_START_HOUR;
         final int startM = existing != null ? parseMin(existing.start(), 0) : 0;
         final int endH = existing != null && existing.end() != null
             ? parseHour(existing.end(), DEFAULT_END_HOUR)
-            : (presetHour >= 0 ? Math.min(presetHour + 1, MAX_HOUR) : DEFAULT_END_HOUR);
+            : presetHour >= 0 ? Math.min(presetHour + 1, MAX_HOUR) : DEFAULT_END_HOUR;
         final int endM = existing != null && existing.end() != null ? parseMin(existing.end(), 0) : 0;
 
         final DatePicker startDate = new DatePicker(startDate0);
@@ -144,7 +144,7 @@ public final class EventDialog extends Dialog<Void> {
             titleField,
             allDayBox,
             new Label("Inizio:"), startRow,
-            new Label("Fine:"),   endRow,
+            new Label("Fine:"), endRow,
             new Label("Descrizione:"), descField,
             new Label("Tag:"), tagCombo
         );
