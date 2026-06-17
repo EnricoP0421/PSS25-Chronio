@@ -73,7 +73,8 @@ public interface CalendarController {
      * @param allDay valore allDay
      * @return l'evento aggiornato, o empty se l'id non esiste
      */
-    Optional<Event> updateEvent(String id, String title, String description, String start, String end, String tagId, boolean allDay);
+    Optional<Event> updateEvent(String id, String title, String description,
+        String start, String end, String tagId, boolean allDay);
 
     /**
      * Elimina un evento.

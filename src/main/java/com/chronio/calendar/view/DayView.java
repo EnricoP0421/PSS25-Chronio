@@ -25,7 +25,7 @@ public final class DayView {
 
     private static final String[] MONTHS_IT = {
         "Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno",
-        "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"
+        "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre",
     };
     private static final int HOURS = 24;
     private static final double TIME_COL_W = 50;
@@ -154,5 +154,4 @@ public final class DayView {
     private String dayLabel() {
         return date.getDayOfMonth() + " " + MONTHS_IT[date.getMonthValue() - 1] + " " + date.getYear();
     }
-
 }

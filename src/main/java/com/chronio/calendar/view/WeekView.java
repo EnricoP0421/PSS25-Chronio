@@ -35,6 +35,7 @@ public final class WeekView {
     private static final String CELL_STYLE = "-fx-border-color: lightgray; -fx-padding: 2;";
     private static final String TIME_FONT = "-fx-font-size: 10; -fx-padding: 2;";
     private static final String ALL_DAY_FONT = "-fx-font-size: 9;";
+    private static final String DATE_SEP = "/";
 
     private final CalendarController controller;
     private final Stage stage;
@@ -107,7 +108,7 @@ public final class WeekView {
         grid.add(new Label(""), 0, 0);
         for (int i = 0; i < DAYS_IN_WEEK; i++) {
             final LocalDate date = weekStart.plusDays(i);
-            final Label lbl = new Label(DAYS_IT[i] + " " + date.getDayOfMonth() + "/" + date.getMonthValue());
+            final Label lbl = new Label(DAYS_IT[i] + " " + date.getDayOfMonth() + DATE_SEP + date.getMonthValue());
             lbl.setMaxWidth(Double.MAX_VALUE);
             lbl.setAlignment(Pos.CENTER);
             lbl.setStyle("-fx-font-weight: bold; -fx-padding: 4; -fx-border-color: lightgray;"
@@ -174,8 +175,8 @@ public final class WeekView {
 
     private String weekLabel() {
         final LocalDate end = weekStart.plusDays(6);
-        return weekStart.getDayOfMonth() + "/" + weekStart.getMonthValue() + "/" + weekStart.getYear()
-            + " - " + end.getDayOfMonth() + "/" + end.getMonthValue() + "/" + end.getYear();
+        return weekStart.getDayOfMonth() + DATE_SEP + weekStart.getMonthValue() + DATE_SEP + weekStart.getYear()
+            + " - " + end.getDayOfMonth() + DATE_SEP + end.getMonthValue() + DATE_SEP + end.getYear();
     }
 
     private LocalDate startOfWeek(final LocalDate d) {
