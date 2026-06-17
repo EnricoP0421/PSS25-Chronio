@@ -35,7 +35,7 @@ public final class MainView {
         final VBox sidebar = sidebarView.build();
         final CalendarView calendarView = new CalendarView(controller, stage, sidebarView, sidebar);
 
-        final NavBar navBar = new NavBar(() -> {}, () -> {});
+        final NavBar navBar = new NavBar(() -> { }, () -> { });
         root.setTop(navBar.build());
         root.setLeft(new TagSidebarView(controller, stage, () -> {
             calendarView.refresh();

@@ -17,6 +17,8 @@ public final class EventSidebarView {
     private static final int SIDEBAR_WIDTH = 220;
     private static final int CARD_SPACING = 6;
     private static final int BOX_SPACING = 8;
+    private static final String TIME_SEPARATOR = "T";
+    private static final String DATE_SEPARATOR = "/";
 
     private final CalendarController controller;
 
@@ -55,12 +57,12 @@ public final class EventSidebarView {
         } else {
             events.stream()
                 .sorted((a, b) -> {
-                    final String ta = a.allDay() || !a.start().contains("T") ? "00:00" : a.start().substring(11, 16);
-                    final String tb = b.allDay() || !b.start().contains("T") ? "00:00" : b.start().substring(11, 16);
+                    final String ta = a.allDay() || !a.start().contains(TIME_SEPARATOR) ? "00:00" : a.start().substring(11, 16);
+                    final String tb = b.allDay() || !b.start().contains(TIME_SEPARATOR) ? "00:00" : b.start().substring(11, 16);
                     return ta.compareTo(tb);
                 })
                 .forEach(ev -> {
-                    final String prefix = (!ev.allDay() && ev.start() != null && ev.start().contains("T"))
+                    final String prefix = (!ev.allDay() && ev.start() != null && ev.start().contains(TIME_SEPARATOR))
                         ? ev.start().substring(11, 16) + " " : "";
                     card.getChildren().add(new Label(prefix + ev.title()));
                 });
@@ -71,7 +73,7 @@ public final class EventSidebarView {
     private String formatDateRange(final String start, final String end) {
         final String[] s = start.split("-");
         final String[] e = end.split("-");
-        return "  " + s[2] + "/" + s[1] + " - " + e[2] + "/" + e[1];
+        return "  " + s[2] + DATE_SEPARATOR + s[1] + " - " + e[2] + DATE_SEPARATOR + e[1];
     }
 
     private VBox buildWeekCard() {
@@ -84,7 +86,7 @@ public final class EventSidebarView {
         } else {
             weekEvents.forEach((dateKey, evs) -> {
                 final String[] parts = dateKey.split("-");
-                final String formatted = parts[2] + "/" + parts[1] + "/" + parts[0];
+                final String formatted = parts[2] + DATE_SEPARATOR + parts[1] + DATE_SEPARATOR + parts[0];
                 card.getChildren().add(new Label(formatted));
                 evs.forEach(ev -> {
                     final String label = ev.allDay() && ev.end() != null && !ev.end().isBlank()
