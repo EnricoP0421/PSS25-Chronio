@@ -49,7 +49,9 @@ public final class CalendarPersistence {
     public void save(final CalendarData data) {
         try {
             final Path parent = filePath.getParent();
-            if (parent != null) Files.createDirectories(parent);
+            if (parent != null) {
+                Files.createDirectories(parent);
+            }
             try (Writer writer = Files.newBufferedWriter(filePath, StandardCharsets.UTF_8)) {
                 gson.toJson(data, writer);
             }
@@ -64,7 +66,9 @@ public final class CalendarPersistence {
      * @return i dati caricati, o CalendarData#empty() in caso di errore
      */
     public CalendarData load() {
-        if (!Files.exists(filePath)) return CalendarData.empty();
+        if (!Files.exists(filePath)) {
+            return CalendarData.empty();
+        }
         try (Reader reader = Files.newBufferedReader(filePath, StandardCharsets.UTF_8)) {
             final CalendarData data = gson.fromJson(reader, CalendarData.class);
             return data != null ? data : CalendarData.empty();

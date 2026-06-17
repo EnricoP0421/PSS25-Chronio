@@ -22,6 +22,12 @@ import javafx.stage.Stage;
  */
 public final class TagSidebarView {
 
+    private static final int SIDEBAR_WIDTH = 200;
+    private static final int DIALOG_WIDTH = 250;
+    private static final int BOX_SPACING = 8;
+    private static final int ROW_SPACING = 6;
+    private static final int TAG_DOT_RADIUS = 6;
+
     private final CalendarController controller;
     private final Stage stage;
     private final Runnable onTagChanged;
@@ -37,14 +43,14 @@ public final class TagSidebarView {
      * @return VBox con l'elenco dei tag e i controlli di gestione
      */
     public VBox build() {
-        final VBox box = new VBox(8);
-        box.setPrefWidth(200);
+        final VBox box = new VBox(BOX_SPACING);
+        box.setPrefWidth(SIDEBAR_WIDTH);
         box.setStyle("-fx-background-color: #f0f0f0; -fx-padding: 12;");
 
         final Label title = new Label("Tags");
         title.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
-        final VBox tagList = new VBox(8);
+        final VBox tagList = new VBox(BOX_SPACING);
 
         final Button burgerBtn = new Button("☰");
         burgerBtn.setOnAction(e -> tagList.setVisible(!tagList.isVisible()));
@@ -52,7 +58,7 @@ public final class TagSidebarView {
         final Button addBtn = new Button("+");
         addBtn.setOnAction(e -> openTagDialog(tagList));
 
-        final HBox header = new HBox(8, burgerBtn, title, addBtn);
+        final HBox header = new HBox(BOX_SPACING, burgerBtn, title, addBtn);
         header.setAlignment(Pos.CENTER_LEFT);
 
         box.getChildren().addAll(header, tagList);
@@ -61,30 +67,13 @@ public final class TagSidebarView {
     }
 
     private void openTagDialog(final VBox tagList) {
-        final Dialog<Void> dialog = new Dialog<>();
-        dialog.initOwner(stage);
-        dialog.setTitle("Nuovo tag");
-
         final TextField nameField = new TextField();
         nameField.setPromptText("Nome tag");
         final ColorPicker colorPicker = new ColorPicker(Color.web("#888888"));
-
-        final VBox content = new VBox(8, new Label("Nome:"), nameField, new Label("Colore:"), colorPicker);
-        content.setPrefWidth(250);
-        dialog.getDialogPane().setContent(content);
-        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-        dialog.setResultConverter(btn -> {
-            if (btn == ButtonType.OK && !nameField.getText().isBlank()) {
-                final Color c = colorPicker.getValue();
-                final String hex = String.format("#%02x%02x%02x",
-                    (int)(c.getRed()*255), (int)(c.getGreen()*255), (int)(c.getBlue()*255));
-                controller.createTag(nameField.getText(), hex);
-                refreshList(tagList);
-            }
-            return null;
+        showColorDialog("Nuovo tag", nameField, colorPicker, () -> {
+            controller.createTag(nameField.getText(), toHex(colorPicker.getValue()));
+            refreshList(tagList);
         });
-        dialog.showAndWait();
     }
 
     private void refreshList(final VBox tagList) {
@@ -93,43 +82,50 @@ public final class TagSidebarView {
             final CheckBox cb = new CheckBox();
             cb.setSelected(tag.visible());
             cb.setOnAction(e -> { controller.toggleTagVisibility(tag.id()); onTagChanged.run(); });
-            final Circle dot = new Circle(6, Color.web(tag.color()));
+            final Circle dot = new Circle(TAG_DOT_RADIUS, Color.web(tag.color()));
             final Label lbl = new Label(tag.name());
             final Button editBtn = new Button("✎");
             final Button delBtn = new Button("✕");
             delBtn.setStyle("-fx-text-fill: red;");
             editBtn.setOnAction(e -> openEditDialog(tagList, tag.id(), tag.name(), tag.color()));
             delBtn.setOnAction(e -> { controller.deleteTag(tag.id()); refreshList(tagList); onTagChanged.run(); });
-            final HBox row = new HBox(6, cb, dot, lbl, editBtn, delBtn);
+            final HBox row = new HBox(ROW_SPACING, cb, dot, lbl, editBtn, delBtn);
             row.setAlignment(Pos.CENTER_LEFT);
             tagList.getChildren().add(row);
         });
     }
 
-    private void openEditDialog(final VBox tagList, final String id, final String currentName, final String currentColor) {
-        final Dialog<Void> dialog = new Dialog<>();
-        dialog.initOwner(stage);
-        dialog.setTitle("Modifica tag");
-
+    private void openEditDialog(final VBox tagList, final String id,
+                                 final String currentName, final String currentColor) {
         final TextField nameField = new TextField(currentName);
         final ColorPicker colorPicker = new ColorPicker(Color.web(currentColor));
+        showColorDialog("Modifica tag", nameField, colorPicker, () -> {
+            controller.updateTag(id, nameField.getText(), toHex(colorPicker.getValue()));
+            refreshList(tagList);
+            onTagChanged.run();
+        });
+    }
 
-        final VBox content = new VBox(8, new Label("Nome:"), nameField, new Label("Colore:"), colorPicker);
-        content.setPrefWidth(250);
+    private void showColorDialog(final String title, final TextField nameField,
+                                  final ColorPicker colorPicker, final Runnable onOk) {
+        final Dialog<Void> dialog = new Dialog<>();
+        dialog.initOwner(stage);
+        dialog.setTitle(title);
+        final VBox content = new VBox(BOX_SPACING, new Label("Nome:"), nameField, new Label("Colore:"), colorPicker);
+        content.setPrefWidth(DIALOG_WIDTH);
         dialog.getDialogPane().setContent(content);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
         dialog.setResultConverter(btn -> {
             if (btn == ButtonType.OK && !nameField.getText().isBlank()) {
-                final Color c = colorPicker.getValue();
-                final String hex = String.format("#%02x%02x%02x",
-                    (int)(c.getRed()*255), (int)(c.getGreen()*255), (int)(c.getBlue()*255));
-                controller.updateTag(id, nameField.getText(), hex);
-                refreshList(tagList);
-                onTagChanged.run();
+                onOk.run();
             }
             return null;
         });
         dialog.showAndWait();
+    }
+
+    private String toHex(final Color c) {
+        return String.format("#%02x%02x%02x",
+            (int) (c.getRed() * 255), (int) (c.getGreen() * 255), (int) (c.getBlue() * 255));
     }
 }
