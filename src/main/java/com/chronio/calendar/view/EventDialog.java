@@ -24,25 +24,38 @@ import javafx.stage.Stage;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 /**
- * Dialog per la creazione e modifica di un evento
+ * Dialog per la creazione e modifica di un evento.
  * Supporta tre modalità di apertura: nuovo evento su una data, nuovo evento con ora preimpostata,
- * e modifica di un evento esistente
+ * e modifica di un evento esistente.
  */
 public final class EventDialog extends Dialog<Void> {
 
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+    private static final int SPINNER_WIDTH = 70;
+    private static final int MAX_HOUR = 23;
+    private static final int TAG_DOT_RADIUS = 6;
+    private static final int DIALOG_WIDTH = 400;
+    private static final int CONTENT_SPACING = 8;
+    private static final int ROW_SPACING = 4;
+    private static final int DEFAULT_START_HOUR = 9;
+    private static final int DEFAULT_END_HOUR = 10;
+    private static final int MINUTE_STEP = 15;
+    private static final int MAX_MINUTE = 59;
 
     public EventDialog(final Stage owner, final CalendarController controller, final LocalDate date) {
         this(owner, controller, date, -1, null);
     }
 
-    public EventDialog(final Stage owner, final CalendarController controller, final LocalDate date, final Event existing) {
+    public EventDialog(final Stage owner, final CalendarController controller,
+                       final LocalDate date, final Event existing) {
         this(owner, controller, date, -1, existing);
     }
 
-    public EventDialog(final Stage owner, final CalendarController controller, final LocalDate date, final int presetHour, final Event existing) {
+    public EventDialog(final Stage owner, final CalendarController controller,
+                       final LocalDate date, final int presetHour, final Event existing) {
         initOwner(owner);
         setTitle(existing == null ? "Nuovo evento" : "Modifica evento");
 
@@ -50,53 +63,54 @@ public final class EventDialog extends Dialog<Void> {
         titleField.setPromptText("Titolo");
 
         final LocalDate startDate0 = existing != null ? parseDate(existing.start(), date) : date;
-        final LocalDate endDate0 = existing != null && existing.end() != null ? parseDate(existing.end(), date) : date;
-        final int startH = existing != null ? parseHour(existing.start(), 9) : (presetHour >= 0 ? presetHour : 9);
+        final LocalDate endDate0 = existing != null && existing.end() != null
+            ? parseDate(existing.end(), date) : date;
+        final int startH = existing != null
+            ? parseHour(existing.start(), DEFAULT_START_HOUR)
+            : (presetHour >= 0 ? presetHour : DEFAULT_START_HOUR);
         final int startM = existing != null ? parseMin(existing.start(), 0) : 0;
-        final int endH = existing != null && existing.end() != null ? parseHour(existing.end(), 10) : (presetHour >= 0 ? Math.min(presetHour + 1, 23) : 10);
+        final int endH = existing != null && existing.end() != null
+            ? parseHour(existing.end(), DEFAULT_END_HOUR)
+            : (presetHour >= 0 ? Math.min(presetHour + 1, MAX_HOUR) : DEFAULT_END_HOUR);
         final int endM = existing != null && existing.end() != null ? parseMin(existing.end(), 0) : 0;
 
         final DatePicker startDate = new DatePicker(startDate0);
-        final Spinner<Integer> startHour = new Spinner<>(0, 23, startH);
-        final Spinner<Integer> startMin = new Spinner<>(0, 59, startM, 15);
+        final Spinner<Integer> startHour = new Spinner<>(0, MAX_HOUR, startH);
+        final Spinner<Integer> startMin = new Spinner<>(0, MAX_MINUTE, startM, MINUTE_STEP);
         startHour.setEditable(true);
         startMin.setEditable(true);
-        startHour.setPrefWidth(70);
-        startMin.setPrefWidth(70);
+        startHour.setPrefWidth(SPINNER_WIDTH);
+        startMin.setPrefWidth(SPINNER_WIDTH);
 
         final DatePicker endDate = new DatePicker(endDate0);
-        final Spinner<Integer> endHour = new Spinner<>(0, 23, endH);
-        final Spinner<Integer> endMin = new Spinner<>(0, 59, endM, 15);
+        final Spinner<Integer> endHour = new Spinner<>(0, MAX_HOUR, endH);
+        final Spinner<Integer> endMin = new Spinner<>(0, MAX_MINUTE, endM, MINUTE_STEP);
         endHour.setEditable(true);
         endMin.setEditable(true);
-        endHour.setPrefWidth(70);
-        endMin.setPrefWidth(70);
+        endHour.setPrefWidth(SPINNER_WIDTH);
+        endMin.setPrefWidth(SPINNER_WIDTH);
 
         startHour.valueProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null) endHour.getValueFactory().setValue(Math.min(newVal + 1, 23));
+            if (newVal != null) {
+                endHour.getValueFactory().setValue(Math.min(newVal + 1, MAX_HOUR));
+            }
         });
 
         final ComboBox<Tag> tagCombo = new ComboBox<>();
         tagCombo.getItems().add(null);
         tagCombo.getItems().addAll(controller.getTags().values());
         tagCombo.setConverter(new javafx.util.StringConverter<Tag>() {
-            @Override public String toString(final Tag t) { return t == null ? "(nessun tag)" : t.name(); }
-            @Override public Tag fromString(final String s) { return null; }
-        });
-        tagCombo.setCellFactory(lv -> new ListCell<Tag>() {
-            @Override protected void updateItem(final Tag t, final boolean empty) {
-                super.updateItem(t, empty);
-                if (empty || t == null) { setText("(nessun tag)"); setGraphic(null); }
-                else { setText(t.name()); setGraphic(new Circle(6, Color.web(t.color()))); }
+            @Override
+            public String toString(final Tag t) {
+                return t == null ? "(nessun tag)" : t.name();
+            }
+            @Override
+            public Tag fromString(final String s) {
+                return null;
             }
         });
-        tagCombo.setButtonCell(new ListCell<Tag>() {
-            @Override protected void updateItem(final Tag t, final boolean empty) {
-                super.updateItem(t, empty);
-                if (empty || t == null) { setText("(nessun tag)"); setGraphic(null); }
-                else { setText(t.name()); setGraphic(new Circle(6, Color.web(t.color()))); }
-            }
-        });
+        tagCombo.setCellFactory(lv -> makeTagCell());
+        tagCombo.setButtonCell(makeTagCell());
         if (existing != null && existing.tagId() != null) {
             controller.getTags().values().stream()
                 .filter(t -> t.id().equals(existing.tagId()))
@@ -107,8 +121,8 @@ public final class EventDialog extends Dialog<Void> {
         final CheckBox allDayBox = new CheckBox("Tutto il giorno");
         allDayBox.setSelected(existing != null && existing.allDay());
 
-        final HBox startRow = new HBox(4, startDate, startHour, startMin);
-        final HBox endRow = new HBox(4, endDate, endHour, endMin);
+        final HBox startRow = new HBox(ROW_SPACING, startDate, startHour, startMin);
+        final HBox endRow = new HBox(ROW_SPACING, endDate, endHour, endMin);
         allDayBox.selectedProperty().addListener((obs, oldVal, newVal) -> {
             startHour.setVisible(!newVal);
             startMin.setVisible(!newVal);
@@ -126,7 +140,7 @@ public final class EventDialog extends Dialog<Void> {
         descField.setPromptText("Descrizione");
         descField.setPrefRowCount(3);
 
-        final VBox content = new VBox(8,
+        final VBox content = new VBox(CONTENT_SPACING,
             titleField,
             allDayBox,
             new Label("Inizio:"), startRow,
@@ -134,7 +148,7 @@ public final class EventDialog extends Dialog<Void> {
             new Label("Descrizione:"), descField,
             new Label("Tag:"), tagCombo
         );
-        content.setPrefWidth(400);
+        content.setPrefWidth(DIALOG_WIDTH);
         getDialogPane().setContent(content);
         getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
@@ -161,25 +175,50 @@ public final class EventDialog extends Dialog<Void> {
                 } else {
                     controller.updateEvent(existing.id(), titleField.getText(), descField.getText(), start, end, tagId, allDay);
                 }
-            } else if (btn != null && btn.getButtonData() == ButtonBar.ButtonData.LEFT) {
+            } else if (btn != null && btn.getButtonData() == ButtonBar.ButtonData.LEFT && existing != null) {
                 controller.deleteEvent(existing.id());
             }
             return null;
         });
     }
 
+    private ListCell<Tag> makeTagCell() {
+        return new ListCell<Tag>() {
+            @Override
+            protected void updateItem(final Tag t, final boolean empty) {
+                super.updateItem(t, empty);
+                if (empty || t == null) {
+                    setText("(nessun tag)");
+                    setGraphic(null);
+                } else {
+                    setText(t.name());
+                    setGraphic(new Circle(TAG_DOT_RADIUS, Color.web(t.color())));
+                }
+            }
+        };
+    }
+
     private LocalDate parseDate(final String dt, final LocalDate fallback) {
-        try { return LocalDateTime.parse(dt, FMT).toLocalDate(); }
-        catch (final Exception e) { return fallback; }
+        try {
+            return LocalDateTime.parse(dt, FMT).toLocalDate();
+        } catch (final DateTimeParseException e) {
+            return fallback;
+        }
     }
 
     private int parseHour(final String dt, final int fallback) {
-        try { return LocalDateTime.parse(dt, FMT).getHour(); }
-        catch (final Exception e) { return fallback; }
+        try {
+            return LocalDateTime.parse(dt, FMT).getHour();
+        } catch (final DateTimeParseException e) {
+            return fallback;
+        }
     }
 
     private int parseMin(final String dt, final int fallback) {
-        try { return LocalDateTime.parse(dt, FMT).getMinute(); }
-        catch (final Exception e) { return fallback; }
+        try {
+            return LocalDateTime.parse(dt, FMT).getMinute();
+        } catch (final DateTimeParseException e) {
+            return fallback;
+        }
     }
 }
