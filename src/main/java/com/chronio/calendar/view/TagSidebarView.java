@@ -27,6 +27,7 @@ public final class TagSidebarView {
     private static final int BOX_SPACING = 8;
     private static final int ROW_SPACING = 6;
     private static final int TAG_DOT_RADIUS = 6;
+    private static final int MAX_COLOR_VALUE = 255;
 
     private final CalendarController controller;
     private final Stage stage;
@@ -81,14 +82,21 @@ public final class TagSidebarView {
         controller.getTags().forEach((id, tag) -> {
             final CheckBox cb = new CheckBox();
             cb.setSelected(tag.visible());
-            cb.setOnAction(e -> { controller.toggleTagVisibility(tag.id()); onTagChanged.run(); });
+            cb.setOnAction(e -> {
+                controller.toggleTagVisibility(tag.id());
+                onTagChanged.run();
+            });
             final Circle dot = new Circle(TAG_DOT_RADIUS, Color.web(tag.color()));
             final Label lbl = new Label(tag.name());
             final Button editBtn = new Button("✎");
             final Button delBtn = new Button("✕");
             delBtn.setStyle("-fx-text-fill: red;");
             editBtn.setOnAction(e -> openEditDialog(tagList, tag.id(), tag.name(), tag.color()));
-            delBtn.setOnAction(e -> { controller.deleteTag(tag.id()); refreshList(tagList); onTagChanged.run(); });
+            delBtn.setOnAction(e -> {
+                controller.deleteTag(tag.id());
+                refreshList(tagList);
+                onTagChanged.run();
+            });
             final HBox row = new HBox(ROW_SPACING, cb, dot, lbl, editBtn, delBtn);
             row.setAlignment(Pos.CENTER_LEFT);
             tagList.getChildren().add(row);
@@ -126,6 +134,8 @@ public final class TagSidebarView {
 
     private String toHex(final Color c) {
         return String.format("#%02x%02x%02x",
-            (int) (c.getRed() * 255), (int) (c.getGreen() * 255), (int) (c.getBlue() * 255));
+            Math.round(c.getRed() * MAX_COLOR_VALUE),
+            Math.round(c.getGreen() * MAX_COLOR_VALUE),
+            Math.round(c.getBlue() * MAX_COLOR_VALUE));
     }
 }
