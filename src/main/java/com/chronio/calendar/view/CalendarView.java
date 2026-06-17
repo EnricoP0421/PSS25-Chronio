@@ -31,7 +31,8 @@ public final class CalendarView {
     private static final int PADDING = 8;
     private static final int HEADER_SPACING = 4;
     private static final int GRID_GAP = 4;
-    private static final String[] DAYS_IT = {"Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"};
+    private static final String[] DAYS_IT = {"Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom",};
+    private static final int GRID_ROWS = 6;
     private static final String[] MONTHS_IT = {
         "Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno",
         "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"
@@ -144,30 +145,29 @@ public final class CalendarView {
         return navBar;
     }
 
-    private void refreshGrid(final GridPane grid) {
-        grid.getChildren().clear();
-        grid.getColumnConstraints().clear();
-        grid.getRowConstraints().clear();
+    private void refreshGrid(final GridPane calGrid) {
+        calGrid.getChildren().clear();
+        calGrid.getColumnConstraints().clear();
+        calGrid.getRowConstraints().clear();
 
         for (int i = 0; i < DAYS_IN_WEEK; i++) {
             final ColumnConstraints cc = new ColumnConstraints();
             cc.setPercentWidth(100.0 / DAYS_IN_WEEK);
             cc.setFillWidth(true);
-            grid.getColumnConstraints().add(cc);
+            calGrid.getColumnConstraints().add(cc);
+        }
+
+        for (int i = 0; i < GRID_ROWS; i++) {
+            final RowConstraints rc = new RowConstraints();
+            rc.setPercentHeight(100.0 / GRID_ROWS);
+            rc.setFillHeight(true);
+            calGrid.getRowConstraints().add(rc);
         }
 
         final LocalDate today = LocalDate.now();
         final LocalDate first = displayMonth.atDay(1);
         final int startCol = first.getDayOfWeek().getValue() - 1;
         final int daysInMonth = displayMonth.lengthOfMonth();
-        final int totalRows = (int) Math.ceil((startCol + daysInMonth) / (double) DAYS_IN_WEEK);
-
-        for (int i = 0; i < totalRows; i++) {
-            final RowConstraints rc = new RowConstraints();
-            rc.setPercentHeight(100.0 / totalRows);
-            rc.setFillHeight(true);
-            grid.getRowConstraints().add(rc);
-        }
 
         int col = startCol;
         int row = 0;
@@ -183,16 +183,16 @@ public final class CalendarView {
             final String dateKey = date.getYear() + "-" + date.getMonthValue() + "-" + date.getDayOfMonth();
             controller.getEventsForDate(dateKey).forEach(ev ->
                 cell.getChildren().add(ViewUtils.makePill(ev, date, controller, stage, () -> {
-                    refreshGrid(grid);
+                    refreshGrid(calGrid);
                     sidebarView.refresh(sidebar);
                 }))
             );
             cell.setOnMouseClicked(e -> {
                 new EventDialog(stage, controller, date).showAndWait();
-                refreshGrid(grid);
+                refreshGrid(calGrid);
                 sidebarView.refresh(sidebar);
             });
-            grid.add(cell, col, row);
+            calGrid.add(cell, col, row);
             col++;
             if (col == DAYS_IN_WEEK) {
                 col = 0;

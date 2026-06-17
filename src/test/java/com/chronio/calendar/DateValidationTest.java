@@ -10,6 +10,8 @@ import com.chronio.calendar.model.CalendarModelImpl;
 
 class DateValidationTest {
 
+    private static final String EVENT_TITLE = "Test";
+
     private CalendarModelImpl newModel() {
         return new CalendarModelImpl(CalendarData.empty());
     }
@@ -17,7 +19,7 @@ class DateValidationTest {
     @Test
     void startNullShouldThrow() {
         final Exception ex = assertThrows(IllegalArgumentException.class, () ->
-            newModel().createEvent("Test", "", null, null, null, false)
+            newModel().createEvent(EVENT_TITLE, "", null, null, null, false)
         );
         assertNotNull(ex);
     }
@@ -25,7 +27,7 @@ class DateValidationTest {
     @Test
     void endBeforeStartShouldThrow() {
         final Exception ex = assertThrows(IllegalArgumentException.class, () ->
-            newModel().createEvent("Test", "", "2026-06-10T10:00", "2026-06-10T09:00", null, false)
+            newModel().createEvent(EVENT_TITLE, "", "2026-06-10T10:00", "2026-06-10T09:00", null, false)
         );
         assertNotNull(ex);
     }
@@ -33,7 +35,7 @@ class DateValidationTest {
     @Test
     void validDatesShouldWork() {
         assertDoesNotThrow(() ->
-            newModel().createEvent("Test", "", "2026-06-10T09:00", "2026-06-10T10:00", null, false)
+            newModel().createEvent(EVENT_TITLE, "", "2026-06-10T09:00", "2026-06-10T10:00", null, false)
         );
     }
 }

@@ -16,9 +16,13 @@ class PersistenceTest {
     @TempDir
     Path tempDir;
 
+    private Path getTempDir() {
+        return tempDir;
+    }
+
     @Test
     void saveAndLoadShouldPreserveEvents() {
-        final Path file = tempDir.resolve("calendar.json");
+        final Path file = getTempDir().resolve("calendar.json");
         final CalendarPersistence persistence = new CalendarPersistence(file);
 
         final CalendarModelImpl model = new CalendarModelImpl(CalendarData.empty());
@@ -32,7 +36,7 @@ class PersistenceTest {
 
     @Test
     void saveAndLoadShouldPreserveTags() {
-        final Path file = tempDir.resolve("calendar.json");
+        final Path file = getTempDir().resolve("calendar.json");
         final CalendarPersistence persistence = new CalendarPersistence(file);
 
         final CalendarModelImpl model = new CalendarModelImpl(CalendarData.empty());
@@ -46,7 +50,7 @@ class PersistenceTest {
 
     @Test
     void missingFileShouldReturnEmpty() {
-        final Path file = tempDir.resolve("nonexistent.json");
+        final Path file = getTempDir().resolve("nonexistent.json");
         final CalendarPersistence persistence = new CalendarPersistence(file);
         final CalendarData loaded = persistence.load();
         assertTrue(loaded.events().isEmpty());
