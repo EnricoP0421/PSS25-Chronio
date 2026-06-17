@@ -45,15 +45,39 @@ public final class EventDialog extends Dialog<Void> {
     private static final int MINUTE_STEP = 15;
     private static final int MAX_MINUTE = 59;
 
+    /**
+     * Apre il dialog per creare un nuovo evento tutto il giorno sulla data specificata.
+     *
+     * @param owner      lo stage proprietario
+     * @param controller il controller del calendario
+     * @param date       la data selezionata
+     */
     public EventDialog(final Stage owner, final CalendarController controller, final LocalDate date) {
         this(owner, controller, date, -1, null);
     }
 
+    /**
+     * Apre il dialog per modificare un evento esistente.
+     *
+     * @param owner      lo stage proprietario
+     * @param controller il controller del calendario
+     * @param date       la data selezionata
+     * @param existing   l'evento da modificare
+     */
     public EventDialog(final Stage owner, final CalendarController controller,
                        final LocalDate date, final Event existing) {
         this(owner, controller, date, -1, existing);
     }
 
+    /**
+     * Costruttore principale del dialog.
+     *
+     * @param owner       lo stage proprietario
+     * @param controller  il controller del calendario
+     * @param date        la data selezionata
+     * @param presetHour  ora preimpostata, -1 se non specificata
+     * @param existing    l'evento da modificare, null se nuovo
+     */
     public EventDialog(final Stage owner, final CalendarController controller,
                        final LocalDate date, final int presetHour, final Event existing) {
         initOwner(owner);
@@ -104,6 +128,7 @@ public final class EventDialog extends Dialog<Void> {
             public String toString(final Tag t) {
                 return t == null ? "(nessun tag)" : t.name();
             }
+
             @Override
             public Tag fromString(final String s) {
                 return null;
