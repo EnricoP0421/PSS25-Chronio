@@ -1,0 +1,35 @@
+package com.chronio.kanban.controller;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import com.chronio.kanban.model.Board;
+import com.chronio.kanban.model.Card;
+import com.chronio.kanban.model.Column;
+
+public interface BoardController {
+
+    Map<String, Board> getBoards();
+
+    Board createBoard(String title);
+
+    Optional<Board> renameBoard(String boardId, String title);
+
+    void deleteBoard(String boardId);
+
+    Column createColumn(String boardId, String title);
+
+    Optional<Column> renameColumn(String boardId, String columnId, String title);
+
+    void deleteColumn(String boardId, String columnId);
+
+    Card createCard(String boardId, String columnId, String title, String description, String tagId);
+
+    Optional<Card> updateCard(String boardId, String columnId, String cardId,
+                              String title, String description, String tagId);
+
+    void deleteCard(String boardId, String columnId, String cardId);
+
+    List<Card> getFilteredCards(String boardId, String columnId, String tagId);
+}
