@@ -18,8 +18,13 @@ import javafx.util.StringConverter;
 
 import java.time.LocalDate;
 
-// Finestra di dialogo per creare o modificare una transazione.
-// Se 'existing' è null siamo in creazione; altrimenti in modifica.
+/**
+ * Finestra di dialogo per creare o modificare una transazione. Se il
+ * parametro {@code existing} del costruttore è null la finestra opera in
+ * creazione, altrimenti in modifica (campi precompilati e pulsante Elimina).
+ * Permette di impostare descrizione, importo, data e categoria, validando
+ * l'input prima del salvataggio.
+ */
 public final class TransactionFormDialog extends Dialog<Void> {
 
     private final BudgetController controller;
@@ -32,6 +37,13 @@ public final class TransactionFormDialog extends Dialog<Void> {
     private final Label errorLabel = new Label();
     private final ComboBox<Tag> tagCombo = new ComboBox<>();
 
+    /**
+     * Crea la finestra del form.
+     *
+     * @param controller il controller a cui inoltrare salvataggio ed eliminazione
+     * @param type       tipo della transazione (entrata o uscita)
+     * @param existing   transazione da modificare, oppure null per crearne una nuova
+     */
     public TransactionFormDialog(final BudgetController controller,
                                  final TransactionType type,
                                  final Transaction existing) {

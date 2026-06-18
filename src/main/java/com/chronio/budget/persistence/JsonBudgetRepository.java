@@ -16,6 +16,11 @@ import com.google.gson.JsonSerializer;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Implementazione di {@link BudgetRepository} che salva i dati del budget
+ * in un file JSON tramite Gson. Le date {@link LocalDate} sono serializzate
+ * in formato ISO ("YYYY-MM-DD") grazie ad appositi adapter.
+ */
 public final class JsonBudgetRepository implements BudgetRepository {
 
     private static final String FILE_NAME = "budget.json";
@@ -31,13 +36,20 @@ public final class JsonBudgetRepository implements BudgetRepository {
                         LocalDate.parse(json.getAsString(), DateTimeFormatter.ISO_LOCAL_DATE))
         .create();
 
-    // Costruttore di default: usa la cartella dati standard dell'app
-    // (la stessa in cui vivono gli altri file dati come data.json del calendario).
+    /**
+     * Costruttore di default: usa la cartella dati standard dell'app
+     * ({@code ~/.chronio}).
+     */
     public JsonBudgetRepository() {
         this(defaultDataDir().resolve(FILE_NAME));
     }
 
-    // Costruttore esplicito: utile per indicare una cartella/percorso specifico.
+    /**
+     * Costruttore esplicito, utile per indicare un percorso specifico
+     * (per esempio nei test).
+     *
+     * @param file percorso del file JSON su cui leggere e scrivere
+     */
     public JsonBudgetRepository(final Path file) {
         this.file = file;
     }

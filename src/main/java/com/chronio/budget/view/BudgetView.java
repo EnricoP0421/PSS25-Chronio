@@ -30,6 +30,13 @@ import java.util.List;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
+/**
+ * Vista principale del modulo budget: layout a tre pannelli affiancati
+ * (Entrate, Uscite, Totale). Mostra le liste delle transazioni, i totali
+ * del periodo e i grafici (uscite per categoria e andamento mensile).
+ * Si ridisegna quando il controller notifica un cambiamento dei dati
+ * tramite l'interfaccia {@link BudgetController.View}.
+ */
 public final class BudgetView extends HBox implements BudgetController.View {
 
     private final BudgetController controller;
@@ -44,6 +51,12 @@ public final class BudgetView extends HBox implements BudgetController.View {
     private final PieChart pieChart = new PieChart();
     private final LineChart<String, Number> lineChart;
 
+    /**
+     * Costruisce la vista, la registra presso il controller e disegna lo
+     * stato iniziale (liste, totali e grafici) sul periodo di default.
+     *
+     * @param controller il controller che fornisce dati e gestisce le azioni
+     */
     public BudgetView(final BudgetController controller) {
         this.controller = controller;
         controller.setView(this);
@@ -122,12 +135,19 @@ public final class BudgetView extends HBox implements BudgetController.View {
 
     //BudgetController.View
 
+    /**
+     * Rigenera le liste delle entrate e delle uscite dai dati del controller.
+     */
     @Override
     public void refreshTransactionLists() {
         incomeList.getChildren().setAll(rowsFor(controller.getIncomes()));
         expenseList.getChildren().setAll(rowsFor(controller.getExpenses()));
     }
 
+    /**
+     * Aggiorna i totali del periodo e ridisegna il grafico a torta
+     * (uscite per categoria) e il grafico a linee (saldo netto mensile).
+     */
     @Override
     public void refreshCharts() {
         final BudgetSummary summary = controller.getCurrentSummary();
@@ -223,6 +243,13 @@ public final class BudgetView extends HBox implements BudgetController.View {
         return badge;
     }
 
+    /**
+     * Converte una stringa esadecimale in un colore JavaFX, in modo
+     * difensivo: restituisce grigio se la stringa è nulla, vuota o malformata.
+     *
+     * @param hex colore in formato "#rrggbb", può essere null
+     * @return il colore corrispondente, o grigio in caso di valore non valido
+     */
     static Color parseColor(final String hex) {
         try {
             return hex == null || hex.isBlank() ? Color.GRAY : Color.web(hex);

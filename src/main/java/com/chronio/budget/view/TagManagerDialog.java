@@ -18,6 +18,12 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
 
+/**
+ * Finestra per la gestione dei tag categoria. Mostra l'elenco dei tag
+ * esistenti con possibilità di rimozione e offre una riga per aggiungerne
+ * di nuovi indicando nome e colore. Le modifiche sono inoltrate al
+ * controller, che aggiorna a sua volta la vista principale.
+ */
 public final class TagManagerDialog extends Dialog<Void> {
 
     private final BudgetController controller;
@@ -26,6 +32,11 @@ public final class TagManagerDialog extends Dialog<Void> {
     private final TextField nameField = new TextField();
     private final ColorPicker colorPicker = new ColorPicker(Color.web("#3b82f6"));
 
+    /**
+     * Crea la finestra di gestione tag e popola l'elenco di quelli esistenti.
+     *
+     * @param controller il controller a cui inoltrare aggiunta e rimozione dei tag
+     */
     public TagManagerDialog(final BudgetController controller) {
         this.controller = controller;
 

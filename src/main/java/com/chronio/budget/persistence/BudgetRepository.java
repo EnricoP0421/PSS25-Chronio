@@ -3,6 +3,11 @@ package com.chronio.budget.persistence;
 import com.chronio.budget.model.BudgetData;
 
 
+/**
+ * Astrazione per la persistenza dei dati del budget. Permette di
+ * sostituire la strategia di salvataggio (file JSON, memoria, ecc.)
+ * senza modificare la logica applicativa.
+ */
 public interface BudgetRepository {
 
     /**
