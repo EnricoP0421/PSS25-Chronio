@@ -49,6 +49,14 @@ public final class CalendarView {
     private String currentView = VIEW_MONTH;
     private Button toggleBtn;
 
+    /**
+     * Costruisce la vista mensile.
+     *
+     * @param controller il controller del calendario
+     * @param stage lo stage principale
+     * @param sidebarView la sidebar degli eventi
+     * @param sidebar il nodo VBox della sidebar
+     */
     public CalendarView(final CalendarController controller, final Stage stage,
                         final EventSidebarView sidebarView, final VBox sidebar) {
         this.controller = controller;

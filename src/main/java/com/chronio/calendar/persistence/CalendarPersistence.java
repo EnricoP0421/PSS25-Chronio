@@ -26,6 +26,10 @@ public final class CalendarPersistence {
     private final Path filePath;
     private final Gson gson;
 
+    /**
+     * Costruisce la persistenza sul percorso specificato.
+     * @param filePath il percorso del file JSON di salvataggio
+     */
     public CalendarPersistence(final Path filePath) {
         this.filePath = filePath;
         this.gson = new GsonBuilder().setPrettyPrinting().create();

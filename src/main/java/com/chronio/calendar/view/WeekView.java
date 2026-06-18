@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import com.chronio.calendar.controller.CalendarController;
 import com.chronio.calendar.model.Event;
+
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -45,6 +46,14 @@ public final class WeekView {
     private Label navLabel;
     private VBox mainBox;
 
+    /**
+     * Costruisce la vista settimanale.
+     *
+     * @param controller il controller del calendario
+     * @param stage lo stage principale
+     * @param sidebarView la sidebar degli eventi
+     * @param sidebar il nodo VBox della sidebar
+     */
     public WeekView(final CalendarController controller, final Stage stage,
                     final EventSidebarView sidebarView, final VBox sidebar) {
         this.controller = controller;

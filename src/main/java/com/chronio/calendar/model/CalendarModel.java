@@ -4,9 +4,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-// Definisce le operazioni sul calendario: gestione tag ed eventi.
-// La logica di validazione e filtraggio sta nell'implementazione.
-
+/**
+ * Definisce le operazioni sul calendario, ossia la gestione di tag ed eventi.
+ * La logica di validazione e filtraggio sta nell'implementazione.
+ */
 public interface CalendarModel {
 
     /**

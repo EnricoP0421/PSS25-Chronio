@@ -20,6 +20,12 @@ public final class CalendarControllerImpl implements CalendarController {
     private final CalendarModel model;
     private final CalendarPersistence persistence;
 
+    /**
+     * Costruisce il controller con il modello e la persistenza specificati.
+     *
+     * @param model       il modello del calendario
+     * @param persistence la persistenza su disco
+     */
     public CalendarControllerImpl(final CalendarModel model, final CalendarPersistence persistence) {
         this.model = model;
         this.persistence = persistence;

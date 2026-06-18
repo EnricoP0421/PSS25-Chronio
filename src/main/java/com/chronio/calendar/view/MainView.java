@@ -10,7 +10,7 @@ import javafx.stage.Stage;
 
 /**
  * Vista principale dell'applicazione. Assembla le tre aree principali (tag, calendario, oggi/questa settimana)
- * in un BorderPane e restituisce la Scene pronta per lo stage.
+ * in un BorderPane e restituisce la Scene pronta per lo stage
  */
 public final class MainView {
 
@@ -20,6 +20,11 @@ public final class MainView {
     private final CalendarController controller;
     private final Stage stage;
 
+    /**
+     * Costruisce la vista principale
+     * @param controller il controller del calendario
+     * @param stage lo stage principale
+     */
     public MainView(final CalendarController controller, final Stage stage) {
         this.controller = controller;
         this.stage = stage;

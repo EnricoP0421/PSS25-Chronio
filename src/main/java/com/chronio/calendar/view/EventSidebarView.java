@@ -22,6 +22,10 @@ public final class EventSidebarView {
 
     private final CalendarController controller;
 
+    /**
+     * Costruisce la sidebar degli eventi
+     * @param controller il controller del calendario
+     */
     public EventSidebarView(final CalendarController controller) {
         this.controller = controller;
     }

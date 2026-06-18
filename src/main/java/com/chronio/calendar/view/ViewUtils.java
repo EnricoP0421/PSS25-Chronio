@@ -49,10 +49,8 @@ final class ViewUtils {
 
     /**
      * Controlla se l'evento inizia nell'ora specificata.
-     *
      * @param ev l'evento
      * @param hour l'ora da confrontare
-     *
      * @return true se l'evento inizia in quell'ora
      */
     static boolean startsAtHour(final Event ev, final int hour) {
