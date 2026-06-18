@@ -10,6 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Implementazione di CalendarModel.
+ * Delega la logica a CalendarData e persiste lo stato dopo ogni operazione di scrittura.
+ */
 public final class CalendarModelImpl implements CalendarModel {
 
     private static final DateTimeFormatter DT_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
@@ -18,6 +22,10 @@ public final class CalendarModelImpl implements CalendarModel {
 
     private CalendarData data;
 
+    /**
+     * Costruisce il modello a partire da dati esistenti.
+     * @param data i dati iniziali del calendario
+     */
     public CalendarModelImpl(final CalendarData data) {
         this.data = data;
     }
@@ -147,6 +155,10 @@ public final class CalendarModelImpl implements CalendarModel {
         return result;
     }
 
+    /**
+     * Restituisce i dati correnti del calendario, usato dalla persistenza per il salvataggio.
+     * @return lo stato corrente del calendario
+     */
     public CalendarData getData() {
         return data;
     }

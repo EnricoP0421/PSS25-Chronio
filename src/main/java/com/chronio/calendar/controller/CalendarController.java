@@ -7,6 +7,10 @@ import java.util.Optional;
 import com.chronio.calendar.model.Event;
 import com.chronio.calendar.model.Tag;
 
+/**
+ * Interfaccia del controller del calendario.
+ * Espone le operazioni su tag ed eventi, delegando la logica al modello e la persistenza allo strato apposito.
+ */
 public interface CalendarController {
 
     /**

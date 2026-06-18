@@ -8,8 +8,16 @@ import com.chronio.calendar.view.MainView;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
-public class App extends Application {
+/**
+ * Punto di ingresso dell'applicazione Chronio.
+ */
+public final class App extends Application {
 
+    /**
+     * Inizializza e mostra la finestra principale.
+     *
+     * @param stage lo stage principale fornito da JavaFX
+     */
     @Override
     public void start(final Stage stage) {
         final CalendarPersistence persistence = new CalendarPersistence(CalendarPersistence.getDefaultPath());

@@ -29,7 +29,7 @@ import java.time.format.DateTimeParseException;
 /**
  * Dialog per la creazione e modifica di un evento.
  * Supporta tre modalità di apertura: nuovo evento su una data, nuovo evento con ora preimpostata,
- * e modifica di un evento esistente.
+ * e modifica di un evento esistente
  */
 public final class EventDialog extends Dialog<Void> {
 
@@ -46,23 +46,23 @@ public final class EventDialog extends Dialog<Void> {
     private static final int MAX_MINUTE = 59;
 
     /**
-     * Apre il dialog per creare un nuovo evento tutto il giorno sulla data specificata.
+     * Apre il dialog per creare un nuovo evento tutto il giorno sulla data specificata
      *
-     * @param owner      lo stage proprietario
+     * @param owner lo stage proprietario
      * @param controller il controller del calendario
-     * @param date       la data selezionata
+     * @param date la data selezionata
      */
     public EventDialog(final Stage owner, final CalendarController controller, final LocalDate date) {
         this(owner, controller, date, -1, null);
     }
 
     /**
-     * Apre il dialog per modificare un evento esistente.
+     * Apre il dialog per modificare un evento esistente
      *
-     * @param owner      lo stage proprietario
+     * @param owner lo stage proprietario
      * @param controller il controller del calendario
-     * @param date       la data selezionata
-     * @param existing   l'evento da modificare
+     * @param date la data selezionata
+     * @param existing l'evento da modificare
      */
     public EventDialog(final Stage owner, final CalendarController controller,
                        final LocalDate date, final Event existing) {
