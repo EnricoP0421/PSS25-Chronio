@@ -153,11 +153,23 @@ public final class BudgetView extends HBox implements BudgetController.View {
         
         Platform.runLater(() -> {
             final var data = pieChart.getData();
+
+            // Allineamenti colori nelle fette del cerchio.
             for (int i = 0; i < data.size(); i++) {
                 final Node node = data.get(i).getNode();
                 if (node != null) {
                     node.setStyle("-fx-pie-color: " + sliceColors.get(i) + ";");
                 }
+            }
+
+            // Allineamenti colori nei simboli della legenda, abbinandoli per posizione.
+            final var legendItems = pieChart.lookupAll(".chart-legend-item-symbol");
+            int i = 0;
+            for (final Node symbol : legendItems) {
+                if (i < sliceColors.size()) {
+                    symbol.setStyle("-fx-background-color: " + sliceColors.get(i) + ";");
+                }
+                i++;
             }
         });
 
