@@ -23,7 +23,8 @@ public class App extends Application {
         // a vuoto: le rispettive view non esistono ancora in questa branch.
         final NavBar navBar = new NavBar(
                 () -> System.out.println("Calendario: non ancora implementato"),
-                () -> System.out.println("Bacheche: non ancora implementato"));
+                () -> System.out.println("Bacheche: non ancora implementato"),
+                () -> System.out.println("Budget: non ancora implementato"));
 
         // Contenitore principale: navbar in alto, budget al centro.
         final BorderPane root = new BorderPane();

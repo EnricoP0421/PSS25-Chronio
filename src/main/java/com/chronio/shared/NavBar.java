@@ -15,16 +15,19 @@ public final class NavBar {
 
     private final Runnable onCalendar;
     private final Runnable onKanban;
+    private final Runnable onBudget;
 
     /**
      * Costruisce la navbar con le azioni di navigazione.
      *
      * @param onCalendar azione eseguita al click su "Calendario"
      * @param onKanban   azione eseguita al click su "Bacheche"
+     * @param onBudget   azione eseguita al click su "Budget"
      */
-    public NavBar(final Runnable onCalendar, final Runnable onKanban) {
+    public NavBar(final Runnable onCalendar, final Runnable onKanban, final Runnable onBudget) {
         this.onCalendar = onCalendar;
         this.onKanban = onKanban;
+        this.onBudget = onBudget;
     }
 
     /**
@@ -38,14 +41,16 @@ public final class NavBar {
 
         final Button calBtn = new Button("Calendario");
         final Button kanBtn = new Button("Bacheche");
+        final Button budBtn = new Button("Budget");
 
         calBtn.setOnAction(e -> onCalendar.run());
         kanBtn.setOnAction(e -> onKanban.run());
+        budBtn.setOnAction(e -> onBudget.run());
 
         final Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        final HBox bar = new HBox(12, logo, spacer, calBtn, kanBtn);
+        final HBox bar = new HBox(12, logo, spacer, calBtn, kanBtn, budBtn);
         bar.setAlignment(Pos.CENTER_LEFT);
         bar.setStyle("-fx-padding: 8 16;");
         return bar;
