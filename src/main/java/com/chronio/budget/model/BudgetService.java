@@ -9,20 +9,37 @@ import java.util.List;
 import java.util.Map;
 import java.time.LocalDate;
 
+/**
+ * Logica applicativa del modulo budget: gestisce transazioni e tag,
+ * calcola riepiloghi e aggregazioni, e delega la persistenza al repository.
+ * Mantiene lo stato corrente in un {@link BudgetData} immutabile che viene
+ * sostituito a ogni modifica.
+ */
 public final class BudgetService {
 
     private final BudgetRepository repository;
     private BudgetData data;
 
+    /**
+     * Crea il service caricando subito i dati dal repository.
+     *
+     * @param repository il repository da cui caricare e su cui salvare i dati
+     */
     public BudgetService(final BudgetRepository repository) {
         this.repository = repository;
         this.data = repository.load();
     }
 
+    /**
+     * @return lo stato corrente del budget
+     */
     public BudgetData getData() {
         return data;
     }
 
+    /**
+     * @return la mappa id -> tag dei tag esistenti
+     */
     public LinkedHashMap<String, Tag> getTags() {
         return data.tags();
     }
