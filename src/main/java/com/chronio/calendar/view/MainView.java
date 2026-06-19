@@ -1,6 +1,8 @@
 package com.chronio.calendar.view;
 
 import com.chronio.calendar.controller.CalendarController;
+import com.chronio.kanban.controller.BoardController;
+import com.chronio.kanban.view.BoardView;
 import com.chronio.shared.NavBar;
 
 import javafx.scene.Scene;
@@ -17,37 +19,57 @@ public final class MainView {
     private static final int SCENE_WIDTH = 1200;
     private static final int SCENE_HEIGHT = 700;
 
-    private final CalendarController controller;
+    private final CalendarController calController;
+    private final BoardController boardController;
     private final Stage stage;
 
     /**
      * Costruisce la vista principale
-     * @param controller il controller del calendario
+     * @param calController il controller del calendario
+     * @param boardController il controller delle bacheche
      * @param stage lo stage principale
      */
-    public MainView(final CalendarController controller, final Stage stage) {
-        this.controller = controller;
+    public MainView(final CalendarController calController, final BoardController boardController, final Stage stage) {
+        this.calController = calController;
+        this.boardController = boardController;
         this.stage = stage;
     }
 
-    /**
+     /**
      * Costruisce e restituisce la scena principale dell'applicazione
      * @return Scene (1200 x 700)
      */
     public Scene build() {
         final BorderPane root = new BorderPane();
-        final EventSidebarView sidebarView = new EventSidebarView(controller);
-        final VBox sidebar = sidebarView.build();
-        final CalendarView calendarView = new CalendarView(controller, stage, sidebarView, sidebar);
 
-        final NavBar navBar = new NavBar(() -> { }, () -> { });
-        root.setTop(navBar.build());
-        root.setLeft(new TagSidebarView(controller, stage, () -> {
+        final EventSidebarView sidebarView = new EventSidebarView(calController);
+        final VBox sidebar = sidebarView.build();
+        final CalendarView calendarView = new CalendarView(calController, stage, sidebarView, sidebar);
+        final TagSidebarView tagSidebar = new TagSidebarView(calController, stage, () -> {
             calendarView.refresh();
             sidebarView.refresh(sidebar);
-        }).build());
-        root.setCenter(calendarView.build());
-        root.setRight(sidebar);
+        });
+
+        final BoardView boardView = new BoardView(boardController);
+        final BorderPane boardPane = boardView.build();
+
+        final Runnable showCalendar = () -> {
+            root.setStyle("");
+            root.setLeft(tagSidebar.build());
+            root.setCenter(calendarView.build());
+            root.setRight(sidebar);
+        };
+        final Runnable showBoard = () -> {
+            root.setStyle("");
+            root.setLeft(null);
+            root.setCenter(boardPane);
+            root.setRight(null);
+        };
+
+        final NavBar navBar = new NavBar(showCalendar, showBoard);
+        root.setTop(navBar.build());
+        showCalendar.run();
+
         return new Scene(root, SCENE_WIDTH, SCENE_HEIGHT);
     }
 }
