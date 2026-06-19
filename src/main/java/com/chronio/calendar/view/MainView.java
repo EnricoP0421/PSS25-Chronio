@@ -7,6 +7,7 @@ import com.chronio.shared.NavBar;
 
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -51,7 +52,7 @@ public final class MainView {
         });
 
         final BoardView boardView = new BoardView(boardController);
-        final BorderPane boardPane = boardView.build();
+        final StackPane boardPane = boardView.build();
 
         final Runnable showCalendar = () -> {
             root.setStyle("");
