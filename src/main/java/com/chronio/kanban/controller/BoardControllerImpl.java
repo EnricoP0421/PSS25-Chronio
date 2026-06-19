@@ -10,6 +10,7 @@ import com.chronio.kanban.model.Board;
 import com.chronio.kanban.model.BoardData;
 import com.chronio.kanban.model.Card;
 import com.chronio.kanban.model.Column;
+import com.chronio.kanban.model.KanbanTag;
 import com.chronio.kanban.persistence.BoardPersistence;
 
 public final class BoardControllerImpl implements BoardController {
@@ -28,12 +29,36 @@ public final class BoardControllerImpl implements BoardController {
     }
 
     @Override
+    public Map<String, KanbanTag> getTags() {
+        return data.tags();
+    }
+
+    @Override
+    public KanbanTag createTag(final String name, final String color) {
+        final String id = "kt" + data.nextTagId();
+        final KanbanTag tag = new KanbanTag(id, name, color);
+        final LinkedHashMap<String, KanbanTag> tags = new LinkedHashMap<>(data.tags());
+        tags.put(id, tag);
+        data = new BoardData(data.boards(), tags, data.nextBoardId(), data.nextColumnId(), data.nextCardId(), data.nextTagId() + 1);
+        persistence.save(data);
+        return tag;
+    }
+
+    @Override
+    public void deleteTag(final String tagId) {
+        final LinkedHashMap<String, KanbanTag> tags = new LinkedHashMap<>(data.tags());
+        tags.remove(tagId);
+        data = new BoardData(data.boards(), tags, data.nextBoardId(), data.nextColumnId(), data.nextCardId(), data.nextTagId());
+        persistence.save(data);
+    }
+
+    @Override
     public Board createBoard(final String title) {
         final String id = "b" + data.nextBoardId();
         final Board board = new Board(id, title, new LinkedHashMap<>());
         final LinkedHashMap<String, Board> boards = new LinkedHashMap<>(data.boards());
         boards.put(id, board);
-        data = new BoardData(boards, data.nextBoardId() + 1, data.nextColumnId(), data.nextCardId());
+        data = new BoardData(boards, data.tags(), data.nextBoardId() + 1, data.nextColumnId(), data.nextCardId(), data.nextTagId());
         persistence.save(data);
         return board;
     }
@@ -47,7 +72,7 @@ public final class BoardControllerImpl implements BoardController {
         final Board updated = new Board(boardId, title, existing.columns());
         final LinkedHashMap<String, Board> boards = new LinkedHashMap<>(data.boards());
         boards.put(boardId, updated);
-        data = new BoardData(boards, data.nextBoardId(), data.nextColumnId(), data.nextCardId());
+        data = new BoardData(boards, data.tags(), data.nextBoardId(), data.nextColumnId(), data.nextCardId(), data.nextTagId());
         persistence.save(data);
         return Optional.of(updated);
     }
@@ -56,7 +81,7 @@ public final class BoardControllerImpl implements BoardController {
     public void deleteBoard(final String boardId) {
         final LinkedHashMap<String, Board> boards = new LinkedHashMap<>(data.boards());
         boards.remove(boardId);
-        data = new BoardData(boards, data.nextBoardId(), data.nextColumnId(), data.nextCardId());
+        data = new BoardData(boards, data.tags(), data.nextBoardId(), data.nextColumnId(), data.nextCardId(), data.nextTagId());
         persistence.save(data);
     }
 
@@ -73,7 +98,7 @@ public final class BoardControllerImpl implements BoardController {
         final Board updated = new Board(boardId, board.title(), columns);
         final LinkedHashMap<String, Board> boards = new LinkedHashMap<>(data.boards());
         boards.put(boardId, updated);
-        data = new BoardData(boards, data.nextBoardId(), data.nextColumnId() + 1, data.nextCardId());
+        data = new BoardData(boards, data.tags(), data.nextBoardId(), data.nextColumnId() + 1, data.nextCardId(), data.nextTagId());
         persistence.save(data);
         return column;
     }
@@ -94,7 +119,7 @@ public final class BoardControllerImpl implements BoardController {
         final Board updatedBoard = new Board(boardId, board.title(), columns);
         final LinkedHashMap<String, Board> boards = new LinkedHashMap<>(data.boards());
         boards.put(boardId, updatedBoard);
-        data = new BoardData(boards, data.nextBoardId(), data.nextColumnId(), data.nextCardId());
+        data = new BoardData(boards, data.tags(), data.nextBoardId(), data.nextColumnId(), data.nextCardId(), data.nextTagId());
         persistence.save(data);
         return Optional.of(updated);
     }
@@ -110,7 +135,7 @@ public final class BoardControllerImpl implements BoardController {
         final Board updated = new Board(boardId, board.title(), columns);
         final LinkedHashMap<String, Board> boards = new LinkedHashMap<>(data.boards());
         boards.put(boardId, updated);
-        data = new BoardData(boards, data.nextBoardId(), data.nextColumnId(), data.nextCardId());
+        data = new BoardData(boards, data.tags(), data.nextBoardId(), data.nextColumnId(), data.nextCardId(), data.nextTagId());
         persistence.save(data);
     }
 
@@ -135,7 +160,7 @@ public final class BoardControllerImpl implements BoardController {
         final Board updatedBoard = new Board(boardId, board.title(), columns);
         final LinkedHashMap<String, Board> boards = new LinkedHashMap<>(data.boards());
         boards.put(boardId, updatedBoard);
-        data = new BoardData(boards, data.nextBoardId(), data.nextColumnId(), data.nextCardId() + 1);
+        data = new BoardData(boards, data.tags(), data.nextBoardId(), data.nextColumnId(), data.nextCardId() + 1, data.nextTagId());
         persistence.save(data);
         return card;
     }
@@ -160,7 +185,7 @@ public final class BoardControllerImpl implements BoardController {
         final Board updatedBoard = new Board(boardId, board.title(), columns);
         final LinkedHashMap<String, Board> boards = new LinkedHashMap<>(data.boards());
         boards.put(boardId, updatedBoard);
-        data = new BoardData(boards, data.nextBoardId(), data.nextColumnId(), data.nextCardId());
+        data = new BoardData(boards, data.tags(), data.nextBoardId(), data.nextColumnId(), data.nextCardId(), data.nextTagId());
         persistence.save(data);
         return Optional.of(updated);
     }
@@ -183,7 +208,7 @@ public final class BoardControllerImpl implements BoardController {
         final Board updatedBoard = new Board(boardId, board.title(), columns);
         final LinkedHashMap<String, Board> boards = new LinkedHashMap<>(data.boards());
         boards.put(boardId, updatedBoard);
-        data = new BoardData(boards, data.nextBoardId(), data.nextColumnId(), data.nextCardId());
+        data = new BoardData(boards, data.tags(), data.nextBoardId(), data.nextColumnId(), data.nextCardId(), data.nextTagId());
         persistence.save(data);
     }
 
