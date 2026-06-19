@@ -7,10 +7,17 @@ import java.util.Optional;
 import com.chronio.kanban.model.Board;
 import com.chronio.kanban.model.Card;
 import com.chronio.kanban.model.Column;
+import com.chronio.kanban.model.KanbanTag;
 
 public interface BoardController {
 
     Map<String, Board> getBoards();
+
+    Map<String, KanbanTag> getTags();
+
+    KanbanTag createTag(String name, String color);
+
+    void deleteTag(String tagId);
 
     Board createBoard(String title);
 

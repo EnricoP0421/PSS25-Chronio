@@ -4,12 +4,14 @@ import java.util.LinkedHashMap;
 
 public record BoardData(
         LinkedHashMap<String, Board> boards,
+        LinkedHashMap<String, KanbanTag> tags,
         int nextBoardId,
         int nextColumnId,
-        int nextCardId
+        int nextCardId,
+        int nextTagId
 ) {
 
     public static BoardData empty() {
-        return new BoardData(new LinkedHashMap<>(), 1, 1, 1);
+        return new BoardData(new LinkedHashMap<>(), new LinkedHashMap<>(), 1, 1, 1, 1);
     }
 }
