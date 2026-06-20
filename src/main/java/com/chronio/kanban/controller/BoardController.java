@@ -38,5 +38,7 @@ public interface BoardController {
 
     void deleteCard(String boardId, String columnId, String cardId);
 
+    void toggleCard(String boardId, String columnId, String cardId);
+
     List<Card> getFilteredCards(String boardId, String columnId, String tagId);
 }
