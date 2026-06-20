@@ -19,6 +19,8 @@ public interface BoardController {
 
     void deleteTag(String tagId);
 
+    Optional<KanbanTag> updateTag(String tagId, String name, String color);
+
     Board createBoard(String title);
 
     Optional<Board> renameBoard(String boardId, String title);
@@ -31,14 +33,14 @@ public interface BoardController {
 
     void deleteColumn(String boardId, String columnId);
 
-    Card createCard(String boardId, String columnId, String title, String description, String tagId);
+    Card createCard(String boardId, String columnId, String title, String description, List<String> tagIds);
 
     Optional<Card> updateCard(String boardId, String columnId, String cardId,
-                              String title, String description, String tagId);
+                              String title, String description, List<String> tagIds);
 
     void deleteCard(String boardId, String columnId, String cardId);
 
     void toggleCard(String boardId, String columnId, String cardId);
 
-    List<Card> getFilteredCards(String boardId, String columnId, String tagId);
+    List<Card> getFilteredCards(String boardId, String columnId, List<String> tagIds);
 }

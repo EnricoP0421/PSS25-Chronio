@@ -53,6 +53,20 @@ public final class BoardControllerImpl implements BoardController {
     }
 
     @Override
+    public Optional<KanbanTag> updateTag(final String tagId, final String name, final String color) {
+        final KanbanTag existing = data.tags().get(tagId);
+        if (existing == null) {
+            return Optional.empty();
+        }
+        final KanbanTag updated = new KanbanTag(tagId, name, color);
+        final LinkedHashMap<String, KanbanTag> tags = new LinkedHashMap<>(data.tags());
+        tags.put(tagId, updated);
+        data = new BoardData(data.boards(), tags, data.nextBoardId(), data.nextColumnId(), data.nextCardId(), data.nextTagId());
+        persistence.save(data);
+        return Optional.of(updated);
+    }
+
+    @Override
     public Board createBoard(final String title) {
         final String id = "b" + data.nextBoardId();
         final Board board = new Board(id, title, new LinkedHashMap<>());
@@ -141,7 +155,7 @@ public final class BoardControllerImpl implements BoardController {
 
     @Override
     public Card createCard(final String boardId, final String columnId,
-                           final String title, final String description, final String tagId) {
+                           final String title, final String description, final List<String> tagIds) {
         final Board board = data.boards().get(boardId);
         if (board == null) {
             throw new IllegalArgumentException("Board non trovata: " + boardId);
@@ -151,7 +165,7 @@ public final class BoardControllerImpl implements BoardController {
             throw new IllegalArgumentException("Colonna non trovata: " + columnId);
         }
         final String id = "k" + data.nextCardId();
-        final Card card = new Card(id, title, description, tagId, false);
+        final Card card = new Card(id, title, description, tagIds != null ? tagIds : List.of(), false);
         final LinkedHashMap<String, Card> cards = new LinkedHashMap<>(column.cards());
         cards.put(id, card);
         final LinkedHashMap<String, Card> reordered = new LinkedHashMap<>();
@@ -170,7 +184,7 @@ public final class BoardControllerImpl implements BoardController {
 
     @Override
     public Optional<Card> updateCard(final String boardId, final String columnId, final String cardId,
-                                     final String title, final String description, final String tagId) {
+                                     final String title, final String description, final List<String> tagIds) {
         final Board board = data.boards().get(boardId);
         if (board == null) {
             return Optional.empty();
@@ -179,7 +193,7 @@ public final class BoardControllerImpl implements BoardController {
         if (column == null || !column.cards().containsKey(cardId)) {
             return Optional.empty();
         }
-        final Card updated = new Card(cardId, title, description, tagId, column.cards().get(cardId).completed());
+        final Card updated = new Card(cardId, title, description, tagIds != null ? tagIds : List.of(), column.cards().get(cardId).completed());
         final LinkedHashMap<String, Card> cards = new LinkedHashMap<>(column.cards());
         cards.put(cardId, updated);
         final Column updatedCol = new Column(columnId, column.title(), cards);
@@ -229,7 +243,7 @@ public final class BoardControllerImpl implements BoardController {
         if (existing == null) {
             return;
         }
-        final Card toggled = new Card(cardId, existing.title(), existing.description(), existing.tagId(), !existing.completed());
+        final Card toggled = new Card(cardId, existing.title(), existing.description(), existing.tagIds(), !existing.completed());
         final LinkedHashMap<String, Card> cards = new LinkedHashMap<>(column.cards());
         cards.put(cardId, toggled);
         final LinkedHashMap<String, Card> reordered = new LinkedHashMap<>();
@@ -246,7 +260,7 @@ public final class BoardControllerImpl implements BoardController {
     }
 
     @Override
-    public List<Card> getFilteredCards(final String boardId, final String columnId, final String tagId) {
+    public List<Card> getFilteredCards(final String boardId, final String columnId, final List<String> tagIds) {
         final Board board = data.boards().get(boardId);
         if (board == null) {
             return List.of();
@@ -256,7 +270,7 @@ public final class BoardControllerImpl implements BoardController {
             return List.of();
         }
         return column.cards().values().stream()
-            .filter(c -> tagId == null || tagId.equals(c.tagId()))
+            .filter(c -> tagIds == null || tagIds.isEmpty() || c.tagIds().stream().anyMatch(tagIds::contains))
             .collect(Collectors.toList());
     }
 
