@@ -4,6 +4,7 @@ public record Card(
         String id,
         String title,
         String description,
-        String tagId
+        String tagId,
+        boolean completed
 ) {
 }

@@ -151,10 +151,13 @@ public final class BoardControllerImpl implements BoardController {
             throw new IllegalArgumentException("Colonna non trovata: " + columnId);
         }
         final String id = "k" + data.nextCardId();
-        final Card card = new Card(id, title, description, tagId);
+        final Card card = new Card(id, title, description, tagId, false);
         final LinkedHashMap<String, Card> cards = new LinkedHashMap<>(column.cards());
         cards.put(id, card);
-        final Column updatedCol = new Column(columnId, column.title(), cards);
+        final LinkedHashMap<String, Card> reordered = new LinkedHashMap<>();
+        cards.entrySet().stream().filter(e -> !e.getValue().completed()).forEach(e -> reordered.put(e.getKey(), e.getValue()));
+        cards.entrySet().stream().filter(e -> e.getValue().completed()).forEach(e -> reordered.put(e.getKey(), e.getValue()));
+        final Column updatedCol = new Column(columnId, column.title(), reordered);
         final LinkedHashMap<String, Column> columns = new LinkedHashMap<>(board.columns());
         columns.put(columnId, updatedCol);
         final Board updatedBoard = new Board(boardId, board.title(), columns);
@@ -176,7 +179,7 @@ public final class BoardControllerImpl implements BoardController {
         if (column == null || !column.cards().containsKey(cardId)) {
             return Optional.empty();
         }
-        final Card updated = new Card(cardId, title, description, tagId);
+        final Card updated = new Card(cardId, title, description, tagId, column.cards().get(cardId).completed());
         final LinkedHashMap<String, Card> cards = new LinkedHashMap<>(column.cards());
         cards.put(cardId, updated);
         final Column updatedCol = new Column(columnId, column.title(), cards);
@@ -203,6 +206,36 @@ public final class BoardControllerImpl implements BoardController {
         final LinkedHashMap<String, Card> cards = new LinkedHashMap<>(column.cards());
         cards.remove(cardId);
         final Column updatedCol = new Column(columnId, column.title(), cards);
+        final LinkedHashMap<String, Column> columns = new LinkedHashMap<>(board.columns());
+        columns.put(columnId, updatedCol);
+        final Board updatedBoard = new Board(boardId, board.title(), columns);
+        final LinkedHashMap<String, Board> boards = new LinkedHashMap<>(data.boards());
+        boards.put(boardId, updatedBoard);
+        data = new BoardData(boards, data.tags(), data.nextBoardId(), data.nextColumnId(), data.nextCardId(), data.nextTagId());
+        persistence.save(data);
+    }
+
+    @Override
+    public void toggleCard(final String boardId, final String columnId, final String cardId) {
+        final Board board = data.boards().get(boardId);
+        if (board == null) {
+            return;
+        }
+        final Column column = board.columns().get(columnId);
+        if (column == null) {
+            return;
+        }
+        final Card existing = column.cards().get(cardId);
+        if (existing == null) {
+            return;
+        }
+        final Card toggled = new Card(cardId, existing.title(), existing.description(), existing.tagId(), !existing.completed());
+        final LinkedHashMap<String, Card> cards = new LinkedHashMap<>(column.cards());
+        cards.put(cardId, toggled);
+        final LinkedHashMap<String, Card> reordered = new LinkedHashMap<>();
+        cards.entrySet().stream().filter(e -> !e.getValue().completed()).forEach(e -> reordered.put(e.getKey(), e.getValue()));
+        cards.entrySet().stream().filter(e -> e.getValue().completed()).forEach(e -> reordered.put(e.getKey(), e.getValue()));
+        final Column updatedCol = new Column(columnId, column.title(), reordered);
         final LinkedHashMap<String, Column> columns = new LinkedHashMap<>(board.columns());
         columns.put(columnId, updatedCol);
         final Board updatedBoard = new Board(boardId, board.title(), columns);

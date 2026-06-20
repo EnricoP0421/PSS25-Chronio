@@ -115,8 +115,15 @@ public final class BoardInsideView {
     }
 
     private HBox buildCardItem(final String columnId, final Card card) {
+        final javafx.scene.control.CheckBox check = new javafx.scene.control.CheckBox();
+        check.setSelected(card.completed());
+        check.setOnAction(e -> {
+            controller.toggleCard(boardId, columnId, card.id());
+            refresh();
+        });
+
         final Label lbl = new Label(card.title());
-        lbl.setStyle("-fx-text-fill: black;");
+        lbl.setStyle("-fx-text-fill: black;" + (card.completed() ? " -fx-strikethrough: true; -fx-opacity: 0.5;" : ""));
         lbl.setWrapText(true);
         lbl.setMaxWidth(Double.MAX_VALUE);
 
@@ -127,7 +134,7 @@ public final class BoardInsideView {
             refresh();
         });
 
-        final HBox row = new HBox(4, lbl, del);
+        final HBox row = new HBox(4, check, lbl, del);
         row.setAlignment(Pos.CENTER_LEFT);
         row.setStyle("-fx-border-color: gray; -fx-padding: 4; -fx-background-color: white;");
         return row;
