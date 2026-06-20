@@ -39,8 +39,10 @@ public final class NavBar {
         final Button calBtn = new Button("Calendario");
         final Button kanBtn = new Button("Bacheche");
 
-        calBtn.setOnAction(e -> onCalendar.run());
-        kanBtn.setOnAction(e -> onKanban.run());
+        calBtn.setFocusTraversable(false);
+        kanBtn.setFocusTraversable(false);
+        calBtn.setOnAction(e -> { onCalendar.run(); calBtn.getScene().getRoot().requestFocus(); });
+        kanBtn.setOnAction(e -> { onKanban.run(); kanBtn.getScene().getRoot().requestFocus(); });
 
         final Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
