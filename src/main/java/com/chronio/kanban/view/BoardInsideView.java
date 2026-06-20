@@ -5,19 +5,32 @@ import com.chronio.kanban.model.Board;
 import com.chronio.kanban.model.Card;
 import com.chronio.kanban.model.Column;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.util.Duration;
 
 public final class BoardInsideView {
 
@@ -26,10 +39,12 @@ public final class BoardInsideView {
     private static final int COLUMN_WIDTH = 220;
     private static final int COLUMN_SPACING = 12;
     private static final int CARD_SPACING = 6;
+    private static final int TAG_DOT_RADIUS = 6;
 
     private final BoardController controller;
     private final String boardId;
     private final Runnable onBack;
+    private final Set<String> activeTagIds = new HashSet<>();
     private StackPane container;
 
     public BoardInsideView(final BoardController controller, final String boardId, final Runnable onBack) {
@@ -60,6 +75,10 @@ public final class BoardInsideView {
         header.setPadding(new Insets(0, 0, PADDING, 0));
         header.setAlignment(Pos.CENTER_LEFT);
         root.setTop(header);
+
+        final KanbanTagSidebarView sidebarView = new KanbanTagSidebarView(controller, activeTagIds, this::refresh);
+        final VBox sidebar = sidebarView.build();
+        root.setLeft(sidebar);
         root.setCenter(buildColumnsArea(board));
         return root;
     }
@@ -90,31 +109,18 @@ public final class BoardInsideView {
 
         final Runnable save = () -> {
             final String val = editor.getText().trim();
-            if (!val.isBlank()) {
-                controller.renameColumn(boardId, col.id(), val);
-            }
+            if (!val.isBlank()) controller.renameColumn(boardId, col.id(), val);
             refresh();
         };
         editor.setOnAction(e -> save.run());
         editor.focusedProperty().addListener((obs, o, focused) -> { if (!focused) save.run(); });
         editor.setOnKeyPressed(e -> { if (e.getCode() == KeyCode.ESCAPE) refresh(); });
 
-        title.setOnMouseClicked(e -> {
-            if (e.getClickCount() == 2) {
-                e.consume();
-                title.setVisible(false); title.setManaged(false);
-                editor.setVisible(true); editor.setManaged(true);
-                editor.selectAll();
-                editor.requestFocus();
-            }
-        });
-
         final Button editCol = new Button("✎");
         editCol.setOnAction(e -> {
             title.setVisible(false); title.setManaged(false);
             editor.setVisible(true); editor.setManaged(true);
-            editor.selectAll();
-            editor.requestFocus();
+            editor.selectAll(); editor.requestFocus();
         });
 
         final Button delCol = new Button("✕");
@@ -125,17 +131,21 @@ public final class BoardInsideView {
         colHeader.setAlignment(Pos.CENTER_LEFT);
 
         final VBox cardsBox = new VBox(CARD_SPACING);
-        col.cards().values().forEach(card -> cardsBox.getChildren().add(buildCardItem(col.id(), card)));
+        col.cards().values().forEach(card -> {
+            final List<String> ids = card.tagIds() != null ? card.tagIds() : List.of();
+            if (activeTagIds.isEmpty() || ids.stream().anyMatch(activeTagIds::contains)) {
+                cardsBox.getChildren().add(buildCardItem(col.id(), card));
+            }
+        });
 
         final Button addCard = new Button("+ Aggiungi card");
-        addCard.setStyle("-fx-background-color: transparent; -fx-cursor: hand; -fx-border-color: gray; -fx-border-style: dashed; -fx-text-fill: black;");
         addCard.setMaxWidth(Double.MAX_VALUE);
         addCard.setOnAction(e -> {
             final TextInputDialog dialog = new TextInputDialog();
             dialog.setHeaderText(null);
             dialog.setContentText("Titolo card:");
             dialog.showAndWait().filter(s -> !s.isBlank()).ifPresent(name -> {
-                controller.createCard(boardId, col.id(), name, "", null);
+                controller.createCard(boardId, col.id(), name, "", List.of());
                 refresh();
             });
         });
@@ -147,60 +157,93 @@ public final class BoardInsideView {
         return column;
     }
 
-    private HBox buildCardItem(final String columnId, final Card card) {
+    private VBox buildCardItem(final String columnId, final Card card) {
         final CheckBox check = new CheckBox();
         check.setSelected(card.completed());
-        check.setOnAction(e -> {
-            controller.toggleCard(boardId, columnId, card.id());
-            refresh();
-        });
+        check.setOnAction(e -> { controller.toggleCard(boardId, columnId, card.id()); refresh(); });
 
         final Label lbl = new Label(card.title());
         lbl.setStyle("-fx-text-fill: black;" + (card.completed() ? " -fx-strikethrough: true; -fx-opacity: 0.5;" : ""));
         lbl.setMaxWidth(Double.MAX_VALUE);
-        HBox.setHgrow(lbl, javafx.scene.layout.Priority.ALWAYS);
+        HBox.setHgrow(lbl, Priority.ALWAYS);
 
-        final TextField editor = new TextField(card.title());
-        editor.setVisible(false);
-        editor.setManaged(false);
+        final HBox dots = buildTagDots(card);
 
-        final Runnable save = () -> {
-            final String val = editor.getText().trim();
-            if (!val.isBlank()) {
-                controller.updateCard(boardId, columnId, card.id(), val, card.description(), card.tagId());
-            }
-            refresh();
-        };
-        editor.setOnAction(e -> save.run());
-        editor.focusedProperty().addListener((obs, o, focused) -> { if (!focused) save.run(); });
-        editor.setOnKeyPressed(e -> { if (e.getCode() == KeyCode.ESCAPE) refresh(); });
-
-        lbl.setOnMouseClicked(e -> {
-            if (e.getClickCount() == 2) {
-                e.consume();
-                lbl.setVisible(false); lbl.setManaged(false);
-                editor.setVisible(true); editor.setManaged(true);
-                editor.selectAll();
-                editor.requestFocus();
-            }
-        });
-
-        final Button edit = new Button("✎");
-        edit.setOnAction(e -> {
-            lbl.setVisible(false); lbl.setManaged(false);
-            editor.setVisible(true); editor.setManaged(true);
-            editor.selectAll();
-            editor.requestFocus();
-        });
+        final Button editBtn = new Button("✎");
+        editBtn.setOnAction(e -> openCardEditDialog(columnId, card));
 
         final Button del = new Button("✕");
         del.setStyle("-fx-text-fill: red;");
         del.setOnAction(e -> { controller.deleteCard(boardId, columnId, card.id()); refresh(); });
 
-        final HBox row = new HBox(4, check, lbl, editor, edit, del);
-        row.setAlignment(Pos.CENTER_LEFT);
-        row.setStyle("-fx-border-color: gray; -fx-padding: 4; -fx-background-color: white;");
-        return row;
+        final HBox topRow = new HBox(4, check, lbl, editBtn, del);
+        topRow.setAlignment(Pos.CENTER_LEFT);
+
+        final VBox cardBox = new VBox(2, topRow, dots);
+        cardBox.setStyle("-fx-border-color: gray; -fx-padding: 4; -fx-background-color: white;");
+        if (card.description() != null && !card.description().isBlank()) {
+            final Tooltip tip = new Tooltip(card.description());
+            tip.setShowDelay(Duration.ZERO);
+            lbl.setTooltip(tip);
+        }
+        return cardBox;
+    }
+
+    private HBox buildTagDots(final Card card) {
+        final HBox dots = new HBox(2);
+        dots.setAlignment(Pos.CENTER_LEFT);
+        (card.tagIds() != null ? card.tagIds() : List.of()).forEach(tid -> {
+            final var tag = controller.getTags().get((String) tid);
+            if (tag != null) {
+                final Circle dot = new Circle(TAG_DOT_RADIUS, Color.web(tag.color()));
+                final Tooltip tip = new Tooltip(tag.name());
+                tip.setShowDelay(Duration.ZERO);
+                Tooltip.install(dot, tip);
+                dots.getChildren().add(dot);
+            }
+        });
+        return dots;
+    }
+
+    private void openCardEditDialog(final String columnId, final Card card) {
+        final Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Modifica card");
+
+        final TextField titleField = new TextField(card.title());
+        final TextArea descField = new TextArea(card.description() != null ? card.description() : "");
+        descField.setPromptText("Descrizione");
+        descField.setPrefRowCount(3);
+
+        final List<String> selected = new ArrayList<>(card.tagIds() != null ? card.tagIds() : List.of());
+        final VBox tagBox = new VBox(CARD_SPACING);
+        controller.getTags().forEach((id, tag) -> {
+            final CheckBox cb = new CheckBox(tag.name());
+            cb.setSelected(selected.contains(id));
+            cb.setOnAction(e -> {
+                if (cb.isSelected()) selected.add(id);
+                else selected.remove(id);
+            });
+            final Circle dot = new Circle(TAG_DOT_RADIUS, Color.web(tag.color()));
+            final HBox row = new HBox(6, dot, cb);
+            row.setAlignment(Pos.CENTER_LEFT);
+            tagBox.getChildren().add(row);
+        });
+
+        final VBox content = new VBox(CARD_SPACING,
+            new Label("Titolo:"), titleField,
+            new Label("Descrizione:"), descField,
+            new Label("Tag:"), tagBox);
+        dialog.getDialogPane().setContent(content);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        dialog.setResultConverter(btn -> {
+            if (btn == ButtonType.OK && !titleField.getText().isBlank()) {
+                controller.updateCard(boardId, columnId, card.id(),
+                    titleField.getText(), descField.getText(), selected);
+            }
+            return null;
+        });
+        dialog.showAndWait();
+        refresh();
     }
 
     private VBox buildAddColumnCard() {
