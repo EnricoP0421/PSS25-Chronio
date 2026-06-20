@@ -8,9 +8,12 @@ import com.chronio.kanban.model.Column;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -81,14 +84,44 @@ public final class BoardInsideView {
         final Label title = new Label(col.title());
         title.setStyle("-fx-font-weight: bold; -fx-text-fill: black;");
 
-        final Button delCol = new Button("✕");
-        delCol.setStyle("-fx-background-color: transparent; -fx-text-fill: #e74c3c; -fx-cursor: hand;");
-        delCol.setOnAction(e -> {
-            controller.deleteColumn(boardId, col.id());
+        final TextField editor = new TextField(col.title());
+        editor.setVisible(false);
+        editor.setManaged(false);
+
+        final Runnable save = () -> {
+            final String val = editor.getText().trim();
+            if (!val.isBlank()) {
+                controller.renameColumn(boardId, col.id(), val);
+            }
             refresh();
+        };
+        editor.setOnAction(e -> save.run());
+        editor.focusedProperty().addListener((obs, o, focused) -> { if (!focused) save.run(); });
+        editor.setOnKeyPressed(e -> { if (e.getCode() == KeyCode.ESCAPE) refresh(); });
+
+        title.setOnMouseClicked(e -> {
+            if (e.getClickCount() == 2) {
+                e.consume();
+                title.setVisible(false); title.setManaged(false);
+                editor.setVisible(true); editor.setManaged(true);
+                editor.selectAll();
+                editor.requestFocus();
+            }
         });
 
-        final HBox colHeader = new HBox(8, title, delCol);
+        final Button editCol = new Button("✎");
+        editCol.setOnAction(e -> {
+            title.setVisible(false); title.setManaged(false);
+            editor.setVisible(true); editor.setManaged(true);
+            editor.selectAll();
+            editor.requestFocus();
+        });
+
+        final Button delCol = new Button("✕");
+        delCol.setStyle("-fx-text-fill: red;");
+        delCol.setOnAction(e -> { controller.deleteColumn(boardId, col.id()); refresh(); });
+
+        final HBox colHeader = new HBox(4, title, editor, editCol, delCol);
         colHeader.setAlignment(Pos.CENTER_LEFT);
 
         final VBox cardsBox = new VBox(CARD_SPACING);
@@ -115,7 +148,7 @@ public final class BoardInsideView {
     }
 
     private HBox buildCardItem(final String columnId, final Card card) {
-        final javafx.scene.control.CheckBox check = new javafx.scene.control.CheckBox();
+        final CheckBox check = new CheckBox();
         check.setSelected(card.completed());
         check.setOnAction(e -> {
             controller.toggleCard(boardId, columnId, card.id());
@@ -124,17 +157,47 @@ public final class BoardInsideView {
 
         final Label lbl = new Label(card.title());
         lbl.setStyle("-fx-text-fill: black;" + (card.completed() ? " -fx-strikethrough: true; -fx-opacity: 0.5;" : ""));
-        lbl.setWrapText(true);
         lbl.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(lbl, javafx.scene.layout.Priority.ALWAYS);
 
-        final Button del = new Button("✕");
-        del.setStyle("-fx-background-color: transparent; -fx-text-fill: #e74c3c; -fx-cursor: hand; -fx-font-size: 10px;");
-        del.setOnAction(e -> {
-            controller.deleteCard(boardId, columnId, card.id());
+        final TextField editor = new TextField(card.title());
+        editor.setVisible(false);
+        editor.setManaged(false);
+
+        final Runnable save = () -> {
+            final String val = editor.getText().trim();
+            if (!val.isBlank()) {
+                controller.updateCard(boardId, columnId, card.id(), val, card.description(), card.tagId());
+            }
             refresh();
+        };
+        editor.setOnAction(e -> save.run());
+        editor.focusedProperty().addListener((obs, o, focused) -> { if (!focused) save.run(); });
+        editor.setOnKeyPressed(e -> { if (e.getCode() == KeyCode.ESCAPE) refresh(); });
+
+        lbl.setOnMouseClicked(e -> {
+            if (e.getClickCount() == 2) {
+                e.consume();
+                lbl.setVisible(false); lbl.setManaged(false);
+                editor.setVisible(true); editor.setManaged(true);
+                editor.selectAll();
+                editor.requestFocus();
+            }
         });
 
-        final HBox row = new HBox(4, check, lbl, del);
+        final Button edit = new Button("✎");
+        edit.setOnAction(e -> {
+            lbl.setVisible(false); lbl.setManaged(false);
+            editor.setVisible(true); editor.setManaged(true);
+            editor.selectAll();
+            editor.requestFocus();
+        });
+
+        final Button del = new Button("✕");
+        del.setStyle("-fx-text-fill: red;");
+        del.setOnAction(e -> { controller.deleteCard(boardId, columnId, card.id()); refresh(); });
+
+        final HBox row = new HBox(4, check, lbl, editor, edit, del);
         row.setAlignment(Pos.CENTER_LEFT);
         row.setStyle("-fx-border-color: gray; -fx-padding: 4; -fx-background-color: white;");
         return row;

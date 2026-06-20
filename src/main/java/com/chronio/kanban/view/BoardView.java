@@ -7,9 +7,12 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
@@ -53,18 +56,50 @@ public final class BoardView {
         final Label title = new Label(board.title());
         title.setStyle("-fx-font-weight: bold;");
 
-        final Button del = new Button("✕");
-        del.setStyle("-fx-background-color: transparent; -fx-text-fill: #e74c3c; -fx-cursor: hand;");
-        del.setOnAction(e -> {
-            controller.deleteBoard(board.id());
+        final TextField editor = new TextField(board.title());
+        editor.setVisible(false);
+        editor.setManaged(false);
+
+        final Runnable save = () -> {
+            final String val = editor.getText().trim();
+            if (!val.isBlank()) {
+                controller.renameBoard(board.id(), val);
+            }
             showBoardList();
+        };
+        editor.setOnAction(e -> save.run());
+        editor.focusedProperty().addListener((obs, o, focused) -> { if (!focused) save.run(); });
+        editor.setOnKeyPressed(e -> { if (e.getCode() == KeyCode.ESCAPE) showBoardList(); });
+
+        title.setOnMouseClicked(e -> {
+            if (e.getClickCount() == 2) {
+                e.consume();
+                title.setVisible(false); title.setManaged(false);
+                editor.setVisible(true); editor.setManaged(true);
+                editor.selectAll();
+                editor.requestFocus();
+            }
         });
 
-        final VBox card = new VBox(8, title, del);
+        final Button editBtn = new Button("✎");
+        editBtn.setOnAction(e -> {
+            title.setVisible(false); title.setManaged(false);
+            editor.setVisible(true); editor.setManaged(true);
+            editor.selectAll();
+            editor.requestFocus();
+        });
+
+        final Button del = new Button("✕");
+        del.setStyle("-fx-text-fill: red;");
+        del.setOnAction(e -> { controller.deleteBoard(board.id()); showBoardList(); });
+
+        final HBox btnRow = new HBox(4, editBtn, del);
+        btnRow.setAlignment(Pos.CENTER);
+        final VBox card = new VBox(8, title, editor, btnRow);
         card.setAlignment(Pos.CENTER);
         card.setPrefSize(CARD_WIDTH, CARD_HEIGHT);
         card.setStyle(CARD_STYLE);
-        card.setOnMouseClicked(e -> showBoardDetail(board.id()));
+        card.setOnMouseClicked(e -> { if (e.getClickCount() == 1 && title.isVisible()) showBoardDetail(board.id()); });
         return card;
     }
 
