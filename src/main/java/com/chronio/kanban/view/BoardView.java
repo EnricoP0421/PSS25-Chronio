@@ -68,14 +68,24 @@ public final class BoardView {
             showBoardList();
         };
         editor.setOnAction(e -> save.run());
-        editor.focusedProperty().addListener((obs, o, focused) -> { if (!focused) save.run(); });
-        editor.setOnKeyPressed(e -> { if (e.getCode() == KeyCode.ESCAPE) showBoardList(); });
+        editor.focusedProperty().addListener((obs, o, focused) -> {
+            if (!focused) {
+                save.run();
+            }
+        });
+        editor.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ESCAPE) {
+                showBoardList();
+            }
+        });
 
         title.setOnMouseClicked(e -> {
             if (e.getClickCount() == 2) {
                 e.consume();
-                title.setVisible(false); title.setManaged(false);
-                editor.setVisible(true); editor.setManaged(true);
+                title.setVisible(false);
+                title.setManaged(false);
+                editor.setVisible(true);
+                editor.setManaged(true);
                 editor.selectAll();
                 editor.requestFocus();
             }
@@ -83,15 +93,20 @@ public final class BoardView {
 
         final Button editBtn = new Button("✎");
         editBtn.setOnAction(e -> {
-            title.setVisible(false); title.setManaged(false);
-            editor.setVisible(true); editor.setManaged(true);
+            title.setVisible(false);
+            title.setManaged(false);
+            editor.setVisible(true);
+            editor.setManaged(true);
             editor.selectAll();
             editor.requestFocus();
         });
 
         final Button del = new Button("✕");
         del.setStyle("-fx-text-fill: red;");
-        del.setOnAction(e -> { controller.deleteBoard(board.id()); showBoardList(); });
+        del.setOnAction(e -> {
+            controller.deleteBoard(board.id());
+            showBoardList();
+        });
 
         final HBox btnRow = new HBox(4, editBtn, del);
         btnRow.setAlignment(Pos.CENTER);
@@ -99,7 +114,11 @@ public final class BoardView {
         card.setAlignment(Pos.CENTER);
         card.setPrefSize(CARD_WIDTH, CARD_HEIGHT);
         card.setStyle(CARD_STYLE);
-        card.setOnMouseClicked(e -> { if (e.getClickCount() == 1 && title.isVisible()) showBoardDetail(board.id()); });
+        card.setOnMouseClicked(e -> {
+            if (e.getClickCount() == 1 && title.isVisible()) {
+                showBoardDetail(board.id());
+            }
+        });
         return card;
     }
 
