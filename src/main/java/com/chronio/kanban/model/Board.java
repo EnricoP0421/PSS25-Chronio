@@ -1,10 +1,9 @@
 package com.chronio.kanban.model;
-
-import java.util.LinkedHashMap;
+import java.util.Map;
 
 public record Board(
         String id,
         String title,
-        LinkedHashMap<String, Column> columns
+        Map<String, Column> columns
 ) {
 }

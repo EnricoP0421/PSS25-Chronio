@@ -1,10 +1,11 @@
 package com.chronio.kanban.model;
 
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 public record BoardData(
-        LinkedHashMap<String, Board> boards,
-        LinkedHashMap<String, KanbanTag> tags,
+        Map<String, Board> boards,
+        Map<String, KanbanTag> tags,
         int nextBoardId,
         int nextColumnId,
         int nextCardId,

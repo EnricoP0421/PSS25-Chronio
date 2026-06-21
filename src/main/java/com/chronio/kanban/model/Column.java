@@ -1,10 +1,10 @@
 package com.chronio.kanban.model;
 
-import java.util.LinkedHashMap;
+import java.util.Map;
 
 public record Column(
         String id,
         String title,
-        LinkedHashMap<String, Card> cards
+        Map<String, Card> cards
 ) {
 }
