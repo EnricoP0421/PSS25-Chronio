@@ -76,8 +76,11 @@ public final class KanbanTagSidebarView {
             final CheckBox cb = new CheckBox();
             cb.setSelected(activeTagIds.contains(id));
             cb.setOnAction(e -> {
-                if (cb.isSelected()) activeTagIds.add(id);
-                else activeTagIds.remove(id);
+                if (cb.isSelected()) {
+                    activeTagIds.add(id);
+                } else {
+                    activeTagIds.remove(id);
+                }
                 onFilterChanged.run();
             });
             final Circle dot = new Circle(TAG_DOT_RADIUS, Color.web(tag.color()));

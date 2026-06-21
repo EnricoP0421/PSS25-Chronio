@@ -41,8 +41,14 @@ public final class NavBar {
 
         calBtn.setFocusTraversable(false);
         kanBtn.setFocusTraversable(false);
-        calBtn.setOnAction(e -> { onCalendar.run(); calBtn.getScene().getRoot().requestFocus(); });
-        kanBtn.setOnAction(e -> { onKanban.run(); kanBtn.getScene().getRoot().requestFocus(); });
+        calBtn.setOnAction(e -> {
+            onCalendar.run();
+            calBtn.getScene().getRoot().requestFocus();
+        });
+        kanBtn.setOnAction(e -> {
+            onKanban.run();
+            kanBtn.getScene().getRoot().requestFocus();
+        });
 
         final Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
