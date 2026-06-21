@@ -1,14 +1,14 @@
 package com.chronio.kanban.view;
 
-import com.chronio.kanban.controller.BoardController;
-import com.chronio.kanban.model.Board;
-import com.chronio.kanban.model.Card;
-import com.chronio.kanban.model.Column;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import com.chronio.kanban.controller.BoardController;
+import com.chronio.kanban.model.Board;
+import com.chronio.kanban.model.Card;
+import com.chronio.kanban.model.Column;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -40,6 +40,7 @@ public final class BoardInsideView {
     private static final int COLUMN_SPACING = 12;
     private static final int CARD_SPACING = 6;
     private static final int TAG_DOT_RADIUS = 6;
+    private static final int ADD_COLUMN_HEIGHT = 60;
 
     private final BoardController controller;
     private final String boardId;
@@ -77,8 +78,7 @@ public final class BoardInsideView {
         root.setTop(header);
 
         final KanbanTagSidebarView sidebarView = new KanbanTagSidebarView(controller, activeTagIds, this::refresh);
-        final VBox sidebar = sidebarView.build();
-        root.setLeft(sidebar);
+        root.setLeft(sidebarView.build());
         root.setCenter(buildColumnsArea(board));
         return root;
     }
@@ -109,23 +109,39 @@ public final class BoardInsideView {
 
         final Runnable save = () -> {
             final String val = editor.getText().trim();
-            if (!val.isBlank()) controller.renameColumn(boardId, col.id(), val);
+            if (!val.isBlank()) {
+                controller.renameColumn(boardId, col.id(), val);
+            }
             refresh();
         };
         editor.setOnAction(e -> save.run());
-        editor.focusedProperty().addListener((obs, o, focused) -> { if (!focused) save.run(); });
-        editor.setOnKeyPressed(e -> { if (e.getCode() == KeyCode.ESCAPE) refresh(); });
+        editor.focusedProperty().addListener((obs, o, focused) -> {
+            if (!focused) {
+                save.run();
+            }
+        });
+        editor.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ESCAPE) {
+                refresh();
+            }
+        });
 
         final Button editCol = new Button("✎");
         editCol.setOnAction(e -> {
-            title.setVisible(false); title.setManaged(false);
-            editor.setVisible(true); editor.setManaged(true);
-            editor.selectAll(); editor.requestFocus();
+            title.setVisible(false);
+            title.setManaged(false);
+            editor.setVisible(true);
+            editor.setManaged(true);
+            editor.selectAll();
+            editor.requestFocus();
         });
 
         final Button delCol = new Button("✕");
         delCol.setStyle("-fx-text-fill: red;");
-        delCol.setOnAction(e -> { controller.deleteColumn(boardId, col.id()); refresh(); });
+        delCol.setOnAction(e -> {
+            controller.deleteColumn(boardId, col.id());
+            refresh();
+        });
 
         final HBox colHeader = new HBox(4, title, editor, editCol, delCol);
         colHeader.setAlignment(Pos.CENTER_LEFT);
@@ -160,12 +176,21 @@ public final class BoardInsideView {
     private VBox buildCardItem(final String columnId, final Card card) {
         final CheckBox check = new CheckBox();
         check.setSelected(card.completed());
-        check.setOnAction(e -> { controller.toggleCard(boardId, columnId, card.id()); refresh(); });
+        check.setOnAction(e -> {
+            controller.toggleCard(boardId, columnId, card.id());
+            refresh();
+        });
 
         final Label lbl = new Label(card.title());
         lbl.setStyle("-fx-text-fill: black;" + (card.completed() ? " -fx-strikethrough: true; -fx-opacity: 0.5;" : ""));
         lbl.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(lbl, Priority.ALWAYS);
+
+        if (card.description() != null && !card.description().isBlank()) {
+            final Tooltip tip = new Tooltip(card.description());
+            tip.setShowDelay(Duration.ZERO);
+            lbl.setTooltip(tip);
+        }
 
         final HBox dots = buildTagDots(card);
 
@@ -174,18 +199,16 @@ public final class BoardInsideView {
 
         final Button del = new Button("✕");
         del.setStyle("-fx-text-fill: red;");
-        del.setOnAction(e -> { controller.deleteCard(boardId, columnId, card.id()); refresh(); });
+        del.setOnAction(e -> {
+            controller.deleteCard(boardId, columnId, card.id());
+            refresh();
+        });
 
         final HBox topRow = new HBox(4, check, lbl, editBtn, del);
         topRow.setAlignment(Pos.CENTER_LEFT);
 
         final VBox cardBox = new VBox(2, topRow, dots);
         cardBox.setStyle("-fx-border-color: gray; -fx-padding: 4; -fx-background-color: white;");
-        if (card.description() != null && !card.description().isBlank()) {
-            final Tooltip tip = new Tooltip(card.description());
-            tip.setShowDelay(Duration.ZERO);
-            lbl.setTooltip(tip);
-        }
         return cardBox;
     }
 
@@ -220,8 +243,11 @@ public final class BoardInsideView {
             final CheckBox cb = new CheckBox(tag.name());
             cb.setSelected(selected.contains(id));
             cb.setOnAction(e -> {
-                if (cb.isSelected()) selected.add(id);
-                else selected.remove(id);
+                if (cb.isSelected()) {
+                    selected.add(id);
+                } else {
+                    selected.remove(id);
+                }
             });
             final Circle dot = new Circle(TAG_DOT_RADIUS, Color.web(tag.color()));
             final HBox row = new HBox(6, dot, cb);
@@ -253,7 +279,7 @@ public final class BoardInsideView {
         final VBox card = new VBox(lbl);
         card.setAlignment(Pos.CENTER);
         card.setPrefWidth(COLUMN_WIDTH);
-        card.setPrefHeight(60);
+        card.setPrefHeight(ADD_COLUMN_HEIGHT);
         card.setStyle("-fx-border-color: gray; -fx-border-style: dashed; -fx-padding: 8; -fx-cursor: hand; -fx-background-color: white;");
         card.setOnMouseClicked(e -> {
             final TextInputDialog dialog = new TextInputDialog();
