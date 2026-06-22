@@ -1,5 +1,6 @@
 package com.chronio.calendar.view;
 
+import com.chronio.budget.view.BudgetView;
 import com.chronio.calendar.controller.CalendarController;
 import com.chronio.kanban.controller.BoardController;
 import com.chronio.kanban.view.BoardView;
@@ -22,17 +23,21 @@ public final class MainView {
 
     private final CalendarController calController;
     private final BoardController boardController;
+    private final BudgetView budgetView;
     private final Stage stage;
 
     /**
      * Costruisce la vista principale
      * @param calController il controller del calendario
      * @param boardController il controller delle bacheche
+     * @param budgetView la vista del budget
      * @param stage lo stage principale
      */
-    public MainView(final CalendarController calController, final BoardController boardController, final Stage stage) {
+    public MainView(final CalendarController calController, final BoardController boardController,
+                    final BudgetView budgetView, final Stage stage) {
         this.calController = calController;
         this.boardController = boardController;
+        this.budgetView = budgetView;
         this.stage = stage;
     }
 
