@@ -1,14 +1,16 @@
 package com.chronio.kanban.model;
 
 import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * Contenitore di tutti i dati delle bacheche che persistono su disco
+ * Gson serializza e deserializza questo record in JSON preservando l'ordine di inserimento
+ * grazie all'uso di LinkedHashMap
+ * I contatori garantiscono id univoci senza usare UUID.
  */
 public record BoardData(
-        Map<String, Board> boards,
-        Map<String, KanbanTag> tags,
+        LinkedHashMap<String, Board> boards,
+        LinkedHashMap<String, KanbanTag> tags,
         int nextBoardId,
         int nextColumnId,
         int nextCardId,

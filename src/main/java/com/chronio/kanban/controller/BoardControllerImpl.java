@@ -3,6 +3,7 @@ package com.chronio.kanban.controller;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -27,8 +28,8 @@ public final class BoardControllerImpl implements BoardController {
      * @param persistence la persistenza su disco
      */
     public BoardControllerImpl(final BoardData data, final BoardPersistence persistence) {
-        this.data = data;
-        this.persistence = persistence;
+        this.data = Objects.requireNonNull(data, "i dati non possono essere null");
+        this.persistence = Objects.requireNonNull(persistence, "la persistenza non può essere null");
     }
 
     @Override
@@ -45,7 +46,7 @@ public final class BoardControllerImpl implements BoardController {
     public KanbanTag createTag(final String name, final String color) {
         final String id = "kt" + data.nextTagId();
         final KanbanTag tag = new KanbanTag(id, name, color);
-        final Map<String, KanbanTag> tags = new LinkedHashMap<>(data.tags());
+        final LinkedHashMap<String, KanbanTag> tags = new LinkedHashMap<>(data.tags());
         tags.put(id, tag);
         data = new BoardData(
             data.boards(), tags,
@@ -57,7 +58,7 @@ public final class BoardControllerImpl implements BoardController {
 
     @Override
     public void deleteTag(final String tagId) {
-        final Map<String, KanbanTag> tags = new LinkedHashMap<>(data.tags());
+        final LinkedHashMap<String, KanbanTag> tags = new LinkedHashMap<>(data.tags());
         tags.remove(tagId);
         data = new BoardData(
             data.boards(), tags,
@@ -73,7 +74,7 @@ public final class BoardControllerImpl implements BoardController {
             return Optional.empty();
         }
         final KanbanTag updated = new KanbanTag(tagId, name, color);
-        final Map<String, KanbanTag> tags = new LinkedHashMap<>(data.tags());
+        final LinkedHashMap<String, KanbanTag> tags = new LinkedHashMap<>(data.tags());
         tags.put(tagId, updated);
         data = new BoardData(
             data.boards(), tags,
@@ -87,7 +88,7 @@ public final class BoardControllerImpl implements BoardController {
     public Board createBoard(final String title) {
         final String id = "b" + data.nextBoardId();
         final Board board = new Board(id, title, new LinkedHashMap<>());
-        final Map<String, Board> boards = new LinkedHashMap<>(data.boards());
+        final LinkedHashMap<String, Board> boards = new LinkedHashMap<>(data.boards());
         boards.put(id, board);
         data = new BoardData(
             boards, data.tags(),
@@ -110,7 +111,7 @@ public final class BoardControllerImpl implements BoardController {
 
     @Override
     public void deleteBoard(final String boardId) {
-        final Map<String, Board> boards = new LinkedHashMap<>(data.boards());
+        final LinkedHashMap<String, Board> boards = new LinkedHashMap<>(data.boards());
         boards.remove(boardId);
         data = new BoardData(
             boards, data.tags(),
@@ -127,7 +128,7 @@ public final class BoardControllerImpl implements BoardController {
         }
         final String id = "c" + data.nextColumnId();
         final Column column = new Column(id, title, new LinkedHashMap<>());
-        final Map<String, Column> columns = new LinkedHashMap<>(board.columns());
+        final LinkedHashMap<String, Column> columns = new LinkedHashMap<>(board.columns());
         columns.put(id, column);
         final Board updated = new Board(boardId, board.title(), columns);
         saveBoard(boardId, updated, data.nextBoardId(), data.nextColumnId() + 1, data.nextCardId());
@@ -155,7 +156,7 @@ public final class BoardControllerImpl implements BoardController {
         if (board == null) {
             return;
         }
-        final Map<String, Column> columns = new LinkedHashMap<>(board.columns());
+        final LinkedHashMap<String, Column> columns = new LinkedHashMap<>(board.columns());
         columns.remove(columnId);
         final Board updated = new Board(boardId, board.title(), columns);
         saveBoard(boardId, updated, data.nextBoardId(), data.nextColumnId(), data.nextCardId());
@@ -174,7 +175,7 @@ public final class BoardControllerImpl implements BoardController {
         }
         final String id = "k" + data.nextCardId();
         final Card card = new Card(id, title, description, tagIds != null ? tagIds : List.of(), false);
-        final Map<String, Card> cards = new LinkedHashMap<>(column.cards());
+        final LinkedHashMap<String, Card> cards = new LinkedHashMap<>(column.cards());
         cards.put(id, card);
         saveColumn(boardId, board, columnId, new Column(columnId, column.title(), sortCards(cards)),
             data.nextCardId() + 1);
@@ -197,7 +198,7 @@ public final class BoardControllerImpl implements BoardController {
             tagIds != null ? tagIds : List.of(),
             column.cards().get(cardId).completed()
         );
-        final Map<String, Card> cards = new LinkedHashMap<>(column.cards());
+        final LinkedHashMap<String, Card> cards = new LinkedHashMap<>(column.cards());
         cards.put(cardId, updated);
         saveColumn(boardId, board, columnId, new Column(columnId, column.title(), cards), data.nextCardId());
         return Optional.of(updated);
@@ -213,7 +214,7 @@ public final class BoardControllerImpl implements BoardController {
         if (column == null) {
             return;
         }
-        final Map<String, Card> cards = new LinkedHashMap<>(column.cards());
+        final LinkedHashMap<String, Card> cards = new LinkedHashMap<>(column.cards());
         cards.remove(cardId);
         saveColumn(boardId, board, columnId, new Column(columnId, column.title(), cards), data.nextCardId());
     }
@@ -235,7 +236,7 @@ public final class BoardControllerImpl implements BoardController {
         final Card toggled = new Card(
             cardId, existing.title(), existing.description(), existing.tagIds(), !existing.completed()
         );
-        final Map<String, Card> cards = new LinkedHashMap<>(column.cards());
+        final LinkedHashMap<String, Card> cards = new LinkedHashMap<>(column.cards());
         cards.put(cardId, toggled);
         saveColumn(boardId, board, columnId,
             new Column(columnId, column.title(), sortCards(cards)), data.nextCardId());
@@ -265,7 +266,7 @@ public final class BoardControllerImpl implements BoardController {
 
     private void saveBoard(final String boardId, final Board updated,
                            final int nextBoard, final int nextCol, final int nextCard) {
-        final Map<String, Board> boards = new LinkedHashMap<>(data.boards());
+        final LinkedHashMap<String, Board> boards = new LinkedHashMap<>(data.boards());
         boards.put(boardId, updated);
         data = new BoardData(boards, data.tags(), nextBoard, nextCol, nextCard, data.nextTagId());
         persistence.save(data);
@@ -273,14 +274,14 @@ public final class BoardControllerImpl implements BoardController {
 
     private void saveColumn(final String boardId, final Board board,
                             final String columnId, final Column updatedCol, final int nextCard) {
-        final Map<String, Column> columns = new LinkedHashMap<>(board.columns());
+        final LinkedHashMap<String, Column> columns = new LinkedHashMap<>(board.columns());
         columns.put(columnId, updatedCol);
         saveBoard(boardId, new Board(boardId, board.title(), columns),
             data.nextBoardId(), data.nextColumnId(), nextCard);
     }
 
-    private Map<String, Card> sortCards(final Map<String, Card> cards) {
-        final Map<String, Card> reordered = new LinkedHashMap<>();
+    private LinkedHashMap<String, Card> sortCards(final LinkedHashMap<String, Card> cards) {
+        final LinkedHashMap<String, Card> reordered = new LinkedHashMap<>();
         cards.entrySet().stream()
             .filter(e -> !e.getValue().completed())
             .forEach(e -> reordered.put(e.getKey(), e.getValue()));

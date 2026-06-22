@@ -10,8 +10,9 @@ import com.chronio.calendar.model.Event;
 import com.chronio.calendar.model.Tag;
 import com.chronio.calendar.persistence.CalendarPersistence;
 
+import java.util.Objects;
+
 /**
- * Implementazione di CalendarController.
  * Delega la logica a CalendarModel e persiste lo stato dopo ogni operazione di scrittura,
  * chiamando save() per salvare su disco.
  */
@@ -27,8 +28,8 @@ public final class CalendarControllerImpl implements CalendarController {
      * @param persistence la persistenza su disco
      */
     public CalendarControllerImpl(final CalendarModel model, final CalendarPersistence persistence) {
-        this.model = model;
-        this.persistence = persistence;
+        this.model = Objects.requireNonNull(model, "il model non può essere null");
+        this.persistence = Objects.requireNonNull(persistence, "la persistenza non può essere null");
     }
 
     private void save() {

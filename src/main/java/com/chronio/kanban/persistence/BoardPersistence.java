@@ -10,6 +10,8 @@ import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import java.util.Objects;
+
 import com.chronio.kanban.model.BoardData;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -31,7 +33,7 @@ public final class BoardPersistence {
      * @param filePath il percorso del file JSON di salvataggio
      */
     public BoardPersistence(final Path filePath) {
-        this.filePath = filePath;
+        this.filePath = Objects.requireNonNull(filePath, "il percorso non può essere null");
         this.gson = new GsonBuilder().setPrettyPrinting().create();
     }
 

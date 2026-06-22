@@ -14,6 +14,8 @@ import com.chronio.calendar.model.CalendarData;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.util.Objects;
+
 /**
  * Gestisce il salvataggio e il caricamento dei dati del calendario su disco in formato JSON
  */
@@ -31,7 +33,7 @@ public final class CalendarPersistence {
      * @param filePath il percorso del file JSON di salvataggio
      */
     public CalendarPersistence(final Path filePath) {
-        this.filePath = filePath;
+        this.filePath = Objects.requireNonNull(filePath, "il percorso non può essere null");
         this.gson = new GsonBuilder().setPrettyPrinting().create();
     }
 
