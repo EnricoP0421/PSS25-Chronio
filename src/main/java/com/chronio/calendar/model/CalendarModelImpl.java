@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import java.util.Objects;
+
 /**
  * Implementazione di CalendarModel.
  * Delega la logica a CalendarData e persiste lo stato dopo ogni operazione di scrittura.
@@ -27,7 +29,7 @@ public final class CalendarModelImpl implements CalendarModel {
      * @param data i dati iniziali del calendario
      */
     public CalendarModelImpl(final CalendarData data) {
-        this.data = data;
+        this.data = Objects.requireNonNull(data, "i dati non possono essere null");
     }
 
     @Override
@@ -39,9 +41,9 @@ public final class CalendarModelImpl implements CalendarModel {
     public Tag createTag(final String name, final String color) {
         final String id = "t" + data.nextTagId();
         final Tag tag = new Tag(id, name, color, true);
-        final Map<String, Tag> tags = new LinkedHashMap<>(data.tags());
+        final LinkedHashMap<String, Tag> tags = new LinkedHashMap<>(data.tags());
         tags.put(id, tag);
-        data = new CalendarData(new LinkedHashMap<>(tags), data.events(), data.nextTagId() + 1, data.nextEventId());
+        data = new CalendarData(tags, data.events(), data.nextTagId() + 1, data.nextEventId());
         return tag;
     }
 
@@ -52,9 +54,9 @@ public final class CalendarModelImpl implements CalendarModel {
             return Optional.empty();
         }
         final Tag updated = new Tag(id, name, color, existing.visible());
-        final Map<String, Tag> tags = new LinkedHashMap<>(data.tags());
+        final LinkedHashMap<String, Tag> tags = new LinkedHashMap<>(data.tags());
         tags.put(id, updated);
-        data = new CalendarData(new LinkedHashMap<>(tags), data.events(), data.nextTagId(), data.nextEventId());
+        data = new CalendarData(tags, data.events(), data.nextTagId(), data.nextEventId());
         return Optional.of(updated);
     }
 
@@ -64,23 +66,23 @@ public final class CalendarModelImpl implements CalendarModel {
         if (existing == null) {
             return;
         }
-        final Map<String, Tag> tags = new LinkedHashMap<>(data.tags());
+        final LinkedHashMap<String, Tag> tags = new LinkedHashMap<>(data.tags());
         tags.put(id, new Tag(id, existing.name(), existing.color(), !existing.visible()));
-        data = new CalendarData(new LinkedHashMap<>(tags), data.events(), data.nextTagId(), data.nextEventId());
+        data = new CalendarData(tags, data.events(), data.nextTagId(), data.nextEventId());
     }
 
     @Override
     public void deleteTag(final String id) {
-        final Map<String, Tag> tags = new LinkedHashMap<>(data.tags());
+        final LinkedHashMap<String, Tag> tags = new LinkedHashMap<>(data.tags());
         tags.remove(id);
-        final Map<String, Event> events = new LinkedHashMap<>();
+        final LinkedHashMap<String, Event> events = new LinkedHashMap<>();
         data.events().forEach((eid, ev) -> {
             final Event updated = id.equals(ev.tagId())
                 ? new Event(ev.id(), ev.title(), ev.description(), ev.start(), ev.end(), null, ev.allDay())
                 : ev;
             events.put(eid, updated);
         });
-        data = new CalendarData(new LinkedHashMap<>(tags), new LinkedHashMap<>(events), data.nextTagId(), data.nextEventId());
+        data = new CalendarData(tags, events, data.nextTagId(), data.nextEventId());
     }
 
     @Override
@@ -95,9 +97,9 @@ public final class CalendarModelImpl implements CalendarModel {
         validate(start, end);
         final String id = "e" + data.nextEventId();
         final Event event = new Event(id, title, description, start, end, tagId, allDay);
-        final Map<String, Event> events = new LinkedHashMap<>(data.events());
+        final LinkedHashMap<String, Event> events = new LinkedHashMap<>(data.events());
         events.put(id, event);
-        data = new CalendarData(data.tags(), new LinkedHashMap<>(events), data.nextTagId(), data.nextEventId() + 1);
+        data = new CalendarData(data.tags(), events, data.nextTagId(), data.nextEventId() + 1);
         return event;
     }
 
@@ -110,17 +112,17 @@ public final class CalendarModelImpl implements CalendarModel {
         }
         validate(start, end);
         final Event updated = new Event(id, title, description, start, end, tagId, allDay);
-        final Map<String, Event> events = new LinkedHashMap<>(data.events());
+        final LinkedHashMap<String, Event> events = new LinkedHashMap<>(data.events());
         events.put(id, updated);
-        data = new CalendarData(data.tags(), new LinkedHashMap<>(events), data.nextTagId(), data.nextEventId());
+        data = new CalendarData(data.tags(), events, data.nextTagId(), data.nextEventId());
         return Optional.of(updated);
     }
 
     @Override
     public void deleteEvent(final String id) {
-        final Map<String, Event> events = new LinkedHashMap<>(data.events());
+        final LinkedHashMap<String, Event> events = new LinkedHashMap<>(data.events());
         events.remove(id);
-        data = new CalendarData(data.tags(), new LinkedHashMap<>(events), data.nextTagId(), data.nextEventId());
+        data = new CalendarData(data.tags(), events, data.nextTagId(), data.nextEventId());
     }
 
     @Override

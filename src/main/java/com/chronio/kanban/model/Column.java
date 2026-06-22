@@ -1,13 +1,14 @@
 package com.chronio.kanban.model;
 
-import java.util.Map;
+import java.util.LinkedHashMap;
 
 /**
  * Colonna di una bacheca, contiene un insieme ordinato di card
+ * Usa LinkedHashMap} per preservare l'ordine di inserimento durante la serializzazione Gson.
  */
 public record Column(
         String id,
         String title,
-        Map<String, Card> cards
+        LinkedHashMap<String, Card> cards
 ) {
 }
