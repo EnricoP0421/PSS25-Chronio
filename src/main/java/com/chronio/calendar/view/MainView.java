@@ -71,8 +71,14 @@ public final class MainView {
             root.setCenter(boardPane);
             root.setRight(null);
         };
+        final Runnable showBudget = () -> {
+            root.setStyle("");
+            root.setLeft(null);
+            root.setCenter(budgetView);
+            root.setRight(null);
+        };
 
-        final NavBar navBar = new NavBar(showCalendar, showBoard);
+        final NavBar navBar = new NavBar(showCalendar, showBoard, showBudget);
         root.setTop(navBar.build());
         showCalendar.run();
 
