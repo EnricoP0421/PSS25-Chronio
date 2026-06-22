@@ -31,6 +31,9 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 
 /**
  * Vista interna di una bacheca: mostra colonne, card e sidebar tag.
@@ -183,6 +186,26 @@ public final class BoardInsideView {
         column.setPrefWidth(COLUMN_WIDTH);
         column.setPadding(new Insets(PADDING));
         column.setStyle("-fx-border-color: gray; -fx-padding: 8; -fx-background-color: white;");
+        column.setOnDragOver(e -> {
+            if (e.getGestureSource() != column && e.getDragboard().hasString()) {
+                e.acceptTransferModes(TransferMode.MOVE);
+            }
+            e.consume();
+        });
+        column.setOnDragDropped(e -> {
+            final Dragboard db = e.getDragboard();
+            boolean success = false;
+            if (db.hasString()) {
+                final String[] parts = db.getString().split(":", 2);
+                final String fromColumn = parts[0];
+                final String cardId = parts[1];
+                controller.moveCard(boardId, fromColumn, col.id(), cardId);
+                refresh();
+                success = true;
+            }
+            e.setDropCompleted(success);
+            e.consume();
+        });
         return column;
     }
 
@@ -222,6 +245,14 @@ public final class BoardInsideView {
 
         final VBox cardBox = new VBox(2, topRow, dots);
         cardBox.setStyle("-fx-border-color: gray; -fx-padding: 4; -fx-background-color: white;");
+        cardBox.setOnDragDetected(e -> {
+            final Dragboard db = cardBox.startDragAndDrop(TransferMode.MOVE);
+            final ClipboardContent content = new ClipboardContent();
+            // Trasportiamo "colonnaOrigine:idCard" come testo.
+            content.putString(columnId + ":" + card.id());
+            db.setContent(content);
+            e.consume();
+        });
         return cardBox;
     }
 
