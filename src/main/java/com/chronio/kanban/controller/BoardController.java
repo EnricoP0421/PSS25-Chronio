@@ -129,6 +129,19 @@ public interface BoardController {
      */
     void toggleCard(String boardId, String columnId, String cardId);
 
+     /**
+     * Sposta una card da una colonna a un'altra della stessa bacheca.
+     * La card viene rimossa dalla colonna di origine e aggiunta in fondo
+     * a quella di destinazione. Se origine e destinazione coincidono non
+     * fa nulla.
+     *
+     * @param boardId    id della bacheca
+     * @param fromColumn id della colonna di origine
+     * @param toColumn   id della colonna di destinazione
+     * @param cardId     id della card da spostare
+     */
+    void moveCard(String boardId, String fromColumn, String toColumn, String cardId);
+
     /**
      * Restituisce le card di una colonna filtrate per tag
      * @param boardId id della bacheca
