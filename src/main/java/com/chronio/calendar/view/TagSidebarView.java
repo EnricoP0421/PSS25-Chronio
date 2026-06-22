@@ -33,6 +33,12 @@ public final class TagSidebarView {
     private final Stage stage;
     private final Runnable onTagChanged;
 
+    /**
+     * Costruisce la sidebar.
+     * @param controller il controller del calendario
+     * @param stage lo stage principale
+     * @param onTagChanged callback eseguita quando un tag viene modificato
+     */
     public TagSidebarView(final CalendarController controller, final Stage stage, final Runnable onTagChanged) {
         this.controller = controller;
         this.stage = stage;
@@ -40,7 +46,7 @@ public final class TagSidebarView {
     }
 
     /**
-     * Costruisce e restituisce il nodo radice della sidebar dei tag.
+     * Costruisce e restituisce il nodo root della sidebar dei tag
      * @return VBox con l'elenco dei tag e i controlli di gestione
      */
     public VBox build() {

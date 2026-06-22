@@ -13,11 +13,19 @@ import com.chronio.kanban.model.Column;
 import com.chronio.kanban.model.KanbanTag;
 import com.chronio.kanban.persistence.BoardPersistence;
 
+/**
+ * Implementazione di BoardController.
+ */
 public final class BoardControllerImpl implements BoardController {
 
     private BoardData data;
     private final BoardPersistence persistence;
 
+    /**
+     * Costruisce il controller a partire da dati esistenti
+     * @param data i dati iniziali delle bacheche
+     * @param persistence la persistenza su disco
+     */
     public BoardControllerImpl(final BoardData data, final BoardPersistence persistence) {
         this.data = data;
         this.persistence = persistence;
@@ -248,6 +256,9 @@ public final class BoardControllerImpl implements BoardController {
             .collect(Collectors.toList());
     }
 
+    /**
+     * @return i dati correnti delle bacheche, usato dalla persistenza
+     */
     public BoardData getData() {
         return data;
     }
