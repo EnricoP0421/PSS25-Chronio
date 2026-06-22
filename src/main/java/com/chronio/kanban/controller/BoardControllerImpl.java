@@ -243,6 +243,42 @@ public final class BoardControllerImpl implements BoardController {
     }
 
     @Override
+    public void moveCard(final String boardId, final String fromColumn,
+                         final String toColumn, final String cardId) {
+        if (fromColumn.equals(toColumn)) {
+            return;
+        }
+        final Board board = data.boards().get(boardId);
+        if (board == null) {
+            return;
+        }
+        final Column source = board.columns().get(fromColumn);
+        final Column dest = board.columns().get(toColumn);
+        if (source == null || dest == null) {
+            return;
+        }
+        final Card card = source.cards().get(cardId);
+        if (card == null) {
+            return;
+        }
+
+        final LinkedHashMap<String, Card> sourceCards = new LinkedHashMap<>(source.cards());
+        sourceCards.remove(cardId);
+
+        final LinkedHashMap<String, Card> destCards = new LinkedHashMap<>(dest.cards());
+        destCards.put(cardId, card);
+
+        // costruzione delle due aggiornate.
+        final LinkedHashMap<String, Column> columns = new LinkedHashMap<>(board.columns());
+        columns.put(fromColumn, new Column(fromColumn, source.title(), sourceCards));
+        columns.put(toColumn, new Column(toColumn, dest.title(), sortCards(destCards)));
+
+        // Salva la board aggiornata (i contatori non cambiano: nessun nuovo id).
+        saveBoard(boardId, new Board(boardId, board.title(), columns),
+            data.nextBoardId(), data.nextColumnId(), data.nextCardId());
+    }
+
+    @Override
     public List<Card> getFilteredCards(final String boardId, final String columnId, final List<String> tagIds) {
         final Board board = data.boards().get(boardId);
         if (board == null) {
