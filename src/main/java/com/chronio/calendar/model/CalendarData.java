@@ -17,7 +17,7 @@ public record CalendarData(
 
     /**
      * Restituisce uno stato iniziale vuoto, usato quando non esiste ancora nessun file di salvataggio.
-     * @return istanza di {@code CalendarData} con mappe vuote e contatori a 1
+     * @return istanza di CalendarData con mappe vuote e contatori a 1
      */
     public static CalendarData empty() {
         return new CalendarData(new LinkedHashMap<>(), new LinkedHashMap<>(), 1, 1);

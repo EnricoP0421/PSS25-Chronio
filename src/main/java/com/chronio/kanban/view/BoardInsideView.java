@@ -32,6 +32,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
 
+/**
+ * Vista interna di una bacheca: mostra colonne, card e sidebar tag.
+ */
 public final class BoardInsideView {
 
     private static final int PADDING = 16;
@@ -48,12 +51,22 @@ public final class BoardInsideView {
     private final Set<String> activeTagIds = new HashSet<>();
     private StackPane container;
 
+    /**
+     * Costruisce la vista interna
+     * @param controller il controller delle bacheche
+     * @param boardId id della bacheca da visualizzare
+     * @param onBack callback eseguita al click su "Bacheche"
+     */
     public BoardInsideView(final BoardController controller, final String boardId, final Runnable onBack) {
         this.controller = controller;
         this.boardId = boardId;
         this.onBack = onBack;
     }
 
+    /**
+     * Costruisce e restituisce il nodo radice della vista.
+     * @return StackPane con il contenuto della bacheca
+     */
     public StackPane build() {
         container = new StackPane();
         container.getChildren().setAll(buildContent());
