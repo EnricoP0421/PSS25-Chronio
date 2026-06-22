@@ -14,6 +14,9 @@ import com.chronio.kanban.model.BoardData;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+/**
+ * Gestisce il salvataggio e il caricamento dei dati delle bacheche su disco in formato JSON.
+ */
 public final class BoardPersistence {
 
     private static final Logger LOGGER = Logger.getLogger(BoardPersistence.class.getName());
@@ -23,15 +26,26 @@ public final class BoardPersistence {
     private final Path filePath;
     private final Gson gson;
 
+    /**
+     * Costruisce la persistenza sul percorso specificato
+     * @param filePath il percorso del file JSON di salvataggio
+     */
     public BoardPersistence(final Path filePath) {
         this.filePath = filePath;
         this.gson = new GsonBuilder().setPrettyPrinting().create();
     }
 
+    /**
+     * @return il percorso di default del file di salvataggio
+     */
     public static Path getDefaultPath() {
         return Paths.get(System.getProperty("user.home"), SAVE_DIR, SAVE_FILE);
     }
 
+    /**
+     * Salva i dati delle bacheche su disco
+     * @param data i dati da salvare
+     */
     public void save(final BoardData data) {
         try {
             final Path parent = filePath.getParent();
@@ -46,6 +60,11 @@ public final class BoardPersistence {
         }
     }
 
+    /**
+     * Carica i dati delle bacheche da disco
+     * Se il file non esiste o è corrotto, restituisce uno stato vuoto
+     * @return i dati caricati, o BoardData#empty() in caso di errore
+     */
     public BoardData load() {
         if (!Files.exists(filePath)) {
             return BoardData.empty();

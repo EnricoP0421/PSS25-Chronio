@@ -16,6 +16,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
+/**
+ * Vista principale delle bacheche. Mostra la griglia delle board disponibili.
+ */
 public final class BoardView {
 
     private static final int PADDING = 24;
@@ -30,11 +33,19 @@ public final class BoardView {
     private final BoardController controller;
     private final StackPane root;
 
+    /**
+     * Costruisce la vista con il controller fornito
+     * @param controller il controller delle bacheche
+     */
     public BoardView(final BoardController controller) {
         this.controller = controller;
         this.root = new StackPane();
     }
 
+    /**
+     * Costruisce e restituisce il nodo root della vista
+     * @return StackPane con la griglia delle bacheche
+     */
     public StackPane build() {
         showBoardList();
         return root;

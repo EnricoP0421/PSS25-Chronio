@@ -1,5 +1,8 @@
 package com.chronio.kanban.view;
 
+import java.util.Set;
+import java.util.function.Consumer;
+
 import com.chronio.kanban.controller.BoardController;
 
 import javafx.geometry.Pos;
@@ -15,9 +18,9 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
-import java.util.Set;
-import java.util.function.Consumer;
-
+/**
+ * Sidebar per la gestione e il filtro dei tag kanban.
+ */
 public final class KanbanTagSidebarView {
 
     private static final int SIDEBAR_WIDTH = 200;
@@ -30,6 +33,12 @@ public final class KanbanTagSidebarView {
     private final Set<String> activeTagIds;
     private final Runnable onFilterChanged;
 
+    /**
+     * Costruisce la sidebar
+     * @param controller il controller delle bacheche
+     * @param activeTagIds set dei tag attivi per il filtro
+     * @param onFilterChanged callback eseguita quando il filtro cambia
+     */
     public KanbanTagSidebarView(final BoardController controller,
                                 final Set<String> activeTagIds,
                                 final Runnable onFilterChanged) {
@@ -38,6 +47,10 @@ public final class KanbanTagSidebarView {
         this.onFilterChanged = onFilterChanged;
     }
 
+    /**
+     * Costruisce e restituisce il nodo radice della sidebar
+     * @return VBox con header e lista tag
+     */
     public VBox build() {
         final VBox box = new VBox(BOX_SPACING);
         box.setPrefWidth(SIDEBAR_WIDTH);
@@ -66,6 +79,10 @@ public final class KanbanTagSidebarView {
         return box;
     }
 
+    /**
+     * Aggiorna la lista tag
+     * @param tagList il nodo VBox della lista
+     */
     public void refresh(final VBox tagList) {
         refreshList(tagList);
     }

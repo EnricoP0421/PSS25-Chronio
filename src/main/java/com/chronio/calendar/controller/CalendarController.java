@@ -50,7 +50,7 @@ public interface CalendarController {
     void deleteTag(String id);
 
     /**
-     * @return mappa id -> evento
+     * @return mappa id -> ritorna l'evento corrispondente all'id salvato
      */
     Map<String, Event> getEvents();
 
