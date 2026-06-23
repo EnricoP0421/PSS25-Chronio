@@ -34,6 +34,7 @@ public final class CalendarView {
     private static final String[] DAYS_IT = {"Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom",};
     private static final int GRID_ROWS = 6;
     private static final int ROW_HEIGHT = 100;
+    private static final int MAX_VISIBLE_EVENTS = 2;
     private static final String[] MONTHS_IT = {
         "Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno",
         "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"
@@ -196,12 +197,17 @@ public final class CalendarView {
                 : "-fx-border-color: gray; -fx-padding: 4;");
             cell.getChildren().add(new Label(String.valueOf(day)));
             final String dateKey = date.getYear() + "-" + date.getMonthValue() + "-" + date.getDayOfMonth();
-            controller.getEventsForDate(dateKey).forEach(ev ->
+            final var events = controller.getEventsForDate(dateKey);
+            final int total = events.size();
+            events.stream().limit(MAX_VISIBLE_EVENTS).forEach(ev ->
                 cell.getChildren().add(ViewUtils.makePill(ev, date, controller, stage, () -> {
                     refreshGrid(calGrid);
                     sidebarView.refresh(sidebar);
                 }))
             );
+            if (total > MAX_VISIBLE_EVENTS) {
+                cell.getChildren().add(new Label("···"));
+            }
             cell.setOnMouseClicked(e -> {
                 new EventDialog(stage, controller, date).showAndWait();
                 refreshGrid(calGrid);
