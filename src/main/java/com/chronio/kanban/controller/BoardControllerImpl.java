@@ -244,10 +244,7 @@ public final class BoardControllerImpl implements BoardController {
 
     @Override
     public void moveCard(final String boardId, final String fromColumn,
-                         final String toColumn, final String cardId) {
-        if (fromColumn.equals(toColumn)) {
-            return;
-        }
+                         final String toColumn, final String cardId, final int toIndex) {
         final Board board = data.boards().get(boardId);
         if (board == null) {
             return;
@@ -262,20 +259,46 @@ public final class BoardControllerImpl implements BoardController {
             return;
         }
 
-        final LinkedHashMap<String, Card> sourceCards = new LinkedHashMap<>(source.cards());
-        sourceCards.remove(cardId);
-
-        final LinkedHashMap<String, Card> destCards = new LinkedHashMap<>(dest.cards());
-        destCards.put(cardId, card);
-
-        // costruzione delle due aggiornate.
         final LinkedHashMap<String, Column> columns = new LinkedHashMap<>(board.columns());
-        columns.put(fromColumn, new Column(fromColumn, source.title(), sourceCards));
-        columns.put(toColumn, new Column(toColumn, dest.title(), sortCards(destCards)));
 
-        // Salva la board aggiornata (i contatori non cambiano: nessun nuovo id).
+        if (fromColumn.equals(toColumn)) {
+            final LinkedHashMap<String, Card> reordered =
+                insertAt(source.cards(), cardId, card, toIndex, true);
+            columns.put(fromColumn, new Column(fromColumn, source.title(), reordered));
+        } else {
+            final LinkedHashMap<String, Card> sourceCards = new LinkedHashMap<>(source.cards());
+            sourceCards.remove(cardId);
+            final LinkedHashMap<String, Card> destCards =
+                insertAt(dest.cards(), cardId, card, toIndex, false);
+            columns.put(fromColumn, new Column(fromColumn, source.title(), sourceCards));
+            columns.put(toColumn, new Column(toColumn, dest.title(), destCards));
+        }
+
         saveBoard(boardId, new Board(boardId, board.title(), columns),
             data.nextBoardId(), data.nextColumnId(), data.nextCardId());
+    }
+
+    /**
+     * Ricostruisce una mappa di card inserendo la card indicata alla posizione toIndex.
+     * Se sameColumn è true, la card preesistente con quell'id viene prima rimossa
+     * (è il caso del riordino interno).
+     */
+    private LinkedHashMap<String, Card> insertAt(final LinkedHashMap<String, Card> original,
+                                                 final String cardId, final Card card,
+                                                 final int toIndex, final boolean sameColumn) {
+        final List<String> order = new java.util.ArrayList<>(original.keySet());
+        if (sameColumn) {
+            order.remove(cardId);
+        }
+
+        final int pos = (toIndex < 0 || toIndex > order.size()) ? order.size() : toIndex;
+        order.add(pos, cardId);
+
+        final LinkedHashMap<String, Card> result = new LinkedHashMap<>();
+        for (final String id : order) {
+            result.put(id, id.equals(cardId) ? card : original.get(id));
+        }
+        return result;
     }
 
     @Override
