@@ -7,6 +7,7 @@ import com.chronio.calendar.controller.CalendarController;
 import com.chronio.calendar.model.Event;
 
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
 
 /**
@@ -55,9 +56,10 @@ public final class EventSidebarView {
         final VBox card = new VBox(CARD_SPACING);
         card.setStyle("-fx-border-color: gray; -fx-padding: 8;");
         card.getChildren().add(new Label("Oggi"));
+        final VBox content = new VBox(CARD_SPACING);
         final List<Event> events = controller.getTodayEvents();
         if (events.isEmpty()) {
-            card.getChildren().add(new Label("Nessun evento oggi"));
+            content.getChildren().add(new Label("Nessun evento oggi"));
         } else {
             events.stream()
                 .sorted((a, b) -> {
@@ -68,9 +70,15 @@ public final class EventSidebarView {
                 .forEach(ev -> {
                     final String prefix = (!ev.allDay() && ev.start() != null && ev.start().contains(TIME_SEPARATOR))
                         ? ev.start().substring(11, 16) + " " : "";
-                    card.getChildren().add(new Label(prefix + ev.title()));
+                    content.getChildren().add(new Label(prefix + ev.title()));
                 });
         }
+        final ScrollPane scroll = new ScrollPane(content);
+        scroll.setFitToWidth(true);
+        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scroll.setMaxHeight(150);
+        scroll.setStyle("-fx-background-color: transparent; -fx-border-color: transparent;");
+        card.getChildren().add(scroll);
         return card;
     }
 
@@ -84,23 +92,30 @@ public final class EventSidebarView {
         final VBox card = new VBox(CARD_SPACING);
         card.setStyle("-fx-border-color: gray; -fx-padding: 8;");
         card.getChildren().add(new Label("Questa settimana"));
+        final VBox content = new VBox(CARD_SPACING);
         final Map<String, List<Event>> weekEvents = controller.getWeekEvents();
         if (weekEvents.isEmpty()) {
-            card.getChildren().add(new Label("Nessun evento nei prossimi giorni"));
+            content.getChildren().add(new Label("Nessun evento nei prossimi giorni"));
         } else {
             weekEvents.forEach((dateKey, evs) -> {
                 final String[] parts = dateKey.split("-");
                 final String formatted = parts[2] + DATE_SEPARATOR + parts[1] + DATE_SEPARATOR + parts[0];
-                card.getChildren().add(new Label(formatted));
+                content.getChildren().add(new Label(formatted));
                 evs.forEach(ev -> {
                     final String label = ev.allDay() && ev.end() != null && !ev.end().isBlank()
                         && !ev.end().equals(ev.start())
                         ? formatDateRange(ev.start(), ev.end()) + " " + ev.title()
                         : "  " + ev.title();
-                    card.getChildren().add(new Label(label));
+                    content.getChildren().add(new Label(label));
                 });
             });
         }
+        final ScrollPane scroll = new ScrollPane(content);
+        scroll.setFitToWidth(true);
+        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scroll.setMaxHeight(200);
+        scroll.setStyle("-fx-background-color: transparent; -fx-border-color: transparent;");
+        card.getChildren().add(scroll);
         return card;
     }
 }

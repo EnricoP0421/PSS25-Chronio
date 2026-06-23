@@ -28,11 +28,12 @@ public final class CalendarView {
     private static final int DAYS_IN_WEEK = 7;
     private static final int NAV_SPACING = 12;
     private static final int CELL_SPACING = 2;
-    private static final int PADDING = 8;
+    private static final int PADDING = 16;
     private static final int HEADER_SPACING = 4;
     private static final int GRID_GAP = 4;
     private static final String[] DAYS_IT = {"Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom",};
     private static final int GRID_ROWS = 6;
+    private static final int ROW_HEIGHT = 100;
     private static final String[] MONTHS_IT = {
         "Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno",
         "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"
@@ -167,7 +168,9 @@ public final class CalendarView {
 
         for (int i = 0; i < GRID_ROWS; i++) {
             final RowConstraints rc = new RowConstraints();
-            rc.setPercentHeight(100.0 / GRID_ROWS);
+            rc.setMinHeight(ROW_HEIGHT);
+            rc.setPrefHeight(ROW_HEIGHT);
+            rc.setMaxHeight(ROW_HEIGHT);
             rc.setFillHeight(true);
             calGrid.getRowConstraints().add(rc);
         }
@@ -183,7 +186,11 @@ public final class CalendarView {
             final LocalDate date = displayMonth.atDay(day);
             final boolean isToday = date.equals(today);
             final VBox cell = new VBox(CELL_SPACING);
-            cell.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+            cell.setMinHeight(ROW_HEIGHT);
+            cell.setPrefHeight(ROW_HEIGHT);
+            cell.setMaxHeight(ROW_HEIGHT);
+            cell.setMaxWidth(Double.MAX_VALUE);
+            cell.setClip(new javafx.scene.shape.Rectangle(Double.MAX_VALUE, ROW_HEIGHT));
             cell.setStyle(isToday
                 ? "-fx-border-color: gray; -fx-background-color: lightblue; -fx-padding: 4;"
                 : "-fx-border-color: gray; -fx-padding: 4;");

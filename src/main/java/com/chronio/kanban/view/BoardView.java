@@ -10,6 +10,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.input.KeyCode;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
@@ -58,8 +59,10 @@ public final class BoardView {
         controller.getBoards().values().forEach(board -> grid.getChildren().add(buildBoardCard(board)));
         grid.getChildren().add(buildAddCard());
 
+        final ScrollPane sp = new ScrollPane(grid);
+        sp.setFitToWidth(true);
         final BorderPane page = new BorderPane();
-        page.setCenter(grid);
+        page.setCenter(sp);
         root.getChildren().setAll(page);
     }
 

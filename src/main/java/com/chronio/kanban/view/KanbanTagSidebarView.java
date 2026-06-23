@@ -12,6 +12,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -74,7 +75,13 @@ public final class KanbanTagSidebarView {
         final HBox header = new HBox(BOX_SPACING, burgerBtn, title, addBtn);
         header.setAlignment(Pos.CENTER_LEFT);
 
-        box.getChildren().addAll(header, tagList);
+        final ScrollPane scroll = new ScrollPane(tagList);
+        scroll.setFitToWidth(true);
+        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scroll.setStyle("-fx-background-color: transparent; -fx-border-color: transparent;");
+        VBox.setVgrow(scroll, javafx.scene.layout.Priority.ALWAYS);
+        box.getChildren().addAll(header, scroll);
         refreshList(tagList);
         return box;
     }
