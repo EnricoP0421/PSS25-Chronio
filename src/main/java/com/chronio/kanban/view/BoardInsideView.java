@@ -199,7 +199,7 @@ public final class BoardInsideView {
                 final String[] parts = db.getString().split(":", 2);
                 final String fromColumn = parts[0];
                 final String cardId = parts[1];
-                controller.moveCard(boardId, fromColumn, col.id(), cardId);
+                controller.moveCard(boardId, fromColumn, col.id(), cardId, -1);
                 refresh();
                 success = true;
             }
@@ -248,9 +248,29 @@ public final class BoardInsideView {
         cardBox.setOnDragDetected(e -> {
             final Dragboard db = cardBox.startDragAndDrop(TransferMode.MOVE);
             final ClipboardContent content = new ClipboardContent();
-            // Trasportiamo "colonnaOrigine:idCard" come testo.
             content.putString(columnId + ":" + card.id());
             db.setContent(content);
+            e.consume();
+        });
+
+        cardBox.setOnDragOver(e -> {
+            if (e.getDragboard().hasString()) {
+                e.acceptTransferModes(TransferMode.MOVE);
+            }
+            e.consume();
+        });
+        cardBox.setOnDragDropped(e -> {
+            final Dragboard db = e.getDragboard();
+            boolean success = false;
+            if (db.hasString()) {
+                final String[] parts = db.getString().split(":", 2);
+                final VBox parent = (VBox) cardBox.getParent();
+                final int index = parent.getChildren().indexOf(cardBox);
+                controller.moveCard(boardId, parts[0], columnId, parts[1], index);
+                refresh();
+                success = true;
+            }
+            e.setDropCompleted(success);
             e.consume();
         });
         return cardBox;
