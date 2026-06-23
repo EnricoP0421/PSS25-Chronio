@@ -182,7 +182,15 @@ public final class BoardInsideView {
             });
         });
 
-        final VBox column = new VBox(CARD_SPACING, colHeader, cardsBox, addCard);
+        cardsBox.setPadding(new Insets(0, 8, 0, 0));
+
+        final ScrollPane cardsScroll = new ScrollPane(cardsBox);
+        cardsScroll.setFitToWidth(true);
+        cardsScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        cardsScroll.setStyle("-fx-background-color: white; -fx-background: white;");
+        VBox.setVgrow(cardsScroll, Priority.ALWAYS);
+
+        final VBox column = new VBox(CARD_SPACING, colHeader, cardsScroll, addCard);
         column.setPrefWidth(COLUMN_WIDTH);
         column.setPadding(new Insets(PADDING));
         column.setStyle("-fx-border-color: gray; -fx-padding: 8; -fx-background-color: white;");
