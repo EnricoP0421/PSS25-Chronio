@@ -32,7 +32,6 @@ public final class CalendarView {
     private static final int HEADER_SPACING = 4;
     private static final int GRID_GAP = 4;
     private static final String[] DAYS_IT = {"Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom",};
-    private static final int GRID_ROWS = 6;
     private static final int ROW_HEIGHT = 100;
     private static final int MAX_VISIBLE_EVENTS = 2;
     private static final String[] MONTHS_IT = {
@@ -167,7 +166,12 @@ public final class CalendarView {
             calGrid.getColumnConstraints().add(cc);
         }
 
-        for (int i = 0; i < GRID_ROWS; i++) {
+        final LocalDate today = LocalDate.now();
+        final LocalDate first = displayMonth.atDay(1);
+        final int startCol = first.getDayOfWeek().getValue() - 1;
+        final int daysInMonth = displayMonth.lengthOfMonth();
+        final int totalRows = (int) Math.ceil((startCol + daysInMonth) / (double) DAYS_IN_WEEK);
+        for (int i = 0; i < totalRows; i++) {
             final RowConstraints rc = new RowConstraints();
             rc.setMinHeight(ROW_HEIGHT);
             rc.setPrefHeight(ROW_HEIGHT);
@@ -175,11 +179,6 @@ public final class CalendarView {
             rc.setFillHeight(true);
             calGrid.getRowConstraints().add(rc);
         }
-
-        final LocalDate today = LocalDate.now();
-        final LocalDate first = displayMonth.atDay(1);
-        final int startCol = first.getDayOfWeek().getValue() - 1;
-        final int daysInMonth = displayMonth.lengthOfMonth();
 
         int col = startCol;
         int row = 0;
