@@ -40,7 +40,7 @@ class CardMoveTest {
         final Card card = controller.createCard(boardId, todo.id(), "Compito", "", List.of());
  
         // Sposta la card da "Da fare" a "Fatto".
-        controller.moveCard(boardId, todo.id(), done.id(), card.id());
+        controller.moveCard(boardId, todo.id(), done.id(), card.id(), -1);
  
         // Verifica immediata: la card non è più nell'origine ed è nella destinazione.
         final Board afterMove = controller.getBoards().get(boardId);
