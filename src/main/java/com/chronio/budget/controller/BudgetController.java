@@ -92,6 +92,7 @@ public final class BudgetController {
         if (end != null) {
             this.periodEnd = end;
         }
+        refreshTransactionLists();
         refreshCharts();
     }
 
@@ -194,9 +195,10 @@ public final class BudgetController {
      * @return le entrate, ordinate dalla più recente
      */
     public List<Transaction> getIncomes() {
-    return service.getAllTransactionsSorted().stream()
+    return getCurrentSummary().transactions().stream()
             .filter(t -> t.type() == TransactionType.INCOME)
             .filter(this::matchesFilter)
+            .sorted(java.util.Comparator.comparing(Transaction::date).reversed())
             .toList();
     }
 
@@ -204,9 +206,10 @@ public final class BudgetController {
      * @return le uscite, ordinate dalla più recente
      */
     public List<Transaction> getExpenses() {
-    return service.getAllTransactionsSorted().stream()
+    return getCurrentSummary().transactions().stream()
             .filter(t -> t.type() == TransactionType.EXPENSE)
             .filter(this::matchesFilter)
+            .sorted(java.util.Comparator.comparing(Transaction::date).reversed())
             .toList();
     }
 
