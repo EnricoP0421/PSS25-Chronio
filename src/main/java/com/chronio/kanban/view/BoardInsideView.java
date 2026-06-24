@@ -273,7 +273,11 @@ public final class BoardInsideView {
             if (db.hasString()) {
                 final String[] parts = db.getString().split(":", 2);
                 final VBox parent = (VBox) cardBox.getParent();
-                final int index = parent.getChildren().indexOf(cardBox);
+                int index = parent.getChildren().indexOf(cardBox);
+                // Se rilascio sulla metà inferiore della card, inserisco DOPO di lei.
+                if (e.getY() > cardBox.getHeight() / 2) {
+                    index++;
+                }
                 controller.moveCard(boardId, parts[0], columnId, parts[1], index);
                 refresh();
                 success = true;
