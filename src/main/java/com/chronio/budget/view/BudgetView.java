@@ -161,25 +161,30 @@ public final class BudgetView extends HBox implements BudgetController.View {
             sliceColors.add(tag != null ? tag.color() : "#9ca3af"); // grigio per "senza categoria"
         }
         
+        final java.util.Map<String, String> colorByLabel = new java.util.HashMap<>();
+        for (int i = 0; i < pieChart.getData().size(); i++) {
+            colorByLabel.put(pieChart.getData().get(i).getName(), sliceColors.get(i));
+        }
+
         Platform.runLater(() -> {
             final var data = pieChart.getData();
 
-            // Allineamenti colori nelle fette del cerchio.
+            // Colora le fette del cerchio.
             for (int i = 0; i < data.size(); i++) {
                 final Node node = data.get(i).getNode();
-                if (node != null) {
+                if (node != null && i < sliceColors.size()) {
                     node.setStyle("-fx-pie-color: " + sliceColors.get(i) + ";");
                 }
             }
 
-            // Allineamenti colori nei simboli della legenda, abbinandoli per posizione.
-            final var legendItems = pieChart.lookupAll(".chart-legend-item-symbol");
-            int i = 0;
-            for (final Node symbol : legendItems) {
-                if (i < sliceColors.size()) {
-                    symbol.setStyle("-fx-background-color: " + sliceColors.get(i) + ";");
+            // Colora i simboli della legenda abbinandoli per NOME.
+            for (final Node legendNode : pieChart.lookupAll(".chart-legend-item")) {
+                if (legendNode instanceof Label label) {
+                    final String color = colorByLabel.get(label.getText());
+                    if (color != null && label.getGraphic() != null) {
+                        label.getGraphic().setStyle("-fx-background-color: " + color + ";");
+                    }
                 }
-                i++;
             }
         });
 
