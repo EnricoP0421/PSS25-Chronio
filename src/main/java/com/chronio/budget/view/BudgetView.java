@@ -25,6 +25,8 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.application.Platform;
+import javafx.scene.control.Tooltip;
+import javafx.util.Duration;
 
 import java.util.List;
 import java.time.format.DateTimeFormatter;
@@ -243,14 +245,11 @@ public final class BudgetView extends HBox implements BudgetController.View {
     }
 
     private Node tagBadge(final Tag tag) {
-        final Circle dot = new Circle(5);
-        dot.setFill(parseColor(tag.color()));
-        final Label name = new Label(tag.name());
-        final HBox badge = new HBox(4, dot, name);
-        badge.setAlignment(Pos.CENTER_LEFT);
-        badge.setPadding(new Insets(2, 6, 2, 6));
-        badge.setStyle("-fx-background-color: #e4e4e7; -fx-background-radius: 10;");
-        return badge;
+        final Circle dot = new Circle(6, parseColor(tag.color()));
+        final Tooltip tip = new Tooltip(tag.name());
+        tip.setShowDelay(Duration.ZERO);
+        Tooltip.install(dot, tip);
+        return dot;
     }
 
     /**
