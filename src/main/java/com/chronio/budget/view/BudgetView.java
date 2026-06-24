@@ -20,11 +20,12 @@ import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
-import javafx.scene.control.DatePicker;
 import javafx.scene.chart.XYChart;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.application.Platform;
+import javafx.scene.control.Tooltip;
+import javafx.util.Duration;
 
 import java.util.List;
 import java.time.format.DateTimeFormatter;
@@ -43,8 +44,6 @@ public final class BudgetView extends HBox implements BudgetController.View {
 
     private final VBox incomeList = new VBox(6);
     private final VBox expenseList = new VBox(6);
-    private final DatePicker fromPicker = new DatePicker();
-    private final DatePicker toPicker = new DatePicker();
     private final Label incomeTotalLabel = new Label();
     private final Label expenseTotalLabel = new Label();
     private final Label balanceLabel = new Label();
@@ -72,30 +71,34 @@ public final class BudgetView extends HBox implements BudgetController.View {
         this.lineChart.setTitle("Andamento saldo mensile");
         this.lineChart.setLegendVisible(false);
 
+        final TagSidebarView tagSidebar = new TagSidebarView(
+            controller, controller.getActiveTagIds(), this::refreshTransactionLists);
+
         getChildren().addAll(
+                tagSidebar.build(),
                 buildPanel("Entrate", incomeList, TransactionType.INCOME),
                 buildPanel("Uscite", expenseList, TransactionType.EXPENSE),
                 buildTotalPanel());
         
-        fromPicker.setValue(controller.getPeriodStart());
-        toPicker.setValue(controller.getPeriodEnd());
         refreshTransactionLists();
         refreshCharts();  
     }
 
     private Node buildPanel(final String titleText, final VBox list, final TransactionType type) {
         final Label title = sectionTitle(titleText);
-        final Button add = new Button("+");
-        add.setOnAction(e -> openTransactionForm(type, null));
 
-        final HBox header = new HBox(8, title, spacer(), add);
+        final HBox header = new HBox(8, title, spacer());
         header.setAlignment(Pos.CENTER_LEFT);
 
         final ScrollPane scroll = new ScrollPane(list);
         scroll.setFitToWidth(true);
         VBox.setVgrow(scroll, Priority.ALWAYS);
 
-        final VBox panel = new VBox(8, header, scroll);
+        final Button addBtn = new Button("+ Aggiungi transazione");
+        addBtn.setMaxWidth(Double.MAX_VALUE);
+        addBtn.setOnAction(e -> openTransactionForm(type, null));
+
+        final VBox panel = new VBox(8, header, scroll, addBtn);
         panel.setPadding(new Insets(8));
         HBox.setHgrow(panel, Priority.ALWAYS);
         panel.setPrefWidth(280);
@@ -104,21 +107,8 @@ public final class BudgetView extends HBox implements BudgetController.View {
 
     private Node buildTotalPanel() {
         final Label title = sectionTitle("Totale");
-        final Button manageTags = new Button("Gestione tag");
-        manageTags.setOnAction(e -> openTagManager());
-        final HBox header = new HBox(8, title, spacer(), manageTags);
+        final HBox header = new HBox(8, title, spacer());
         header.setAlignment(Pos.CENTER_LEFT);
-
-        final Label fromLabel = new Label("Da:");
-        fromLabel.setMinWidth(Region.USE_PREF_SIZE);
-        final Label toLabel = new Label("A:");
-        toLabel.setMinWidth(Region.USE_PREF_SIZE);
-
-        final HBox periodBox = new HBox(8, fromLabel, fromPicker, toLabel, toPicker);
-        periodBox.setAlignment(Pos.CENTER_LEFT);
-
-        fromPicker.setOnAction(e -> onPeriodChanged());
-        toPicker.setOnAction(e -> onPeriodChanged());
 
         final VBox summaryBox = new VBox(4, incomeTotalLabel, expenseTotalLabel, balanceLabel);
         summaryBox.setPadding(new Insets(8, 0, 8, 0));
@@ -127,7 +117,7 @@ public final class BudgetView extends HBox implements BudgetController.View {
         pieChart.setPrefHeight(240);
         lineChart.setPrefHeight(240);
 
-        final VBox panel = new VBox(10, header, periodBox, summaryBox, pieChart, lineChart);
+        final VBox panel = new VBox(10, header, summaryBox, pieChart, lineChart);
         panel.setPadding(new Insets(8));
         panel.setPrefWidth(380);
         return panel;
@@ -171,25 +161,30 @@ public final class BudgetView extends HBox implements BudgetController.View {
             sliceColors.add(tag != null ? tag.color() : "#9ca3af"); // grigio per "senza categoria"
         }
         
+        final java.util.Map<String, String> colorByLabel = new java.util.HashMap<>();
+        for (int i = 0; i < pieChart.getData().size(); i++) {
+            colorByLabel.put(pieChart.getData().get(i).getName(), sliceColors.get(i));
+        }
+
         Platform.runLater(() -> {
             final var data = pieChart.getData();
 
-            // Allineamenti colori nelle fette del cerchio.
+            // Colora le fette del cerchio.
             for (int i = 0; i < data.size(); i++) {
                 final Node node = data.get(i).getNode();
-                if (node != null) {
+                if (node != null && i < sliceColors.size()) {
                     node.setStyle("-fx-pie-color: " + sliceColors.get(i) + ";");
                 }
             }
 
-            // Allineamenti colori nei simboli della legenda, abbinandoli per posizione.
-            final var legendItems = pieChart.lookupAll(".chart-legend-item-symbol");
-            int i = 0;
-            for (final Node symbol : legendItems) {
-                if (i < sliceColors.size()) {
-                    symbol.setStyle("-fx-background-color: " + sliceColors.get(i) + ";");
+            // Colora i simboli della legenda abbinandoli per NOME.
+            for (final Node legendNode : pieChart.lookupAll(".chart-legend-item")) {
+                if (legendNode instanceof Label label) {
+                    final String color = colorByLabel.get(label.getText());
+                    if (color != null && label.getGraphic() != null) {
+                        label.getGraphic().setStyle("-fx-background-color: " + color + ";");
+                    }
                 }
-                i++;
             }
         });
 
@@ -215,7 +210,14 @@ public final class BudgetView extends HBox implements BudgetController.View {
             tx.date().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         date.setStyle("-fx-text-fill: gray;");
 
-        final HBox top = new HBox(8, desc, spacer(), amount);
+        final Button editBtn = new Button("✎");
+        editBtn.setOnAction(e -> openTransactionForm(tx.type(), tx));
+
+        final Button delBtn = new Button("✕");
+        delBtn.setStyle("-fx-text-fill: red;");
+        delBtn.setOnAction(e -> controller.onDeleteTransaction(tx.id()));
+
+        final HBox top = new HBox(8, desc, spacer(), amount, editBtn, delBtn);
         top.setAlignment(Pos.CENTER_LEFT);
 
         final HBox bottom = new HBox(8, date);
@@ -228,19 +230,15 @@ public final class BudgetView extends HBox implements BudgetController.View {
         final VBox card = new VBox(2, top, bottom);
         card.setPadding(new Insets(8));
         card.setStyle("-fx-background-color: #f4f4f5; -fx-background-radius: 6;");
-        card.setOnMouseClicked(e -> openTransactionForm(tx.type(), tx));
         return card;
     }
 
     private Node tagBadge(final Tag tag) {
-        final Circle dot = new Circle(5);
-        dot.setFill(parseColor(tag.color()));
-        final Label name = new Label(tag.name());
-        final HBox badge = new HBox(4, dot, name);
-        badge.setAlignment(Pos.CENTER_LEFT);
-        badge.setPadding(new Insets(2, 6, 2, 6));
-        badge.setStyle("-fx-background-color: #e4e4e7; -fx-background-radius: 10;");
-        return badge;
+        final Circle dot = new Circle(6, parseColor(tag.color()));
+        final Tooltip tip = new Tooltip(tag.name());
+        tip.setShowDelay(Duration.ZERO);
+        Tooltip.install(dot, tip);
+        return dot;
     }
 
     /**
@@ -260,14 +258,6 @@ public final class BudgetView extends HBox implements BudgetController.View {
 
     private void openTransactionForm(final TransactionType defaultType, final Transaction existing) {
         new TransactionFormDialog(controller, defaultType, existing).showAndWait();
-    }
-
-    private void onPeriodChanged() {
-        controller.onPeriodChanged(fromPicker.getValue(), toPicker.getValue());
-    }
-
-    private void openTagManager() {
-        new TagManagerDialog(controller).showAndWait();
     }
 
     //Util
