@@ -20,7 +20,6 @@ import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
-import javafx.scene.control.DatePicker;
 import javafx.scene.chart.XYChart;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -45,8 +44,6 @@ public final class BudgetView extends HBox implements BudgetController.View {
 
     private final VBox incomeList = new VBox(6);
     private final VBox expenseList = new VBox(6);
-    private final DatePicker fromPicker = new DatePicker();
-    private final DatePicker toPicker = new DatePicker();
     private final Label incomeTotalLabel = new Label();
     private final Label expenseTotalLabel = new Label();
     private final Label balanceLabel = new Label();
@@ -83,8 +80,6 @@ public final class BudgetView extends HBox implements BudgetController.View {
                 buildPanel("Uscite", expenseList, TransactionType.EXPENSE),
                 buildTotalPanel());
         
-        fromPicker.setValue(controller.getPeriodStart());
-        toPicker.setValue(controller.getPeriodEnd());
         refreshTransactionLists();
         refreshCharts();  
     }
@@ -115,17 +110,6 @@ public final class BudgetView extends HBox implements BudgetController.View {
         final HBox header = new HBox(8, title, spacer());
         header.setAlignment(Pos.CENTER_LEFT);
 
-        final Label fromLabel = new Label("Da:");
-        fromLabel.setMinWidth(Region.USE_PREF_SIZE);
-        final Label toLabel = new Label("A:");
-        toLabel.setMinWidth(Region.USE_PREF_SIZE);
-
-        final HBox periodBox = new HBox(8, fromLabel, fromPicker, toLabel, toPicker);
-        periodBox.setAlignment(Pos.CENTER_LEFT);
-
-        fromPicker.setOnAction(e -> onPeriodChanged());
-        toPicker.setOnAction(e -> onPeriodChanged());
-
         final VBox summaryBox = new VBox(4, incomeTotalLabel, expenseTotalLabel, balanceLabel);
         summaryBox.setPadding(new Insets(8, 0, 8, 0));
 
@@ -133,7 +117,7 @@ public final class BudgetView extends HBox implements BudgetController.View {
         pieChart.setPrefHeight(240);
         lineChart.setPrefHeight(240);
 
-        final VBox panel = new VBox(10, header, periodBox, summaryBox, pieChart, lineChart);
+        final VBox panel = new VBox(10, header, summaryBox, pieChart, lineChart);
         panel.setPadding(new Insets(8));
         panel.setPrefWidth(380);
         return panel;
@@ -269,10 +253,6 @@ public final class BudgetView extends HBox implements BudgetController.View {
 
     private void openTransactionForm(final TransactionType defaultType, final Transaction existing) {
         new TransactionFormDialog(controller, defaultType, existing).showAndWait();
-    }
-
-    private void onPeriodChanged() {
-        controller.onPeriodChanged(fromPicker.getValue(), toPicker.getValue());
     }
 
     //Util

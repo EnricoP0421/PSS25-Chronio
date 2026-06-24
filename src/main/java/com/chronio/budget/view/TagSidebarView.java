@@ -11,6 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -63,6 +64,22 @@ public final class TagSidebarView {
         final VBox box = new VBox(BOX_SPACING);
         box.setPrefWidth(SIDEBAR_WIDTH);
         box.setStyle("-fx-background-color: #f0f0f0; -fx-padding: 12;");
+
+        // Selezione periodo di tempo
+        final DatePicker fromPicker = new DatePicker(controller.getPeriodStart());
+        final DatePicker toPicker = new DatePicker(controller.getPeriodEnd());
+        fromPicker.setMaxWidth(Double.MAX_VALUE);
+        toPicker.setMaxWidth(Double.MAX_VALUE);
+        fromPicker.setOnAction(e -> controller.onPeriodChanged(fromPicker.getValue(), toPicker.getValue()));
+        toPicker.setOnAction(e -> controller.onPeriodChanged(fromPicker.getValue(), toPicker.getValue()));
+
+        final Label periodTitle = new Label("Periodo");
+        periodTitle.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+        final VBox periodSection = new VBox(4,
+            periodTitle,
+            new Label("Da:"), fromPicker,
+            new Label("A:"), toPicker);
+        periodSection.setStyle("-fx-padding: 0 0 12 0;");
  
         final Label title = new Label("Tags");
         title.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
@@ -88,7 +105,7 @@ public final class TagSidebarView {
         scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         scroll.setStyle("-fx-background-color: transparent; -fx-border-color: transparent;");
         VBox.setVgrow(scroll, Priority.ALWAYS);
-        box.getChildren().addAll(header, scroll);
+        box.getChildren().addAll(periodSection, header, scroll);
         refreshList(tagList);
         return box;
     }
