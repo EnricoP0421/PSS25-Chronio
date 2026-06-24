@@ -89,17 +89,19 @@ public final class BudgetView extends HBox implements BudgetController.View {
 
     private Node buildPanel(final String titleText, final VBox list, final TransactionType type) {
         final Label title = sectionTitle(titleText);
-        final Button add = new Button("+");
-        add.setOnAction(e -> openTransactionForm(type, null));
 
-        final HBox header = new HBox(8, title, spacer(), add);
+        final HBox header = new HBox(8, title, spacer());
         header.setAlignment(Pos.CENTER_LEFT);
 
         final ScrollPane scroll = new ScrollPane(list);
         scroll.setFitToWidth(true);
         VBox.setVgrow(scroll, Priority.ALWAYS);
 
-        final VBox panel = new VBox(8, header, scroll);
+        final Button addBtn = new Button("+ Aggiungi transazione");
+        addBtn.setMaxWidth(Double.MAX_VALUE);
+        addBtn.setOnAction(e -> openTransactionForm(type, null));
+
+        final VBox panel = new VBox(8, header, scroll, addBtn);
         panel.setPadding(new Insets(8));
         HBox.setHgrow(panel, Priority.ALWAYS);
         panel.setPrefWidth(280);
@@ -217,7 +219,14 @@ public final class BudgetView extends HBox implements BudgetController.View {
             tx.date().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         date.setStyle("-fx-text-fill: gray;");
 
-        final HBox top = new HBox(8, desc, spacer(), amount);
+        final Button editBtn = new Button("✎");
+        editBtn.setOnAction(e -> openTransactionForm(tx.type(), tx));
+
+        final Button delBtn = new Button("✕");
+        delBtn.setStyle("-fx-text-fill: red;");
+        delBtn.setOnAction(e -> controller.onDeleteTransaction(tx.id()));
+
+        final HBox top = new HBox(8, desc, spacer(), amount, editBtn, delBtn);
         top.setAlignment(Pos.CENTER_LEFT);
 
         final HBox bottom = new HBox(8, date);
@@ -230,7 +239,6 @@ public final class BudgetView extends HBox implements BudgetController.View {
         final VBox card = new VBox(2, top, bottom);
         card.setPadding(new Insets(8));
         card.setStyle("-fx-background-color: #f4f4f5; -fx-background-radius: 6;");
-        card.setOnMouseClicked(e -> openTransactionForm(tx.type(), tx));
         return card;
     }
 
