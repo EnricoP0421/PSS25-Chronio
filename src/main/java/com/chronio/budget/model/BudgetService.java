@@ -195,6 +195,27 @@ public final class BudgetService {
     }
 
     /**
+     * Aggiorna nome e colore di un tag esistente.
+     *
+     * @param id    id del tag da aggiornare
+     * @param name  nuovo nome
+     * @param color nuovo colore in formato esadecimale
+     * @return il tag aggiornato, o null se l'id non esiste
+     */
+    public Tag updateTag(final String id, final String name, final String color) {
+        final Tag existing = data.tags().get(id);
+        if (existing == null) {
+            return null;
+        }
+        final Tag updated = existing.withName(name).withColor(color);
+        final LinkedHashMap<String, Tag> tags = new LinkedHashMap<>(data.tags());
+        tags.put(id, updated);
+        data = new BudgetData(data.transactions(), tags, data.nextTransactionId(), data.nextTagId());
+        persist();
+        return updated;
+    }
+
+    /**
      * Calcola il riepilogo (entrate, uscite, saldo) sulle transazioni il cui
      * date è compreso tra startDate e endDate inclusi. Il confronto è
      * lessicografico su stringhe ISO-8601 (sufficiente per il formato "YYYY-MM-DD").

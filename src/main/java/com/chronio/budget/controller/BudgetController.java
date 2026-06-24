@@ -38,6 +38,8 @@ public final class BudgetController {
     private LocalDate periodStart;
     private LocalDate periodEnd;
 
+    private final java.util.Set<String> activeTagIds = new java.util.HashSet<>();
+
     /**
      * Crea il controller impostando il periodo di default dal primo giorno
      * del mese corrente a oggi.
@@ -164,24 +166,56 @@ public final class BudgetController {
         refreshCharts();
     }
 
+    /**
+     * Aggiorna un tag esistente e ridisegna la UI.
+     *
+     * @param id    id del tag
+     * @param name  nuovo nome
+     * @param color nuovo colore esadecimale
+     * @return il tag aggiornato, o null se non esiste
+     */
+    public Tag onUpdateTag(final String id, final String name, final String color) {
+        final Tag tag = service.updateTag(id, name, color);
+        refreshTransactionLists();
+        refreshCharts();
+        return tag;
+    }
+
+    /**
+     * @return il set (modificabile) dei tag attivi per il filtro
+     */
+    public java.util.Set<String> getActiveTagIds() {
+        return activeTagIds;
+    }
+
     //Query per la view
 
     /**
      * @return le entrate, ordinate dalla più recente
      */
     public List<Transaction> getIncomes() {
-        return service.getAllTransactionsSorted().stream()
-                .filter(t -> t.type() == TransactionType.INCOME)
-                .toList();
+    return service.getAllTransactionsSorted().stream()
+            .filter(t -> t.type() == TransactionType.INCOME)
+            .filter(this::matchesFilter)
+            .toList();
     }
 
     /**
      * @return le uscite, ordinate dalla più recente
      */
     public List<Transaction> getExpenses() {
-        return service.getAllTransactionsSorted().stream()
-                .filter(t -> t.type() == TransactionType.EXPENSE)
-                .toList();
+    return service.getAllTransactionsSorted().stream()
+            .filter(t -> t.type() == TransactionType.EXPENSE)
+            .filter(this::matchesFilter)
+            .toList();
+    }
+
+    /**
+     * @return true se la transazione passa il filtro tag attivo
+     *         (se nessun tag è selezionato, passano tutte)
+     */
+    private boolean matchesFilter(final Transaction t) {
+        return activeTagIds.isEmpty() || activeTagIds.contains(t.tagId());
     }
 
     /**
