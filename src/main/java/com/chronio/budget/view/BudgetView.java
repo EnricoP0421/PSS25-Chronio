@@ -72,7 +72,11 @@ public final class BudgetView extends HBox implements BudgetController.View {
         this.lineChart.setTitle("Andamento saldo mensile");
         this.lineChart.setLegendVisible(false);
 
+        final TagSidebarView tagSidebar = new TagSidebarView(
+            controller, controller.getActiveTagIds(), this::refreshTransactionLists);
+
         getChildren().addAll(
+                tagSidebar.build(),
                 buildPanel("Entrate", incomeList, TransactionType.INCOME),
                 buildPanel("Uscite", expenseList, TransactionType.EXPENSE),
                 buildTotalPanel());
@@ -104,9 +108,7 @@ public final class BudgetView extends HBox implements BudgetController.View {
 
     private Node buildTotalPanel() {
         final Label title = sectionTitle("Totale");
-        final Button manageTags = new Button("Gestione tag");
-        manageTags.setOnAction(e -> openTagManager());
-        final HBox header = new HBox(8, title, spacer(), manageTags);
+        final HBox header = new HBox(8, title, spacer());
         header.setAlignment(Pos.CENTER_LEFT);
 
         final Label fromLabel = new Label("Da:");
@@ -264,10 +266,6 @@ public final class BudgetView extends HBox implements BudgetController.View {
 
     private void onPeriodChanged() {
         controller.onPeriodChanged(fromPicker.getValue(), toPicker.getValue());
-    }
-
-    private void openTagManager() {
-        new TagManagerDialog(controller).showAndWait();
     }
 
     //Util
