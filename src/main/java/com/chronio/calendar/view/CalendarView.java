@@ -49,6 +49,8 @@ public final class CalendarView {
     private HBox nav;
     private String currentView = VIEW_MONTH;
     private Button toggleBtn;
+    private WeekView activeWeekView;
+    private DayView activeDayView;
 
     /**
      * Costruisce la vista mensile.
@@ -87,11 +89,14 @@ public final class CalendarView {
     }
 
     /**
-     * Aggiorna la griglia del mese corrente, se la vista attiva è quella mensile
+     * Aggiorna la griglia del mese corrente
      */
     public void refresh() {
-        if (VIEW_MONTH.equals(currentView)) {
-            refreshGrid(grid);
+        switch (currentView) {
+            case VIEW_MONTH -> refreshGrid(grid);
+            case VIEW_WEEK -> { if (activeWeekView != null) { activeWeekView.refresh(); } }
+            case VIEW_DAY -> { if (activeDayView != null) { activeDayView.refresh(); } }
+            default -> { }
         }
     }
 
@@ -129,14 +134,16 @@ public final class CalendarView {
                 case VIEW_MONTH -> {
                     currentView = VIEW_WEEK;
                     toggleBtn.setText("Giorno");
-                    final VBox weekBox = new WeekView(controller, stage, sidebarView, sidebar).build();
+                    activeWeekView = new WeekView(controller, stage, sidebarView, sidebar);
+                    final VBox weekBox = activeWeekView.build();
                     mainBox.getChildren().setAll(nav, weekBox);
                     VBox.setVgrow(weekBox, Priority.ALWAYS);
                 }
                 case VIEW_WEEK -> {
                     currentView = VIEW_DAY;
                     toggleBtn.setText("Mese");
-                    final VBox dayBox = new DayView(controller, stage, sidebarView, sidebar).build();
+                    activeDayView = new DayView(controller, stage, sidebarView, sidebar);
+                    final VBox dayBox = activeDayView.build();
                     mainBox.getChildren().setAll(nav, dayBox);
                     VBox.setVgrow(dayBox, Priority.ALWAYS);
                 }

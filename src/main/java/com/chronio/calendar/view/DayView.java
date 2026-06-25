@@ -45,6 +45,7 @@ public final class DayView {
     private LocalDate date = LocalDate.now();
     private Label navLabel;
     private VBox mainBox;
+    private ScrollPane scrollPane;
 
     /**
      * Costruisce la vista giornaliera.
@@ -72,6 +73,17 @@ public final class DayView {
         VBox.setVgrow(mainBox, Priority.ALWAYS);
         mainBox.getChildren().addAll(buildNav(), buildScrollContent());
         return mainBox;
+    }
+
+    /**
+     * Aggiorna il contenuto mantenendo la posizione di scroll.
+     */
+    public void refresh() {
+        final double scrollPos = scrollPane != null ? scrollPane.getVvalue() : 0;
+        rebuildContent();
+        if (scrollPane != null) {
+            scrollPane.setVvalue(scrollPos);
+        }
     }
 
     private void rebuildContent() {
@@ -147,10 +159,10 @@ public final class DayView {
             grid.add(cell, 1, h + 1);
         }
 
-        final ScrollPane sp = new ScrollPane(grid);
-        sp.setFitToWidth(true);
-        VBox.setVgrow(sp, Priority.ALWAYS);
-        return sp;
+        scrollPane = new ScrollPane(grid);
+        scrollPane.setFitToWidth(true);
+        VBox.setVgrow(scrollPane, Priority.ALWAYS);
+        return scrollPane;
     }
 
     private Label makePill(final Event ev) {
