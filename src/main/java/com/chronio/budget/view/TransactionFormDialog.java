@@ -71,7 +71,7 @@ public final class TransactionFormDialog extends Dialog<Void> {
         tagCombo.getSelectionModel().selectFirst(); 
 
         // Pulsanti: Salva e Annulla sempre; Elimina solo in modifica.
-        final ButtonType saveButton = new ButtonType("Salva", ButtonBar.ButtonData.OK_DONE);
+        final ButtonType saveButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
         final ButtonType deleteButton = new ButtonType("Elimina", ButtonBar.ButtonData.LEFT);
         getDialogPane().getButtonTypes().add(saveButton);
         if (editing) {
