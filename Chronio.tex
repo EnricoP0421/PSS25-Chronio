@@ -1,0 +1,483 @@
+\documentclass[a4paper,12pt]{report}
+
+\usepackage{alltt, fancyvrb, url}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\usepackage[italian]{babel}
+
+\usepackage{cleveref}
+
+\title{Relazione PSS25-Chronio\\``Progettazione e Sviluppo Software'' A.A.\ 2025/2026}
+
+\author{Aurora Loprino - \small aurora.loprino@studio.unibo.it
+\and Enrico Poli - \small enrico.poli@studio.unibo.it}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\chapter{Analisi}
+\section{Descrizione e requisiti}
+
+Chronio è un'applicazione per la gestione personale del tempo e delle attività.
+L'utente può tenere traccia dei propri impegni tramite un calendario, organizzare attività in bacheche kanban, e monitorare le proprie finanze personali tramite un modulo di budget.
+
+\subsubsection{Requisiti funzionali}
+\begin{itemize}
+    \item L'applicazione deve consentire la creazione, modifica ed eliminazione di eventi nel calendario, con supporto a eventi giornalieri e a tutto il giorno.
+    \item Gli eventi devono poter essere associati a tag colorati, creabili, modificabili ed eliminabili dall'utente.
+    \item I tag devono poter essere resi invisibili per filtrare gli eventi nella vista.
+    \item Il calendario deve offrire una vista mensile, settimanale e giornaliera, con navigazione tra periodi.
+    \item L'applicazione deve mostrare una barra laterale con gli eventi del giorno corrente e dei successivi sei giorni.
+    \item L'applicazione deve consentire la creazione di bacheche kanban, ciascuna con colonne e card personalizzabili.
+    \item Le card devono poter essere associate a tag, marcate come completate e filtrate per tag.
+    \item L'applicazione deve consentire la gestione di un budget personale con transazioni e tag.
+    \item I dati devono essere persistiti su disco e ricaricati automaticamente all'avvio.
+\end{itemize}
+
+\subsubsection{Requisiti non funzionali}
+\begin{itemize}
+    \item L'applicazione deve essere eseguibile su Windows, macOS e Linux senza configurazione aggiuntiva da parte dell'utente.
+    \item I dati devono essere salvati automaticamente dopo ogni operazione, senza intervento esplicito dell'utente.
+    \item L'interfaccia deve essere reattiva e non bloccarsi durante le operazioni di salvataggio.
+\end{itemize}
+
+\section{Modello del Dominio}
+
+Il dominio di Chronio è composto da tre aree principali: calendario, bacheche kanban e budget.
+
+Nel calendario, l'entità centrale è l'\textbf{Evento}, caratterizzato da titolo, descrizione, data + ora di inizio e fine opzionale, un flag per gli eventi a tutto il giorno, e un riferimento opzionale a un \textbf{Tag}.
+
+Il Tag è un'etichetta colorata con un nome e uno stato di visibilità.
+
+Il \textbf{Calendario} raccoglie tutti gli eventi e i tag, e consente di interrogarli per data.
+
+Nelle bacheche, la \textbf{Bacheca} è l'entità principale, composta da \textbf{Colonne} ordinate.
+Ogni colonna contiene un insieme ordinato di \textbf{Card}, ciascuna con titolo, descrizione, stato di completamento e una lista di \textbf{KanbanTag} associati.
+
+% QUI PER BUDGET
+
+Gli elementi del dominio e le relazioni fra loro sono rappresentati in \Cref{img:dominio}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1\linewidth]{dominio.png}
+    \caption{Schema UML del dominio di Chronio con entità principali e relazioni.}
+    \label{img:dominio}
+\end{figure}
+
+\chapter{Design}
+
+\section{Architettura}
+
+L'architettura di Chronio segue il pattern \textbf{MVC (Model-View-Controller)} applicato a ciascuna delle tre aree funzionali (calendario, kanban, budget).
+
+Ogni area ha il proprio model, controller e view, tra loro indipendenti.
+
+Il \textbf{Model} contiene le entità del dominio (record Java immutabili) e la logica di business quale la validazione delle date, il filtraggio per tag e il calcolo degli eventi per data.
+
+Il \textbf{Controller} fa da intermediario tra view e model, delegando la logica al model e invocando la persistenza dopo ogni operazione di scrittura.
+
+La \textbf{View} è costruita interamente in JavaFX, limitandosi a chiamare il controller e a ridisegnarsi in risposta agli eventi utente.
+
+La persistenza è separata dal model: ogni area ha la propria classe di persistenza che salva e carica i dati in formato JSON tramite Gson.
+
+Sostituire la view con un'altra tecnologia grafica non richiederebbe modifiche al model né al controller, dato che nessuna delle interfacce di model e controller dipende da JavaFX.
+
+Il modulo kanban non ha un'interfaccia \texttt{BoardModel} separata: tutta la logica risiede in \texttt{BoardControllerImpl}, che gestisce direttamente il record \texttt{BoardData}.
+La scelta di non introdurre un'interfaccia \texttt{BoardModel} separata è motivata dall'assenza di logica di dominio complessa nel modulo. Le operazioni sono per lo più di CRUD su strutture dati ordinate, già testabili direttamente tramite \texttt{BoardControllerImpl}.
+
+Lo schema architetturale è sintetizzato in \Cref{img:arch}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1\linewidth]{arch.png}
+    \caption{Schema UML architetturale di Chronio. Ogni modulo applica il pattern MVC in modo indipendente.}
+    \label{img:arch}
+\end{figure}
+
+\section{Design dettagliato}
+
+\subsection{Aurora Loprino}
+
+\subsubsection{Immutabilità del modello con record Java}
+
+\paragraph{Problema}
+Le entità del dominio devono essere condivise tra model, controller e view senza rischio di modifiche accidentali.
+In un sistema con salvataggio automatico dopo ogni operazione, è essenziale che lo stato non venga mutato in modo implicito.
+
+\paragraph{Soluzione}
+Il modello del calendario e delle bacheche è rappresentato interamente tramite record Java
+(\texttt{Event}, \texttt{Tag}, \texttt{Board}, \texttt{Column}, \texttt{Card}, \texttt{KanbanTag}).
+I record sono immutabili, quindi ogni operazione di modifica produce un nuovo oggetto; questo elimina la possibilità di modifiche accidentali dello stato e rende il modello thread-safe per lettura.
+
+L'aggiornamento dello stato avviene sostituendo l'intera struttura dati (\texttt{CalendarData}, \texttt{BoardData}) con una nuova istanza contenente i dati aggiornati.
+
+La struttura del model del calendario è mostrata in \Cref{img:calmodel}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{calmodel.png}
+    \caption{\texttt{CalendarData} come record immutabile che aggrega eventi e tag.}
+    \label{img:calmodel}
+\end{figure}
+
+\subsubsection{Filtraggio degli eventi per tag visibili}
+
+\paragraph{Problema}
+Gli eventi associati a un tag nascosto non devono comparire in nessuna vista (mensile, settimanale, giornaliera, sidebar).
+La logica di filtraggio deve essere centralizzata per evitare duplicazioni tra le diverse viste.
+
+\paragraph{Soluzione}
+Il model gestisce la visibilità degli eventi in base allo stato del tag associato.
+Il metodo \texttt{getEventsForDate} itera su tutti gli eventi in \texttt{CalendarData} applicando due metodi privati.
+\texttt{isVisible} restituisce \texttt{true} se l'evento non ha tag o se il tag associato è visibile, e \texttt{fallsOn} verifica se la data richiesta ricade nell'intervallo start--end dell'evento, supportando gli eventi multi-giorno.
+Questo consente alla view di non contenere alcuna logica di filtraggio.
+
+
+\subsubsection{Vista del calendario a tre livelli}
+
+\paragraph{Problema}
+Il calendario deve offrire tre tipi di visualizzazione (mese, settimana, giorno) navigabili senza ricreare la struttura principale della finestra.
+
+\paragraph{Soluzione}
+La vista è organizzata su tre livelli (\texttt{CalendarView}, \texttt{WeekView}, \texttt{DayView}), navigabili tramite un unico pulsante di toggle.
+La navigazione avviene sostituendo il contenuto della \texttt{VBox} principale senza ricreare il nodo radice, preservando la navbar.
+Le tre viste condividono i metodi di utilità tramite la classe \texttt{ViewUtils}, eliminando la necessità di duplicare il codice.
+
+La gerarchia delle viste è illustrata in \Cref{img:calviews}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{calviews.png}
+    \caption{Le tre viste del calendario condividono il controller e sono navigate tramite toggle.}
+    \label{img:calviews}
+\end{figure}
+
+\subsubsection{Bacheca con struttura gerarchica e associazione tag alle card}
+
+\paragraph{Problema}
+La bacheca richiede una struttura a tre livelli (\texttt{Board} $\to$ \texttt{Column} $\to$ \texttt{Card}) con ordine di inserimento preservato anche dopo serializzazione e deserializzazione JSON.
+Le card devono poter avere tag associati per riferimento tramite id, essere marcate come completate, e filtrare la vista per tag attivi.
+
+\paragraph{Soluzione}
+L'ordine di inserimento è garantito tramite \texttt{LinkedHashMap} sia per le colonne che per le card, in \texttt{Board} e \texttt{Column} rispettivamente.
+Gson serializza le \texttt{LinkedHashMap} come oggetti JSON con chiavi stringa, preservando l'ordine.
+Il model \texttt{Card} include una lista di id di \texttt{KanbanTag} associati; il filtraggio per tag attivi avviene nel controller tramite \texttt{getFilteredCards}, senza modificare il modello.
+L'intera struttura è contenuta in \texttt{BoardData}, un record immutabile analogo a \texttt{CalendarData}, che viene sostituito a ogni modifica e serializzato su disco tramite \texttt{BoardPersistence}.
+A differenza del calendario, non è stata introdotta un'interfaccia \texttt{BoardModel} separata in quanto le operazioni della bacheca sono prevalentemente CRUD su strutture dati ordinate, già testabili direttamente tramite \texttt{BoardControllerImpl} senza necessità di disaccoppiamento aggiuntivo.
+La struttura del model è mostrata in \Cref{img:boardmodel}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{boardmodel.png}
+    \caption{\texttt{BoardData} è un record immutabile che aggrega bacheche, colonne, card e tag.}
+    \label{img:boardmodel}
+\end{figure}
+
+\subsection{Enrico Poli}
+
+\subsubsection{Spostamento delle card tramite drag-and-drop}
+ 
+\paragraph{Problema}
+Le card di una bacheca devono poter essere spostate dall'utente sia tra
+colonne diverse sia all'interno della stessa colonna, scegliendo la posizione
+di inserimento. Lo spostamento deve riflettersi nel modello e venire
+persistito, mantenendo l'ordine corretto delle card anche dopo un riavvio
+dell'applicazione.
+ 
+\paragraph{Soluzione}
+Lo spostamento è realizzato dal metodo \texttt{moveCard} di
+\texttt{BoardControllerImpl}, che riceve la bacheca, la colonna di origine,
+la colonna di destinazione, l'id della card e l'indice di inserimento.
+Poiché il modello è immutabile e le card sono memorizzate in
+\texttt{LinkedHashMap}, l'inserimento in una posizione arbitraria non è
+diretto: il metodo privato \texttt{insertAt} ricostruisce la mappa di
+destinazione nell'ordine voluto, scorrendo gli id esistenti e inserendo la
+card spostata all'indice indicato. Lo stesso meccanismo gestisce in modo
+unificato sia lo spostamento tra colonne diverse (la card viene rimossa
+dall'origine e inserita nella destinazione) sia il riordino interno alla
+stessa colonna (la card viene prima rimossa dalla sua vecchia posizione e poi
+reinserita). Se l'indice è fuori range la card viene posta in fondo alla
+colonna. Al termine la board aggiornata viene salvata tramite la persistenza,
+così che lo spostamento sopravviva al riavvio.
+
+Le classi coinvolte sono mostrate in \Cref{img:dndclass}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{dndclass.png}
+    \caption{La view avvia il drag-and-drop e delega lo spostamento al controller, che ricostruisce l'ordine e persiste i dati..}
+    \label{img:dndclass}
+\end{figure}
+
+ 
+\subsubsection{Modulo budget: gestione e filtro dei tag}
+ 
+\paragraph{Problema}
+Il modulo budget deve permettere di associare un tag categoria alle
+transazioni, di gestire i tag (creazione, modifica, eliminazione con scelta del
+colore) e di filtrare le transazioni mostrando solo quelle dei tag selezionati,
+in modo coerente con le sidebar di calendario e bacheche.
+ 
+\paragraph{Soluzione}
+La gestione dei tag del budget è centralizzata in una sidebar laterale
+(\texttt{TagSidebarView}) analoga a quelle degli altri moduli. Ogni tag è
+mostrato con una checkbox di filtro, un indicatore di colore e i comandi di
+modifica ed eliminazione; la creazione e la modifica avvengono tramite un
+dialog con \texttt{ColorPicker} per la personalizzazione del colore. Lo stato
+del filtro è mantenuto nel \texttt{BudgetController} come insieme di id di tag
+attivi, condiviso con la sidebar: i metodi \texttt{getIncomes} e
+\texttt{getExpenses} applicano il filtro, mostrando tutte le transazioni quando
+nessun tag è selezionato. Lo stesso pannello ospita il selettore del periodo,
+che filtra in modo unificato liste, totali e grafici.
+
+Il collegamento è mostrato in \Cref{img:budsidefil}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{budsidefil.png}
+    \caption{La sidebar dei tag del budget comunica col controller per il filtro e la gestione dei tag, che a sua volta delega la logica al service.}
+    \label{img:budsidefil}
+\end{figure}
+
+\subsubsection{Calcolo dei totali e aggregazioni per i grafici}
+ 
+\paragraph{Problema}
+Il modulo budget deve riepilogare le transazioni di un periodo mostrando
+entrate totali, uscite totali e saldo, e deve alimentare due grafici: la
+distribuzione delle uscite per categoria e l'andamento del saldo netto mese
+per mese. La logica di calcolo non deve risiedere nella view, che si limita a
+presentare i dati.
+ 
+\paragraph{Soluzione}
+Il calcolo è interamente delegato al \texttt{BudgetService}. Il metodo
+\texttt{calculateSummary} produce un \texttt{BudgetSummary}, un record
+immutabile che raccoglie entrate totali, uscite totali, saldo e le transazioni
+del periodo. L'aggregazione per i grafici è affidata a due metodi distinti:
+\texttt{aggregateByTag} somma le uscite del periodo raggruppandole per tag,
+fornendo i dati del grafico a torta; \texttt{aggregateByMonth} calcola il saldo
+netto di ogni mese, fornendo i dati del grafico a linee. Il
+\texttt{BudgetController} espone questi risultati alla view tramite metodi di
+sola lettura, così che \texttt{BudgetView} si limiti a popolare le etichette
+dei totali e i due grafici senza contenere alcuna logica di calcolo. Il saldo
+viene inoltre evidenziato con colori diversi a seconda che sia positivo,
+negativo o nullo.
+
+Il flusso è mostrato in \Cref{img:budtotchart}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\linewidth]{budtotchart.png}
+    \caption{Il calcolo dei totali e l'aggregazione dei dati per i grafici sono delegati al service; la view si limita a leggerli tramite il controller.}
+    \label{img:budtotchart}
+\end{figure}
+
+\chapter{Sviluppo}
+
+\section{Testing automatizzato}
+
+Sono stati realizzati test automatizzati con JUnit per le componenti del model e del controller, in quanto privi di dipendenze grafiche e quindi testabili in isolamento.
+I test di calendario e kanban sono a cura di Aurora Loprino, mentre i test di budget e card move sono a cura di Enrico Poli.
+
+\subsection*{Calendario (\texttt{com.chronio.calendar})}
+\begin{itemize}
+    \item \texttt{DateValidationTest} verifica che la creazione di un evento con data di inizio nulla lanci \texttt{IllegalArgumentException}, che una data di fine precedente all'inizio lanci eccezione, e che date valide vengano accettate senza errori.
+    \item \texttt{TagFilterTest} verifica che gli eventi con tag visibile appaiano nella vista per data, che quelli con tag nascosto vengano filtrati, e che gli eventi senza tag siano sempre visibili.
+    \item \texttt{PersistenceTest} verifica che eventi e tag vengano correttamente serializzati su file JSON e ricaricati con i dati intatti, e che un file mancante restituisca uno stato vuoto.
+\end{itemize}
+
+\subsection*{Kanban (\texttt{com.chronio.kanban})}
+\begin{itemize}
+    \item \texttt{BoardPersistenceTest} verifica che bacheche e colonne vengano ripristinate correttamente dopo un ciclo di salvataggio e ricaricamento.
+    \item \texttt{ColumnDeletionTest} verifica che l'eliminazione di una colonna rimuova anche tutte le card contenute.
+    \item \texttt{TagFilterTest} verifica che il filtro per tag restituisca solo le card associate al tag specificato, escludendo quelle prive di tag.
+    \item \texttt{CardMoveTest} verifica che una card spostata in un'altra
+    colonna non sia più presente nella colonna di origine e si trovi nella
+    destinazione, e che lo spostamento sia persistito: dopo il ricaricamento
+    dei dati da file la card risulta ancora nella colonna corretta, con i
+    propri dati preservati.
+\end{itemize}
+
+\subsection*{Budget (\texttt{com.chronio.budget})}
+
+\begin{itemize}
+  \item \texttt{BudgetSummaryTest} verifica che il saldo di un periodo
+    corrisponda alla differenza tra entrate e uscite e che il filtro per
+    periodo escluda correttamente le transazioni con data fuori
+    dall'intervallo, includendo solo quelle comprese tra le date estreme.
+  \item \texttt{ChartUpdateTest} verifica che i dati di alimentazione dei
+    grafici si aggiornino dopo l'aggiunta di transazioni: l'aggregazione delle
+    uscite per tag e il saldo netto mensile riflettono correttamente le nuove
+    transazioni, inclusa la combinazione di entrate e uscite nello stesso mese.
+\end{itemize}
+
+\section{Note di sviluppo}
+
+\subsection{Aurora Loprino}
+
+\subsubsection{Record Java come entità di dominio immutabili}
+
+\texttt{Event}, \texttt{Tag}, \texttt{Board}, \texttt{Column}, \texttt{Card}, \texttt{KanbanTag} sono tutti record Java.
+
+\href{https://github.com/EnricoP0421/PSS25-Chronio/blob/34d1db0db9fd6cff156d6554a28cfc19982bf427/src/main/java/com/chronio/calendar/model/Event.java#L9-L16}{Permalink (link diretto)}
+
+\subsubsection{Lambda expressions}
+
+Usate nel model per filtraggio e trasformazione degli eventi. Esempio in \texttt{data.events().forEach((id, ev)}.
+      
+\href{https://github.com/EnricoP0421/PSS25-Chronio/blob/34d1db0db9fd6cff156d6554a28cfc19982bf427/src/main/java/com/chronio/calendar/model/CalendarModelImpl.java#L129-L136}{Permalink (link diretto)}
+
+\subsubsection{\texttt{Optional}}
+
+Usato nelle operazioni di aggiornamento del model (\texttt{updateEvent}, \texttt{updateTag}, \texttt{updateCard}) per segnalare l'assenza dell'entità senza eccezioni.
+
+\href{https://github.com/EnricoP0421/PSS25-Chronio/blob/34d1db0db9fd6cff156d6554a28cfc19982bf427/src/main/java/com/chronio/calendar/model/CalendarModelImpl.java#L51-L54}{Permalink (link diretto)}
+\subsubsection{Libreria Gson (Google)}
+
+Usata per la serializzazione/deserializzazione JSON dei dati di calendario e kanban in \texttt{CalendarPersistence} e \texttt{BoardPersistence}.
+
+\href{https://github.com/EnricoP0421/PSS25-Chronio/blob/34d1db0db9fd6cff156d6554a28cfc19982bf427/src/main/java/com/chronio/calendar/persistence/CalendarPersistence.java#L55-L67}{Permalink (link diretto)}
+
+\subsubsection{Stream}
+
+Utilizzati in \texttt{CalendarView} per limitare e iterare gli eventi visibili per cella nella vista mensile.
+
+\href{https://github.com/EnricoP0421/PSS25-Chronio/blob/34d1db0db9fd6cff156d6554a28cfc19982bf427/src/main/java/com/chronio/calendar/view/CalendarView.java#L208-L213}{Permalink (link diretto)}
+
+\subsubsection{Libreria JavaFX}
+
+Usata per l'intera interfaccia grafica. Esempio in \texttt{ViewUtils.makePill} che utilizza \texttt{Tooltip} con \texttt{setShowDelay(Duration.ZERO)} per mostrare la descrizione dell'evento all'hover del mouse immediatamente (solo se la descrizione è presente.)
+
+\href{https://github.com/EnricoP0421/PSS25-Chronio/blob/34d1db0db9fd6cff156d6554a28cfc19982bf427/src/main/java/com/chronio/calendar/view/ViewUtils.java#L87-L90}{Permalink (link diretto)}
+
+\subsection{Enrico Poli}
+
+\subsubsection{Drag-and-drop di JavaFX}
+Utilizzato in \texttt{BoardInsideView} per lo spostamento delle card tramite
+\texttt{setOnDragDetected}, \texttt{setOnDragOver} e \texttt{setOnDragDropped},
+con trasporto dei dati tramite \textit{dragboard}.\\
+\href{https://github.com/EnricoP0421/PSS25-Chronio/blob/dev/src/main/java/com/chronio/kanban/view/BoardInsideView.java#L256-L283}{Permalink (link diretto)}
+ 
+\subsubsection{LinkedHashMap per l'ordinamento}
+Sfruttata in \texttt{moveCard} e \texttt{insertAt} per ricostruire l'ordine
+delle card preservando le posizioni durante lo spostamento e il riordino.\\
+\href{https://github.com/EnricoP0421/PSS25-Chronio/blob/dev/src/main/java/com/chronio/kanban/controller/BoardControllerImpl.java#L286-L301}{Permalink (link diretto)}
+ 
+\subsubsection{Stream}
+Utilizzati nel \texttt{BudgetController} per filtrare le transazioni per tipo
+(entrata/uscita) e per tag attivo nei metodi \texttt{getIncomes} e
+\texttt{getExpenses}.\\
+\href{https://github.com/EnricoP0421/PSS25-Chronio/blob/dev/src/main/java/com/chronio/budget/controller/BudgetController.java#L208-L213}{Permalink (link diretto)}
+ 
+\subsubsection{Libreria JavaFX}
+Usata per la sidebar dei tag del budget (\texttt{TagSidebarView}), con
+\texttt{ColorPicker} per la scelta del colore e \texttt{Tooltip} per mostrare
+il nome del tag all'hover.\\
+\href{https://github.com/EnricoP0421/PSS25-Chronio/blob/dev/src/main/java/com/chronio/budget/view/TagSidebarView.java#L145-L152}{Permalink (link diretto)}
+ 
+\subsubsection{Libreria Gson (Google)}
+Sfruttata indirettamente per la persistenza JSON degli spostamenti di card,
+con adapter per la serializzazione del tipo \texttt{LocalDate} nelle
+transazioni del budget.\\
+\href{https://github.com/EnricoP0421/PSS25-Chronio/blob/dev/src/main/java/com/chronio/budget/persistence/JsonBudgetRepository.java#L31-L36}{Permalink (link diretto)}
+
+\chapter{Commenti finali}
+
+\section{Autovalutazione e lavori futuri}
+
+\subsection*{Aurora Loprino}
+
+Chronio è nato come progetto per il corso di Ingegneria Web e abbiamo colto l'occasione per svilupparlo ulteriormente.
+Mi piacerebbe renderlo utilizzabile in altri linguaggi, fino alla tesi di laurea.
+Non ho mai programmato in Java ed apprendere il linguaggio è stato impegnativo ma molto soddisfacente. In futuro mi piacerebbe lavorare nell'ambito di DevOps, quindi spero di mettere in pratica ed implementare sempre di più quanto appreso.
+
+Inizialmente il lavoro era ripartito tra tre persone. Ho avuto delle difficoltà oggettive nella gesione improvvisa dell'aumento del carico di lavoro, quando a due settimane dalla consegna ci siamo fatti carico della parte scoperta. Ho utilizzato Chronio per calendarizzare le attività e tenere traccia di quanto fatto e quanto mancava, sperimentandone i benefici in prima persona.
+
+Purtroppo per  mancanza di tempo non abbiamo potuto aassegnare a Chronio la sua palette di colori, ma nel futuro si potrebbe pensare di abbellirlo e magari dargli un backend condiviso con l'applicazione web.
+
+\subsection*{Enrico Poli}
+
+Sono ormai affezionato al progetto Chronio, dato che ero in gruppo con Aurora
+anche per Ingegneria dei Sistemi Web, e sono contento che abbiamo deciso di
+svilupparlo anche in Java. Questa è stata la prima volta che ho usato questo
+linguaggio e, nonostante sia difficile iniziare con un progetto secondo me già
+abbastanza avanzato, mi è sembrato più intuitivo di altri linguaggi. Mi
+piacerebbe continuare a usarlo in futuro, anche solo per progetti personali
+come semplici applicazioni desktop, per analisi sui miei dati personali, o per
+integrarlo con Raspberry nell'ambito della domotica.
+ 
+Ci sono state alcune difficoltà oggettive con il carico di lavoro quando, a due
+settimane dalla consegna, il gruppo è passato da tre a due persone, lasciando
+scoperta una parte considerevole. Ho avuto qualche incertezza sulla
+possibilità di completare il progetto entro la scadenza, sia per motivi di
+tempo sia per la difficoltà di comprendere alcuni bug.
+ 
+Ho usato Chronio anche in ambito personale, principalmente per tenere sotto
+controllo i miei movimenti finanziari. In futuro mi piacerebbe rendere il
+modulo budget più completo, magari inserendo grafici più articolati o un
+calcolo del budget basato su parametri più vari, come la situazione familiare
+o patrimoniale.
+
+\appendix
+\chapter{Guida utente}
+
+All'avvio, Chronio mostra tre sezioni principali accessibili dalla barra di navigazione superiore: \textbf{Calendario}, \textbf{Bacheche} e \textbf{Budget}.
+
+\section*{Calendario}
+\begin{itemize}
+    \item Clic su una cella del mese per aggiungere un nuovo evento.
+    \item Clic su una pill per modificare o eliminare un evento esistente.
+    \item I pulsanti \texttt{<} e \texttt{>} navigano tra i mesi.
+    \item Il pulsante ``Settimana'' / ``Giorno'' / ``Mese'' alterna la vista.
+    \item Nella sidebar a sinistra, il pannello ``Tags'' permette di creare, modificare, eliminare e mostrare/nascondere i tag. I tag nascosti filtrano gli eventi dalla vista.
+    \item I pannelli ``Oggi'' e ``Questa settimana'' mostrano gli eventi imminenti.
+    \item Tramite hover si può leggere la descrizione dell'evento.
+\end{itemize}
+
+\section*{Bacheche}
+\begin{itemize}
+    \item Clic su ``+ Nuova Bacheca'' per creare una bacheca.
+    \item All'interno di una bacheca, è possibile aggiungere colonne e card tramite i pulsanti dedicati.
+    \item Le card possono essere marcate come completate tramite checkbox.
+    \item La sidebar dei tag permette di filtrare le card per tag.
+    \item Tramite hover si può leggere la descrizione della card o il nome del tag assegnato.
+    \item Le card possono essere spostate trascinandole con il mouse, sia tra
+    colonne diverse sia all'interno della stessa colonna.
+    \item Rilasciando una card sulla metà superiore di un'altra, viene inserita
+    prima di essa; sulla metà inferiore, viene inserita dopo. Rilasciandola
+    nello spazio vuoto di una colonna, viene spostata in fondo.
+\end{itemize}
+
+\section*{Budget}
+
+\begin{itemize}
+  \item I movimenti sono divisi in due colonne: Entrate e Uscite.
+  \item Clic su ``+ Aggiungi transazione'' in fondo a una colonna per inserire
+    un nuovo movimento, indicando descrizione, importo, data e tag.
+  \item Clic sull'icona di modifica di una card per
+    modificarne i dati, o sull'icona di eliminazione per rimuoverla.
+  \item Nella sidebar a sinistra, il pannello ``Tags'' permette di creare,
+    modificare ed eliminare i tag, scegliendone il colore. Le checkbox filtrano
+    i movimenti mostrando solo quelli dei tag selezionati.
+  \item Sempre nella sidebar, i selettori di periodo ``Da'' e ``A'' filtrano i
+    movimenti, i totali e i grafici, mostrando solo le transazioni comprese
+    nell'intervallo scelto.
+  \item Il pannello ``Totale'' mostra entrate totali, uscite totali e saldo del
+    periodo, con il saldo evidenziato in verde se positivo e in rosso se
+    negativo.
+  \item Il grafico a torta riepiloga le uscite per categoria, mentre il grafico
+    a linee mostra l'andamento del saldo netto mese per mese.
+  \item Tramite hover sul pallino colorato di una transazione si può leggere il
+    nome del tag assegnato.
+\end{itemize}
+
+\end{document}
